@@ -183,13 +183,12 @@ public class SearchService {
         mail.setMailUrl(doc.get(FieldNames.URL));
 	    mail.setDate(new Date(Long.parseLong(doc.get(FieldNames.DATE))));
 		mail.setMailText(doc.get(FieldNames.TEXT));
-		// TODO 検索対象のENUMを作る
-		if ("text".equals(fieldName)) {
+		if (SearchField.text.equals(fieldName)) {
             /* 本文をハイライトしてsummaryにセット */
             String text = mail.getMailText();
             text = this.highlight(fieldName, queryStr, text);
             mail.setMailSummary(text);
-        } else if ("subject".equals(fieldName)) {
+        } else if (SearchField.subject.equals(fieldName)) {
             /* 件名をハイライト */
             String subject = mail.getSubject();
             subject = this.highlight(fieldName, queryStr, subject);
