@@ -4,6 +4,7 @@
 **************************************************************/
 package info.one.ideal.milm.search.crawling;
 
+import info.one.ideal.milm.search.FieldNames;
 import info.one.ideal.milm.search.SystemConfig;
 import info.one.ideal.milm.search.common.html.HtmlParser;
 import info.one.ideal.milm.search.common.html.Tag;
@@ -195,13 +196,12 @@ public class CrawlingTimerTask extends TimerTask {
      */
     private Document createDocument(Mail mail) throws ParseException {
         Document doc = new Document();
-        // TODO subjectとかを定数化
-        doc.add(new Field("subject", mail.getSubject(), Store.YES, Index.ANALYZED));
-        doc.add(new Field("from", mail.getFromName(), Store.YES, Index.NOT_ANALYZED));
-        doc.add(new Field("email", mail.getFromEmail(), Store.YES, Index.NOT_ANALYZED));
-        doc.add(new Field("url", mail.getMailUrl(), Store.YES, Index.NOT_ANALYZED));
-        doc.add(new Field("date", Long.toString(mail.getDate().getTime()), Store.YES, Index.NOT_ANALYZED));
-        doc.add(new Field("text", mail.getMailText(), Store.YES, Index.ANALYZED));
+        doc.add(new Field(FieldNames.SUBJECT, mail.getSubject(), Store.YES, Index.ANALYZED));
+        doc.add(new Field(FieldNames.FROM, mail.getFromName(), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new Field(FieldNames.EMAIL, mail.getFromEmail(), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new Field(FieldNames.URL, mail.getMailUrl(), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new Field(FieldNames.DATE, Long.toString(mail.getDate().getTime()), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new Field(FieldNames.TEXT, mail.getMailText(), Store.YES, Index.ANALYZED));
         return doc;
     }
 

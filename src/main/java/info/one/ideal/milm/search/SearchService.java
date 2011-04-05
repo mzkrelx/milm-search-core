@@ -177,13 +177,12 @@ public class SearchService {
 	 */
 	protected Mail createMail(Document doc, String fieldName, String queryStr) throws MilmSearchException {
 		Mail mail = new Mail();
-		// TODO subject とかを定数化
-		mail.setSubject(doc.get("subject"));
-		mail.setFromName(doc.get("from"));
-		mail.setFromEmail(doc.get("email"));
-        mail.setMailUrl(doc.get("url"));
-	    mail.setDate(new Date(Long.parseLong(doc.get("date"))));
-		mail.setMailText(doc.get("text"));
+		mail.setSubject(doc.get(FieldNames.SUBJECT));
+		mail.setFromName(doc.get(FieldNames.FROM));
+		mail.setFromEmail(doc.get(FieldNames.EMAIL));
+        mail.setMailUrl(doc.get(FieldNames.URL));
+	    mail.setDate(new Date(Long.parseLong(doc.get(FieldNames.DATE))));
+		mail.setMailText(doc.get(FieldNames.TEXT));
 		// TODO 検索対象のENUMを作る
 		if ("text".equals(fieldName)) {
             /* 本文をハイライトしてsummaryにセット */
