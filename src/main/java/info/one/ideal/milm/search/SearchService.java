@@ -5,6 +5,7 @@
 package info.one.ideal.milm.search;
 
 import info.one.ideal.milm.search.crawling.Mail;
+import info.one.ideal.milm.search.lucene.LuceneUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,13 +94,7 @@ public class SearchService {
     	    log.error("検索中に例外が発生しました。", e);
     		throw new MilmSearchException(e.getMessage(), e);
     	} finally {
-    	    // TODO LuceneUtil.closeQuietly(Searchable) みたいなのつくる 
-    	    if (searcher != null) {
-    	        try {
-                    searcher.close();
-                } catch (IOException ignore) {
-                }
-    	    }
+    	    LuceneUtils.closeQuietly(searcher); 
     	}
     	return mailList;
     }
