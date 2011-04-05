@@ -15,6 +15,9 @@ import java.util.Locale;
  */
 public class Mail {
     
+    /** ID */
+    private int id;
+    
     /** 送信日時 */
     private Date date;
 
@@ -91,6 +94,16 @@ public class Mail {
     }
 
     /**
+     * 送信日時をRFC3339形式で取得します。
+     * 
+     * @return 送信日時文字列
+     */
+    public String getDateRFC3339() {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.JAPAN)
+                .format(this.date);
+    }
+
+    /**
      * 送信日時を文字列で取得します。
      * 
      * @return 送信日時文字列
@@ -99,16 +112,6 @@ public class Mail {
         return new SimpleDateFormat("yyyy年MM月dd日 (EEE) HH:mm:ss", Locale.JAPAN)
                 .format(this.date);
     }
-    
-    /**
-     * 送信日時をRFC3339形式で取得します。
-     * 
-     * @return 送信日時文字列
-     */
-    public String getDateRFC3339() {
-        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.JAPAN)
-                .format(this.date);
-    }    
 
     /**
      * 差出人メールアドレスを取得します。
@@ -118,7 +121,7 @@ public class Mail {
     public String getFromEmail() {
         return this.fromEmail;
     }
-
+    
     /**
      * 差出人名を取得します。
      * 
@@ -126,6 +129,15 @@ public class Mail {
      */
     public String getFromName() {
         return this.fromName;
+    }    
+
+    /**
+     * id を取得します。
+     *
+     * @return id
+     */
+    public int getId() {
+        return this.id;
     }
 
     /**
@@ -189,6 +201,15 @@ public class Mail {
      */
     public void setFromName(String fromName) {
         this.fromName = fromName;
+    }
+
+    /**
+     * id を設定します。
+     *
+     * @param id 設定する id
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**

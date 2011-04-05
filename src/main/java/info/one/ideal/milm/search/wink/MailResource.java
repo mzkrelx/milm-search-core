@@ -75,8 +75,7 @@ public class MailResource {
             Element title = feed.addElement("title");
             title.addText("setuco-public Mailing List Search");
             Element updated = feed.addElement("updated");
-            updated.addText(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.JAPAN)
-            .format(new Date()));
+            updated.addText(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.JAPAN).format(new Date()));
             Element id = feed.addElement("id");
             id.addText("setuco-public Mailing List Search");
 
@@ -86,7 +85,7 @@ public class MailResource {
                 entry.addElement("link").addAttribute("src", mail.getMailUrl());
                 entry.addElement("summary").addCDATA(searchService.highlight(searchField, queryStr, mail.getMailText()));
                 entry.addElement("updated").addText(mail.getDateRFC3339());
-                entry.addElement("id").addText(mail.extractSubjectHeader());    // TODO URLのケツ
+                entry.addElement("id").addText(String.valueOf(mail.getId()));
 //                Element author = entry.addElement("author");
 //                author.addElement("name").addCDATA(mail.getFromName());
 //                author.addElement("email").addCDATA(mail.getFromEmail());

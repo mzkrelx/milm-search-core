@@ -65,7 +65,7 @@ public class SearchCondition {
         if (this.searchField == null) {
             return this.defaultSearchField;
         }
-        return this.getSearchField();
+        return this.searchField;
     }
 
     /**

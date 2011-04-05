@@ -66,7 +66,9 @@ public class SearchService {
         try {
             List<Mail> mailList = new ArrayList<Mail>();
             searcher = new IndexSearcher(FSDirectory.open(new File(SystemConfig.getIndexDir())), true);
-            Query query = new QueryParser(Version.LUCENE_29, condition.getSearchField().toString(), this.analyzer).parse(condition.getQueryStr());
+            Query query = new QueryParser(Version.LUCENE_29, condition
+                    .getSearchField().toString(), this.analyzer)
+                    .parse(condition.getQueryStr());
             Sort sort = this.createSort(condition.getSortValue());
             TopDocs topDocs;
             if (sort == null) {
@@ -82,7 +84,7 @@ public class SearchService {
                     continue;
                 }
                 Document doc = searcher.doc(scoreDoc.doc);
-                Mail mail = this.createMail(doc, condition.getSearchField(), condition.getQueryStr());
+                Mail mail = this.createMail(doc, scoreDoc.doc, condition.getSearchField(), condition.getQueryStr());
                 mailList.add(mail);
             }
             result.setMailList(mailList);
@@ -148,13 +150,15 @@ public class SearchService {
 	 * 検索ドキュメントからメールを作成します。
 	 * 
 	 * @param doc 検索ドキュメント
+	 * @param score スコア
 	 * @param searchField 検索フィールド
 	 * @param queryStr クエリ文字列
 	 * @return メール 
 	 * @throws MilmSearchException 
 	 */
-	protected Mail createMail(Document doc, SearchField searchField, String queryStr) throws MilmSearchException {
+	protected Mail createMail(Document doc, int score, SearchField searchField, String queryStr) throws MilmSearchException {
 		Mail mail = new Mail();
+		mail.setId(score);
 		mail.setSubject(doc.get(FieldNames.SUBJECT));
 		mail.setFromName(doc.get(FieldNames.FROM));
 		mail.setFromEmail(doc.get(FieldNames.EMAIL));
