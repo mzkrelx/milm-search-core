@@ -62,11 +62,12 @@ public class SearchService {
 	 * @return 検索結果
 	 * @throws MilmSearchException
 	 */
-    public List<Mail> search(String fieldName, String queryStr, int itemCountPerPage, int pageNumber, SortValue sortValue) 
+    public SearchResult search(String fieldName, String queryStr, int itemCountPerPage, int pageNumber, SortValue sortValue) 
             throws MilmSearchException {
-		List<Mail> mailList = new ArrayList<Mail>();
+        SearchResult result = new SearchResult();
 		IndexSearcher searcher = null;
     	try {
+            List<Mail> mailList = new ArrayList<Mail>();
     	    searcher = new IndexSearcher(FSDirectory.open(new File(SystemConfig.getIndexDir())), true);
             Query query = new QueryParser(Version.LUCENE_29, fieldName, this.analyzer).parse(queryStr);
             Sort sort = this.createSort(sortValue);
@@ -87,6 +88,8 @@ public class SearchService {
                 Mail mail = this.createMail(doc, fieldName, queryStr);
 	    		mailList.add(mail);
 	    	}
+            result.setMailList(mailList);
+            result.setTotalCount(topDocs.totalHits);
     	} catch (ParseException pe) {
     	    log.error("検索キーワードのパースに失敗しました。", pe);
     	    throw new MilmSearchException("検索キーワードが無効です。\n" + pe.getMessage(), pe);
@@ -96,26 +99,7 @@ public class SearchService {
     	} finally {
     	    LuceneUtils.closeQuietly(searcher); 
     	}
-    	return mailList;
-    }
-    
-    /**
-     * 検索結果が全部で何件かを取得します。
-     * 
-     * @return 検索結果の件数
-     * @throws MilmSearchException 
-     */
-    public int countTotal(String fieldName, String queryStr) throws MilmSearchException {
-        try {
-            IndexSearcher searcher = new IndexSearcher(FSDirectory.open(new File(SystemConfig.getIndexDir())), true);
-            Query query = new QueryParser(Version.LUCENE_29, fieldName, this.analyzer).parse(queryStr);
-            TopDocs topDocs = searcher.search(query, null, 1);
-            return topDocs.totalHits;
-        } catch (ParseException pe) {
-            throw new MilmSearchException("検索キーワードが無効です。\n" + pe.getMessage(), pe);
-        } catch (Exception e) {
-            throw new MilmSearchException(e.getMessage(), e);
-        }
+    	return result;
     }
     
     /**

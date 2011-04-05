@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.search.Searchable;
 
 /**
- *
+ * Luceneパッケージ関連のユーティリティクラスです。
  *
  * @author Mizuki Yamanaka
  */

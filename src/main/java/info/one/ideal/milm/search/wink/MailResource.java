@@ -5,13 +5,13 @@
 package info.one.ideal.milm.search.wink;
 
 import info.one.ideal.milm.search.MilmSearchException;
+import info.one.ideal.milm.search.SearchResult;
 import info.one.ideal.milm.search.SearchService;
 import info.one.ideal.milm.search.SortValue;
 import info.one.ideal.milm.search.crawling.Mail;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import javax.ws.rs.GET;
@@ -55,21 +55,17 @@ public class MailResource {
                                 @QueryParam("sortValue") SortValue sortValue,
                                 @QueryParam("pp")        int itemCountPerPage,
                                 @QueryParam("page")      int pageNumber) {
-        List<Mail> mailList = null;
-        int totalMailCount = 0;
         Document document = DocumentHelper.createDocument();
         try {
             SearchService searchService = new SearchService();
             // TODO パラメータチェック
-            mailList = searchService.search(fieldName, queryStr, itemCountPerPage, pageNumber, sortValue);
-            // TODO メールリストと件数を内包するクラスをつくってsearchメソッドで返す
-            totalMailCount = searchService.countTotal(fieldName, queryStr);
+            SearchResult searchResult = searchService.search(fieldName, queryStr, itemCountPerPage, pageNumber, sortValue);
     
             // TODO ROME使って作る
             // TODO CDATA
             Element feed = document.addElement("feed");
             feed.addNamespace("", "http://www.w3.org/2005/Atom");
-            feed.addAttribute("total", String.valueOf(totalMailCount));
+            feed.addAttribute("total", String.valueOf(searchResult.getTotalCount()));
             Element title = feed.addElement("title");
             title.addText("setuco-public Mailing List Search");
             Element updated = feed.addElement("updated");
@@ -78,7 +74,7 @@ public class MailResource {
             Element id = feed.addElement("id");
             id.addText("setuco-public Mailing List Search");
 
-            for (Mail mail : mailList) {
+            for (Mail mail : searchResult.getMailList()) {
                 Element entry = feed.addElement("entry");
                 entry.addElement("title").addCDATA(mail.getSubject());
                 entry.addElement("link").addAttribute("src", mail.getMailUrl());
