@@ -4,12 +4,24 @@
 **************************************************************/
 package info.one.ideal.milm.search.wink;
 
+import info.one.ideal.milm.search.MilmSearchException;
+import info.one.ideal.milm.search.SearchService;
+import info.one.ideal.milm.search.SortValue;
+import info.one.ideal.milm.search.crawling.Mail;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -22,62 +34,97 @@ import org.dom4j.Element;
 @Path("/mails")
 public class MailResource {
 
+    /** ログ */
+    private final Log log = LogFactory.getLog(MailResource.class);
+    
     /**
      * /mails にGETアクセスで呼び出される処理。
      * メールを検索してメール情報のXML文書(AtomPub仕様)を返します。 
      * 
-     * @param query     クエリ文字列
-     * @param field     検索フィールド文字列
-     * @param sortValue 並び替え指定文字列
-     * @param pp        1ページに表示するメール数
-     * @param page      取得するページ番号
+     * @param queryStr     クエリ文字列
+     * @param fieldName     検索フィールド文字列
+     * @param sortStr 並び替え指定文字列
+     * @param itemCountPerPage        1ページに表示するメール数
+     * @param pageNumber      取得するページ番号
      * @return          検索結果メールのXML文書
      */
     @GET
-    @Produces("text/xml")
-    public Response searchMails(@QueryParam("q")         String query,
-                                @QueryParam("field")     String field,
-                                @QueryParam("sortValue") String sortValue,
-                                @QueryParam("pp")        String pp,
-                                @QueryParam("page")      String page) {
-        /*   ======XMLの雛形======
-         * 
-         * <feed xmlns="http://....">
-         *   <entry>
-         *     <title>件名</title>
-         *     <link src=リンク/>
-         *     <id>Luceneのスコアか件名?</id>
-         *     <published>送信日時</published>
-         *     <author>
-         *       <name>差出人</name>
-         *       <email>メールアドレス</email>
-         *     </author>
-         *     <content>本文</content>
-         *   </entry>
-         *   <entry>
-         *    ---
-         *   </entry>
-         * </feed>
-         */
+    @Produces("application/atom+xml")
+    public Response searchMails(@QueryParam("q")         String queryStr,
+                                @QueryParam("field")     String fieldName,
+                                @QueryParam("sortValue") SortValue sortValue,
+                                @QueryParam("pp")        int itemCountPerPage,
+                                @QueryParam("page")      int pageNumber) {
+        List<Mail> mailList = null;
+        int totalMailCount = 0;
         Document document = DocumentHelper.createDocument();
+        try {
+            SearchService searchService = new SearchService();
+            // TODO パラメータチェック
+            mailList = searchService.search(fieldName, queryStr, itemCountPerPage, pageNumber, sortValue);
+            // TODO メールリストと件数を内包するクラスをつくってsearchメソッドで返す
+            totalMailCount = searchService.countTotal(fieldName, queryStr);
+    
+            // TODO ROME使って作る
+            // TODO CDATA
+            Element feed = document.addElement("feed");
+            feed.addNamespace("", "http://www.w3.org/2005/Atom");
+            feed.addAttribute("total", String.valueOf(totalMailCount));
+            Element title = feed.addElement("title");
+            title.addText("setuco-public Mailing List Search");
+            Element updated = feed.addElement("updated");
+            updated.addText(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.JAPAN)
+            .format(new Date()));
+            Element id = feed.addElement("id");
+            id.addText("setuco-public Mailing List Search");
 
-        Element feed = document.addElement("feed");
-        feed.addNamespace("", "http://www.w3.org/2005/Atom");
-
-        Element entry = feed.addElement("entry");
-        entry.addElement("title").addText("query[" + query + "], field=[" + field
-                + "], sortValue=[" + sortValue + "], pp=[" + pp + "], page=["
-                + page + "]");
-        entry.addElement("link").addAttribute("src", "リンクURL");
-        entry.addElement("id").addText("ID");
-        entry.addElement("published").addText("送信日時");
-        Element author = entry.addElement("author");
-        author.addElement("name").addText("差出人名");
-        author.addElement("email").addText("メールアドレス");
-        entry.addElement("content").addText("本文");
+            for (Mail mail : mailList) {
+                Element entry = feed.addElement("entry");
+                entry.addElement("title").addCDATA(mail.getSubject());
+                entry.addElement("link").addAttribute("src", mail.getMailUrl());
+                entry.addElement("summary").addCDATA(searchService.highlight(fieldName, queryStr, mail.getMailText()));
+                entry.addElement("updated").addText(mail.getDateRFC3339());
+                entry.addElement("id").addText(mail.extractSubjectHeader());    // TODO URLのケツ
+//                Element author = entry.addElement("author");
+//                author.addElement("name").addCDATA(mail.getFromName());
+//                author.addElement("email").addCDATA(mail.getFromEmail());
+            }
+        } catch (MilmSearchException e) {
+            log.error("検索中に障害が発生しました。", e);
+            return Response.serverError().build();
+        }
 
         byte[] entity = document.asXML().getBytes();
-        return Response.ok(entity).type("text/xml").build();
+        return Response.ok(entity).build();
     }
+    
+    @GET
+    @Produces("text/plain")
+    @Path("{id}/content")
+    public Response mailText() {
+        return null; // TODO
+    }
+    
 	
 }
+/*   ======XMLの雛形======
+ * 
+ * <feed xmlns="http://....">
+ *   <entry>
+ *     <title>件名</title>
+ *     <link src=リンク/>
+ *     <id>Luceneのスコアか件名?</id>
+ *     <summary>概要</summary>
+ *     <published>送信日時</published>
+ *     <author>
+ *       <name>差出人</name>
+ *       <email>メールアドレス</email>
+ *     </author>
+ *     <content>本文</content>
+ *   </entry>
+ *   <entry>
+ *    ---
+ *   </entry>
+ * </feed>
+ */
+

@@ -4,6 +4,7 @@
 **************************************************************/
 package info.one.ideal.milm.search.crawling;
 
+import info.one.ideal.milm.search.SystemConfig;
 import info.one.ideal.milm.search.common.html.HtmlParser;
 import info.one.ideal.milm.search.common.html.Tag;
 import info.one.ideal.milm.search.common.util.DateUtil;
@@ -46,7 +47,7 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
 /**
- *
+ * 
  *
  * @author Mizuki Yamanaka
  */
@@ -56,8 +57,6 @@ public class CrawlingTimerTask extends TimerTask {
     private static Log log = LogFactory.getLog(CrawlingTimerTask.class);
 
     public String archiveUrlStr = "http://sourceforge.jp/projects/setucocms/lists/archive/public/";
-    
-    public String indexPath = "/home/charles/temp/milm-search";
     
     /* (非 Javadoc)
      * @see java.util.TimerTask#run()
@@ -78,7 +77,7 @@ public class CrawlingTimerTask extends TimerTask {
             if (preLastMailDate == 0L) {
                 log.warn("最後に解析したメール情報が取得できませんでした。全てのメール情報を解析します。");
                 indexWriter = new IndexWriter(
-                        FSDirectory.open(new File(this.indexPath)),
+                        FSDirectory.open(new File(SystemConfig.getIndexDir())),
                         new CJKAnalyzer(Version.LUCENE_29),
                         true,    // trueなら空の状態から作り、falseなら追加する(既に追加されたものでも新たに増える)。
                         MaxFieldLength.UNLIMITED);
@@ -86,7 +85,7 @@ public class CrawlingTimerTask extends TimerTask {
                 log.info("最後に解析したメール情報を取得しました。途中から解析します。");
                 log.info("前回の最後に解析したメールの送信日時は " + DateUtil.convertDate2Str(new Date(preLastMailDate)));
                 indexWriter = new IndexWriter(
-                        FSDirectory.open(new File(this.indexPath)),
+                        FSDirectory.open(new File(SystemConfig.getIndexDir())),
                         new CJKAnalyzer(Version.LUCENE_29),
                         false,    // trueなら空の状態から作り、falseなら追加する(既に追加されたものでも新たに増える)。
                         MaxFieldLength.UNLIMITED);
@@ -173,7 +172,7 @@ public class CrawlingTimerTask extends TimerTask {
     private long findPreLastMailDate() throws CorruptIndexException, IOException,
             StaleReaderException, LockObtainFailedException {
         long lastMailDate = 0L;
-        IndexReader indexReader = IndexReader.open(FSDirectory.open(new File(this.indexPath)), false);
+        IndexReader indexReader = IndexReader.open(FSDirectory.open(new File(SystemConfig.getIndexDir())), false);
         for(int i = 0; i < indexReader.maxDoc(); i++){
             Document doc = indexReader.document(i);
             if (doc.get("lastMailDate") == null) {
@@ -196,6 +195,7 @@ public class CrawlingTimerTask extends TimerTask {
      */
     private Document createDocument(Mail mail) throws ParseException {
         Document doc = new Document();
+        // TODO subjectとかを定数化
         doc.add(new Field("subject", mail.getSubject(), Store.YES, Index.ANALYZED));
         doc.add(new Field("from", mail.getFromName(), Store.YES, Index.NOT_ANALYZED));
         doc.add(new Field("email", mail.getFromEmail(), Store.YES, Index.NOT_ANALYZED));
@@ -347,7 +347,7 @@ public class CrawlingTimerTask extends TimerTask {
         
         for (String subUrlStr : subUrlList) {
             long subUrlDate = this.calcMonthDate(subUrlStr);
-            if (!DateUtil.isSameYearMonth(preLastMailDate, subUrlDate) || preLastMailDate > subUrlDate) {
+            if (!isValidDate(subUrlDate, preLastMailDate)) {
                 continue;
             }
             BufferedReader br = this.createUrlReader(this.archiveUrlStr + subUrlStr);
@@ -367,6 +367,23 @@ public class CrawlingTimerTask extends TimerTask {
             }
         }
         return mailUrlList;
+    }
+
+    /**
+     * subUrlがメール解析の対象かを判断します。
+     * 
+     * @param subUrlDate subUrlの日付値
+     * @param preLastMailDate 前回解析したメールの最後の日付値
+     * @return 対象とするなら true
+     */
+    private boolean isValidDate(long subUrlDate, long preLastMailDate) {
+        if (subUrlDate > preLastMailDate) {
+            return true;
+        }
+        if (DateUtil.isSameYearMonth(preLastMailDate, subUrlDate)) {
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -36,5 +36,15 @@
   		<artifactId>lucene-analyzers</artifactId>
   		<version>2.9.4</version>
   	</dependency>
+  	<dependency>
+  		<groupId>org.apache.lucene</groupId>
+  		<artifactId>lucene-highlighter</artifactId>
+  		<version>2.9.4</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>rome</groupId>
+  		<artifactId>rome</artifactId>
+  		<version>0.9</version>
+  	</dependency>
   </dependencies>
 </project>

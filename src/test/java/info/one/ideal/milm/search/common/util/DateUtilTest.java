@@ -19,7 +19,7 @@ import org.junit.Test;
  *
  * @author Mizuki Yamanaka
  */
-public class DateUtilsTest {
+public class DateUtilTest {
 
     /**
      * @throws java.lang.Exception

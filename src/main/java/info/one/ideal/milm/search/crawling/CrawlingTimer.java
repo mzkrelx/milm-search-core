@@ -17,7 +17,7 @@ import javax.servlet.ServletContextListener;
 public class CrawlingTimer implements ServletContextListener {
     
     /** タイマー */
-    private static final Timer timer = new Timer();
+    private static final Timer TIMER = new Timer();
     
     /** クローリングする間隔時間 */
     private final int hour = 24;
@@ -27,6 +27,7 @@ public class CrawlingTimer implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(ServletContextEvent arg0) {
+        TIMER.cancel();
     }
 
     /* (非 Javadoc)
@@ -34,7 +35,7 @@ public class CrawlingTimer implements ServletContextListener {
      */
     @Override
     public void contextInitialized(ServletContextEvent arg0) {
-        timer.schedule(new CrawlingTimerTask(),
+        TIMER.schedule(new CrawlingTimerTask(),
                 0,   // 初回の起動時間
                 hour * 60 * 60 * 1000);  // 固定間隔時間
     }

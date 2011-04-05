@@ -29,6 +29,9 @@ public class Mail {
 
     /** メール本文 */
     private String mailText;
+    
+    /** メールの概要 */
+    private String mailSummary;
 
     /** メールのURL */
     private String mailUrl;
@@ -96,6 +99,25 @@ public class Mail {
         return new SimpleDateFormat("yyyy年MM月dd日 (EEE) HH:mm:ss", Locale.JAPAN)
                 .format(this.date);
     }
+    
+    /**
+     * 送信日時をRFC3339形式で取得します。
+     * 
+     * @return 送信日時文字列
+     */
+    public String getDateRFC3339() {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.JAPAN)
+                .format(this.date);
+    }    
+
+    /**
+     * 差出人メールアドレスを取得します。
+     * 
+     * @return 差出人メールアドレス
+     */
+    public String getFromEmail() {
+        return this.fromEmail;
+    }
 
     /**
      * 差出人名を取得します。
@@ -107,12 +129,12 @@ public class Mail {
     }
 
     /**
-     * 差出人メールアドレスを取得します。
-     * 
-     * @return 差出人メールアドレス
+     * mailSummary を取得します。
+     *
+     * @return mailSummary
      */
-    public String getFromEmail() {
-        return this.fromEmail;
+    public String getMailSummary() {
+        return this.mailSummary;
     }
 
     /**
@@ -152,6 +174,15 @@ public class Mail {
     }
 
     /**
+     * 差出人メールアドレスを設定します。
+     * 
+     * @param fromEmail 差出人メールアドレス
+     */
+    public void setFromEmail(String fromEmail) {
+        this.fromEmail = fromEmail;
+    }
+
+    /**
      * 差出人名を設定します。
      * 
      * @param fromName 差出人名
@@ -161,12 +192,12 @@ public class Mail {
     }
 
     /**
-     * 差出人メールアドレスを設定します。
-     * 
-     * @param fromEmail 差出人メールアドレス
+     * mailSummary を設定します。
+     *
+     * @param mailSummary 設定する mailSummary
      */
-    public void setFromEmail(String fromEmail) {
-        this.fromEmail = fromEmail;
+    public void setMailSummary(String mailSummary) {
+        this.mailSummary = mailSummary;
     }
 
     /**
