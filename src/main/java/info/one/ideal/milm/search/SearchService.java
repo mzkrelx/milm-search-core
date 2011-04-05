@@ -53,55 +53,52 @@ public class SearchService {
     public SearchService() {
     }
 	
-	/**
-	 * 検索をしてメールリストを取得します。
-	 * 
-	 * @param fieldName 検索フィールド
-	 * @param queryStr 検索文字列
-	 * @param sortingStr 並べ替え識別文字列
-	 * @return 検索結果
-	 * @throws MilmSearchException
-	 */
-    public SearchResult search(String fieldName, String queryStr, int itemCountPerPage, int pageNumber, SortValue sortValue) 
-            throws MilmSearchException {
+    /**
+     * 検索をしてメールリストを取得します。
+     * 
+     * @param condition 検索条件
+     * @return 検索結果
+     * @throws MilmSearchException
+     */
+    public SearchResult search(SearchCondition condition) throws MilmSearchException {
         SearchResult result = new SearchResult();
-		IndexSearcher searcher = null;
-    	try {
+        IndexSearcher searcher = null;
+        try {
             List<Mail> mailList = new ArrayList<Mail>();
-    	    searcher = new IndexSearcher(FSDirectory.open(new File(SystemConfig.getIndexDir())), true);
-            Query query = new QueryParser(Version.LUCENE_29, fieldName, this.analyzer).parse(queryStr);
-            Sort sort = this.createSort(sortValue);
+            searcher = new IndexSearcher(FSDirectory.open(new File(SystemConfig.getIndexDir())), true);
+            Query query = new QueryParser(Version.LUCENE_29, condition.getSearchField().toString(), this.analyzer).parse(condition.getQueryStr());
+            Sort sort = this.createSort(condition.getSortValue());
             TopDocs topDocs;
             if (sort == null) {
-                topDocs = searcher.search(query, null, itemCountPerPage * pageNumber);
+                topDocs = searcher.search(query, null, condition.getItemCountPerPage() * condition.getPageNumber());
             } else {
-                topDocs = searcher.search(query, null, itemCountPerPage * pageNumber, sort);
+                topDocs = searcher.search(query, null, condition.getItemCountPerPage() * condition.getPageNumber(), sort);
             }
             // ◯件取得したうちの、最後のページ部分のみメールリストに含めるための最初の位置。
-            int beginIndex = (pageNumber - 1) * itemCountPerPage;
+            int beginIndex = (condition.getPageNumber() - 1) * condition.getItemCountPerPage();
             int i = 0;
             for(ScoreDoc scoreDoc: topDocs.scoreDocs) { // ScoreDoc は Doc へのポインタ
                 if (i++ < beginIndex) {
                     continue;
                 }
                 Document doc = searcher.doc(scoreDoc.doc);
-                Mail mail = this.createMail(doc, fieldName, queryStr);
-	    		mailList.add(mail);
-	    	}
+                Mail mail = this.createMail(doc, condition.getSearchField(), condition.getQueryStr());
+                mailList.add(mail);
+            }
             result.setMailList(mailList);
             result.setTotalCount(topDocs.totalHits);
-    	} catch (ParseException pe) {
-    	    log.error("検索キーワードのパースに失敗しました。", pe);
-    	    throw new MilmSearchException("検索キーワードが無効です。\n" + pe.getMessage(), pe);
-    	} catch (Exception e) {
-    	    log.error("検索中に例外が発生しました。", e);
-    		throw new MilmSearchException(e.getMessage(), e);
-    	} finally {
-    	    LuceneUtils.closeQuietly(searcher); 
-    	}
-    	return result;
+        } catch (ParseException pe) {
+            log.error("検索キーワードのパースに失敗しました。", pe);
+            throw new MilmSearchException("検索キーワードが無効です。\n" + pe.getMessage(), pe);
+        } catch (Exception e) {
+            log.error("検索中に例外が発生しました。", e);
+            throw new MilmSearchException(e.getMessage(), e);
+        } finally {
+            LuceneUtils.closeQuietly(searcher); 
+        }
+        return result;
     }
-    
+
     /**
      * 並び順を作成します。
      * 
@@ -130,17 +127,17 @@ public class SearchService {
      * 文字列をハイライトします。
      * fieldTextに検索の該当箇所がないと null を返します。
      * 
-     * @param fieldName 検索フィールド
+     * @param searchField 検索フィールド
      * @param queryStr 検索クエリ
      * @param fieldText ハイライトする文字列
      * @throws MilmSearchException 
      */
-    public String highlight(String fieldName, String queryStr, String fieldText) throws MilmSearchException {
+    public String highlight(SearchField searchField, String queryStr, String fieldText) throws MilmSearchException {
         try {
             Formatter formatter = new SimpleHTMLFormatter(Highlight.preTag, Highlight.postTag);
-            QueryScorer score = new QueryScorer(new QueryParser(Version.LUCENE_29, fieldName, this.analyzer).parse(queryStr), fieldName);
+            QueryScorer score = new QueryScorer(new QueryParser(Version.LUCENE_29, searchField.toString(), this.analyzer).parse(queryStr), searchField.toString());
             Highlighter highlighter = new Highlighter(formatter, score);
-            String highlightString = highlighter.getBestFragment(this.analyzer, fieldName, fieldText);
+            String highlightString = highlighter.getBestFragment(this.analyzer, searchField.toString(), fieldText);
             return highlightString;
         } catch (Exception e) {
             throw new MilmSearchException("ハイライト処理時に例外が発生しました。", e);
@@ -151,10 +148,12 @@ public class SearchService {
 	 * 検索ドキュメントからメールを作成します。
 	 * 
 	 * @param doc 検索ドキュメント
+	 * @param searchField 検索フィールド
+	 * @param queryStr クエリ文字列
 	 * @return メール 
 	 * @throws MilmSearchException 
 	 */
-	protected Mail createMail(Document doc, String fieldName, String queryStr) throws MilmSearchException {
+	protected Mail createMail(Document doc, SearchField searchField, String queryStr) throws MilmSearchException {
 		Mail mail = new Mail();
 		mail.setSubject(doc.get(FieldNames.SUBJECT));
 		mail.setFromName(doc.get(FieldNames.FROM));
@@ -162,21 +161,25 @@ public class SearchService {
         mail.setMailUrl(doc.get(FieldNames.URL));
 	    mail.setDate(new Date(Long.parseLong(doc.get(FieldNames.DATE))));
 		mail.setMailText(doc.get(FieldNames.TEXT));
-		if (SearchField.text.equals(fieldName)) {
-            /* 本文をハイライトしてsummaryにセット */
-            String text = mail.getMailText();
-            text = this.highlight(fieldName, queryStr, text);
-            mail.setMailSummary(text);
-        } else if (SearchField.subject.equals(fieldName)) {
-            /* 件名をハイライト */
-            String subject = mail.getSubject();
-            subject = this.highlight(fieldName, queryStr, subject);
-            mail.setSubject(subject);
-            /* 本文を短くしてsummaryにセット */
-            String text = mail.getMailText();
-            text = this.scrapeMailText(text);
-            mail.setMailText(text);
+		
+		String text = mail.getMailText();
+        switch (searchField) {
+            case subject:
+                /* 件名をハイライト */
+                String subject = mail.getSubject();
+                subject = this.highlight(searchField, queryStr, subject);
+                mail.setSubject(subject);
+                /* 本文を短くしてsummaryにセット */
+                text = this.scrapeMailText(text);
+                mail.setMailText(text);
+                break;
+            default:
+                /* 本文をハイライトしてsummaryにセット */
+                text = this.highlight(searchField, queryStr, text);
+                mail.setMailSummary(text);
+                break;
         }
+		    
 		return mail;
 	}
 	

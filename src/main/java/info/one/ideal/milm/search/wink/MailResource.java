@@ -5,6 +5,8 @@
 package info.one.ideal.milm.search.wink;
 
 import info.one.ideal.milm.search.MilmSearchException;
+import info.one.ideal.milm.search.SearchCondition;
+import info.one.ideal.milm.search.SearchField;
 import info.one.ideal.milm.search.SearchResult;
 import info.one.ideal.milm.search.SearchService;
 import info.one.ideal.milm.search.SortValue;
@@ -51,15 +53,19 @@ public class MailResource {
     @GET
     @Produces("application/atom+xml")
     public Response searchMails(@QueryParam("q")         String queryStr,
-                                @QueryParam("field")     String fieldName,
+                                @QueryParam("field")     SearchField searchField,
                                 @QueryParam("sortValue") SortValue sortValue,
                                 @QueryParam("pp")        int itemCountPerPage,
                                 @QueryParam("page")      int pageNumber) {
+        if (queryStr == null || "".equals(queryStr.trim())) {
+            Response.noContent().build();
+        }
         Document document = DocumentHelper.createDocument();
         try {
             SearchService searchService = new SearchService();
-            // TODO パラメータチェック
-            SearchResult searchResult = searchService.search(fieldName, queryStr, itemCountPerPage, pageNumber, sortValue);
+            SearchResult searchResult = searchService
+                    .search(new SearchCondition(searchField, queryStr,
+                            itemCountPerPage, pageNumber, sortValue));
     
             // TODO ROME使って作る
             // TODO CDATA
@@ -78,7 +84,7 @@ public class MailResource {
                 Element entry = feed.addElement("entry");
                 entry.addElement("title").addCDATA(mail.getSubject());
                 entry.addElement("link").addAttribute("src", mail.getMailUrl());
-                entry.addElement("summary").addCDATA(searchService.highlight(fieldName, queryStr, mail.getMailText()));
+                entry.addElement("summary").addCDATA(searchService.highlight(searchField, queryStr, mail.getMailText()));
                 entry.addElement("updated").addText(mail.getDateRFC3339());
                 entry.addElement("id").addText(mail.extractSubjectHeader());    // TODO URLのケツ
 //                Element author = entry.addElement("author");
