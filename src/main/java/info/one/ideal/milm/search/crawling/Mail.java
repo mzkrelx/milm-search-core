@@ -16,7 +16,7 @@ import java.util.Locale;
 public class Mail {
     
     /** ID */
-    private int id;
+    private String id;
     
     /** 送信日時 */
     private Date date;
@@ -136,7 +136,7 @@ public class Mail {
      *
      * @return id
      */
-    public int getId() {
+    public String getId() {
         return this.id;
     }
 
@@ -208,7 +208,7 @@ public class Mail {
      *
      * @param id 設定する id
      */
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -158,7 +158,7 @@ public class SearchService {
 	 */
 	protected Mail createMail(Document doc, int score, SearchField searchField, String queryStr) throws MilmSearchException {
 		Mail mail = new Mail();
-		mail.setId(score);
+		mail.setId(String.valueOf(score));
 		mail.setSubject(doc.get(FieldNames.SUBJECT));
 		mail.setFromName(doc.get(FieldNames.FROM));
 		mail.setFromEmail(doc.get(FieldNames.EMAIL));
