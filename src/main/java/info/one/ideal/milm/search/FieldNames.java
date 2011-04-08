@@ -28,4 +28,8 @@ public class FieldNames {
 
     /** メール本文 */
     public static final String TEXT = "text";
+
+    /** 最後のメールの日時 */
+    public static final String LAST_MAIL_DATE = "lastMailDate";
+
 }

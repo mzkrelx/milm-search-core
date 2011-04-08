@@ -117,7 +117,7 @@ public class CrawlingTimerTask extends TimerTask {
             }
             if (madeCount > 0) {
                 Document doc = new Document();
-                doc.add(new Field("lastMailDate", Long.toString(lastMailDate), Store.YES, Index.NOT_ANALYZED));
+                doc.add(new Field(FieldNames.LAST_MAIL_DATE, Long.toString(lastMailDate), Store.YES, Index.NOT_ANALYZED));
                 indexWriter.addDocument(doc);
                 log.debug("最後に解析したメール情報を保存しました。");
                 log.info("保存した最新のメールの送信日時[" + DateUtil.convertDate2Str(new Date(lastMailDate)) + "]");
@@ -176,10 +176,10 @@ public class CrawlingTimerTask extends TimerTask {
         IndexReader indexReader = IndexReader.open(FSDirectory.open(new File(SystemConfig.getIndexDir())), false);
         for(int i = 0; i < indexReader.maxDoc(); i++){
             Document doc = indexReader.document(i);
-            if (doc.get("lastMailDate") == null) {
+            if (doc.get(FieldNames.LAST_MAIL_DATE) == null) {
                 continue;
             }
-            lastMailDate = Long.parseLong(doc.get("lastMailDate"));
+            lastMailDate = Long.parseLong(doc.get(FieldNames.LAST_MAIL_DATE));
             indexReader.deleteDocument(i);
             break;
         }
