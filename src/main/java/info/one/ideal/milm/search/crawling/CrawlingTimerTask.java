@@ -6,9 +6,8 @@ package info.one.ideal.milm.search.crawling;
 
 import info.one.ideal.milm.search.FieldNames;
 import info.one.ideal.milm.search.SystemConfig;
-import info.one.ideal.milm.search.common.html.HtmlParser;
-import info.one.ideal.milm.search.common.html.Tag;
 import info.one.ideal.milm.search.common.util.DateUtil;
+import info.one.ideal.milm.search.lucene.LuceneUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,15 +20,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,17 +35,19 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
-import org.apache.lucene.index.StaleReaderException;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
+import org.cyberneko.html.parsers.DOMParser;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import com.sun.org.apache.xpath.internal.XPathAPI;
 
 /**
- * 
+ * メールをクローリングして検索インデックスを作成するタスクです。
  *
  * @author Mizuki Yamanaka
  */
@@ -57,7 +56,8 @@ public class CrawlingTimerTask extends TimerTask {
     /** ロガー */
     private static Log log = LogFactory.getLog(CrawlingTimerTask.class);
 
-    public String archiveUrlStr = "http://sourceforge.jp/projects/setucocms/lists/archive/public/";
+    /** 保存書庫のURL文字列 */
+    public String archiveUrlStr = SystemConfig.getArchiveUrl();
     
     /* (非 Javadoc)
      * @see java.util.TimerTask#run()
@@ -73,8 +73,7 @@ public class CrawlingTimerTask extends TimerTask {
     private void doCrawling() {
         IndexWriter indexWriter = null;
         try {
-            List<String> subUrlList = this.createMonthlyArchiveUrlList();
-            long preLastMailDate = this.findPreLastMailDate();
+            long preLastMailDate = CrawlingProperty.findPreLastMailDate();
             if (preLastMailDate == 0L) {
                 log.warn("最後に解析したメール情報が取得できませんでした。全てのメール情報を解析します。");
                 indexWriter = new IndexWriter(
@@ -91,13 +90,13 @@ public class CrawlingTimerTask extends TimerTask {
                         false,    // trueなら空の状態から作り、falseなら追加する(既に追加されたものでも新たに増える)。
                         MaxFieldLength.UNLIMITED);
             }
-            List<String> mailUrlList = this.createMailUrlList(subUrlList, preLastMailDate);
+            List<String> mailUrlList = this.createMailUrlList(this.createMonthlyArchiveUrlList(), preLastMailDate);
             
             int madeCount = 0;
-            int logTerm = 100;
+            final int commitTerm = 100;
             long lastMailDate = 0L;
             for (String mailUrlStr : mailUrlList) {
-                Mail mail = this.createMail(mailUrlStr);
+                Mail mail = this.createMail(this.archiveUrlStr + mailUrlStr);
                 if (mail.getDate().getTime() <= preLastMailDate) {
                     continue;
                 }
@@ -106,41 +105,32 @@ public class CrawlingTimerTask extends TimerTask {
                     lastMailDate = mail.getDate().getTime();
                 }
                 madeCount++;
-                if ((madeCount % 100) == 0) {
-                    indexWriter.optimize();
+                if ((madeCount % commitTerm) == 0) {
+                    CrawlingProperty.updatePreLastMailDate(lastMailDate);
                     indexWriter.commit();
-                }
-
-                if ((madeCount % logTerm) == 0) {
-                    log.info(madeCount + " 件目作成しました。");
+                    log.info(madeCount + " 件目コミットしました。");
                 }
             }
-            if (madeCount > 0) {
-                Document doc = new Document();
-                doc.add(new Field(FieldNames.LAST_MAIL_DATE, Long.toString(lastMailDate), Store.YES, Index.NOT_ANALYZED));
-                indexWriter.addDocument(doc);
-                log.debug("最後に解析したメール情報を保存しました。");
-                log.info("保存した最新のメールの送信日時[" + DateUtil.convertDate2Str(new Date(lastMailDate)) + "]");
-    
-                indexWriter.optimize();
+            if (madeCount % commitTerm > 0) {
+                CrawlingProperty.updatePreLastMailDate(lastMailDate);
                 indexWriter.commit();
             }
-            log.info(madeCount + " 件目作成しました。(終了)");
+            if (lastMailDate > 0L) {
+                log.info("最後に解析したメールの送信日時は [" + new Date(lastMailDate) + "] です。");
+            }
+            log.info("全 " + madeCount + " 件作成しました。(終了)");
         } catch (Exception e) {
+            log.error("処理中にエラーが発生しました。処理を中断します。", e);
             if (indexWriter != null) { 
                 try {
                     indexWriter.rollback();
-                } catch (IOException ignore) {
+                    log.info("処理をロールバックしました。");
+                } catch (IOException ioe) {
+                    log.error("ロールバックに失敗しました。", ioe);
                 }
-            }
-            log.error("処理中にエラーが発生しました。処理を中断します。", e);
+            }            
         } finally {
-            if (indexWriter != null) {
-                try {
-                    indexWriter.close();
-                } catch (Exception ignore) {
-                }
-            }
+            LuceneUtils.closeQuietly(indexWriter);
             log.info("インデックスの作成を終了しました。");
         }
     }
@@ -157,34 +147,6 @@ public class CrawlingTimerTask extends TimerTask {
         String subUrlHead = subUrl.substring(0, subUrl.indexOf("/"));
         Date lastSubUrlDate = new SimpleDateFormat("yyyy-MMMMM", Locale.US).parse(subUrlHead);
         return lastSubUrlDate.getTime();
-    }
-    
-
-    /**
-     * 前回最後にインデクシングしたメールの送信日時を取得します。
-     * 見つからない場合は 0L が返ります。
-     * 
-     * @return 最後にインデクシングしたメールの送信日時
-     * @throws CorruptIndexException
-     * @throws IOException
-     * @throws StaleReaderException
-     * @throws LockObtainFailedException
-     */
-    private long findPreLastMailDate() throws CorruptIndexException, IOException,
-            StaleReaderException, LockObtainFailedException {
-        long lastMailDate = 0L;
-        IndexReader indexReader = IndexReader.open(FSDirectory.open(new File(SystemConfig.getIndexDir())), false);
-        for(int i = 0; i < indexReader.maxDoc(); i++){
-            Document doc = indexReader.document(i);
-            if (doc.get(FieldNames.LAST_MAIL_DATE) == null) {
-                continue;
-            }
-            lastMailDate = Long.parseLong(doc.get(FieldNames.LAST_MAIL_DATE));
-            indexReader.deleteDocument(i);
-            break;
-        }
-        indexReader.close();
-        return lastMailDate;
     }
 
     /**
@@ -207,104 +169,36 @@ public class CrawlingTimerTask extends TimerTask {
 
     /**
      * メールURLからウェブにアクセスし、HTMLを解析してメールを作成します。
+     * メールのウェブページのタグなどのカスタマイズをしていない前提です。
      * 
      * @param mailUrlStr メールURL
      * @return メール
+     * @throws SAXException 
      * @throws MalformedURLException
      * @throws IOException
+     * @throws TransformerException 
+     * @throws DOMException 
      * @throws ParseException
      */
-    private Mail createMail(String mailUrlStr) throws MalformedURLException,
-            IOException, ParseException {
-        BufferedReader br = this.createUrlReader(this.archiveUrlStr + mailUrlStr);
-        StringBuffer sb = new StringBuffer();
-        for (String line = br.readLine(); line != null; line = br.readLine()) {
-            sb.append(line + "\n");
-        }
+    private Mail createMail(String mailUrlStr) throws SAXException, IOException, TransformerException, DOMException, ParseException {
+        DOMParser parser = new DOMParser();
+        parser.parse(mailUrlStr);
+        Node node = parser.getDocument();
         
-        HtmlParser htmlParser = new HtmlParser(sb.toString());
-        List<Tag> tagList = new ArrayList<Tag>();
-        while (htmlParser.hasNext()) {
-            Tag tag = htmlParser.next();
-            tagList.add(tag);
-        }
-        
-        Set<Tag> mailInfoTagSet = this.chooseMailInfoTags(tagList);
-
         Mail mail = new Mail();
-        for (Tag tag : mailInfoTagSet) {
-            mail.setMailUrl(this.archiveUrlStr + mailUrlStr);
-            if ("B".equals(tag.getTagName())) {
-                mail.setFromName(tag.getInnerHtml());
-            }
-            if ("A".equals(tag.getTagName())) {
-                String subjectSource = tag.getTagAttribute();
-                mail.setSubject(subjectSource.substring(
-                        subjectSource.indexOf("TITLE=\"") + "TITLE=\"".length(),
-                        subjectSource.lastIndexOf('\"')));
-                mail.setFromEmail(tag.getInnerHtml());
-            }
-            if ("I".equals(tag.getTagName())) {
-                mail.setDate(DateUtil.convertDefaultToDate(tag.getInnerHtml()));
-            }
-            if ("PRE".equals(tag.getTagName())) {
-                mail.setMailText(tag.getInnerHtml());
-            }
-        }
+        mail.setMailUrl(mailUrlStr);
+        mail.setFromName(XPathAPI.selectSingleNode(node, "//P/B").getTextContent().trim());
+        Node a = XPathAPI.selectSingleNode(node, "//P/A");
+        mail.setFromEmail(a.getTextContent().trim());
+        String subjectSource = a.getAttributes().getNamedItem("title").toString();
+        mail.setSubject(subjectSource.substring(
+                subjectSource.indexOf("TITLE=\"") + "TITLE=\"".length() + 1,
+                subjectSource.lastIndexOf('\"')).trim());
+        mail.setDate(DateUtil.convertDefaultToDate(XPathAPI.selectSingleNode(node, "//P/I").getTextContent().trim()));
+        mail.setMailText(XPathAPI.selectSingleNode(node, "//PRE").getTextContent());
         return mail;
     }
-
-    /**
-     * タグリストから、メール情報に関するものだけを選び抜きます。
-     * 
-     * @param tagList タグリスト
-     * @return メール情報のセット
-     */
-    private Set<Tag> chooseMailInfoTags(List<Tag> tagList) {
-        boolean isBNext = false;
-        boolean isANext = false;
-        boolean isBAIEnd = false;
-        boolean isBiginCommentNext = false;
-        Map<String, Tag> mailInfoTagMap = new HashMap<String, Tag>();
-        for (Tag tag : tagList) {
-            // 閉じタグ,<BR>は無視する
-            if (tag.getTagName().startsWith("/") || "BR".equals(tag.getTagName())) {
-                continue;
-            }
-            
-            // B A I のタグが続いていたら差出人、タイトル、送信日時とみなして取得する
-            if (isBAIEnd == false && isANext == true && "I".equals(tag.getTagName())) {
-                mailInfoTagMap.put("I", tag);
-                isBAIEnd = true;
-                continue;
-            }
-            if (isBAIEnd == false && isBNext == true && "A".equals(tag.getTagName())) {
-                isANext = true;
-                mailInfoTagMap.put("A", tag);
-                continue;
-            }
-            if (isBAIEnd == false && "B".equals(tag.getTagName())) {
-                isBNext = true;
-                mailInfoTagMap.put("B", tag);
-                continue;
-            }
-            
-            // 本文のPREタグは "<!--beginaarticle-->" のコメントの次。
-            if (isBiginCommentNext == true) {
-                mailInfoTagMap.put("PRE", tag);
-                break;
-            }
-            if (tag.getTagName().startsWith("!--beginarticle")) {   // !--の次にスペースがないのでコメント内容までTagNameの方に入っている
-                isBiginCommentNext = true;
-                continue;
-            }
-            
-            isBNext = false;
-            isANext = false;
-        }
-        return new HashSet<Tag>(mailInfoTagMap.values());
-    }
-
+    
     /**
      * 月ごとのメールリストのURLのリストを作成します。
      * 

@@ -42,5 +42,13 @@ public class SystemConfig {
         return PROPERTIES.getProperty("index.dir");
     }
     
+    /**
+     * 保存書庫のURL文字列を取得します。
+     * 
+     * @return 保存書庫のURL文字列
+     */
+    public static String getArchiveUrl() {
+        return PROPERTIES.getProperty("archive.url");
+    }    
     
 }

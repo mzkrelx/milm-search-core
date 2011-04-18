@@ -30,6 +30,7 @@ public class FieldNames {
     public static final String TEXT = "text";
 
     /** 最後のメールの日時 */
+    @Deprecated
     public static final String LAST_MAIL_DATE = "lastMailDate";
 
 }
