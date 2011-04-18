@@ -42,6 +42,7 @@ import org.apache.lucene.util.Version;
 import org.cyberneko.html.parsers.DOMParser;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.sun.org.apache.xpath.internal.XPathAPI;
@@ -203,22 +204,21 @@ public class CrawlingTimerTask extends TimerTask {
      * 月ごとのメールリストのURLのリストを作成します。
      * 
      * @return URL文字列のリスト
-     * @throws MalformedURLException
      * @throws IOException
+     * @throws SAXException 
+     * @throws TransformerException 
      */
-    private List<String> createMonthlyArchiveUrlList()
-            throws MalformedURLException, IOException {
-        BufferedReader br = this.createUrlReader(this.archiveUrlStr);
-        List<String> subUrlList = new ArrayList<String>(); 
-        
-        for (String line = br.readLine(); line != null; line = br.readLine()) {
-            Matcher matcher = Pattern.compile("<A href=\".*?date.html").matcher(line);
-            if (matcher.find()) {
-                String subUrl = matcher.group().substring(9);
-                subUrlList.add(subUrl);
-            }
+    private List<String> createMonthlyArchiveUrlList() throws SAXException, IOException, TransformerException {
+        DOMParser parser = new DOMParser();
+        parser.parse(this.archiveUrlStr);
+        Node contextNode = parser.getDocument();
+        List<String> urlList = new ArrayList<String>(); 
+        NodeList nodeList = XPathAPI.selectNodeList(contextNode, "//TABLE/TR/TD/A[4]/@href");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            urlList.add(node.getTextContent());
         }
-        return subUrlList;
+        return urlList;
     }
     
     /**
