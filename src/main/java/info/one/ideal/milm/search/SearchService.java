@@ -61,9 +61,9 @@ public class SearchService {
      * @throws MilmSearchException
      */
     public SearchResult search(SearchCondition condition) throws MilmSearchException {
-        SearchResult result = new SearchResult();
         IndexSearcher searcher = null;
         try {
+            SearchResult result = new SearchResult();
             List<Mail> mailList = new ArrayList<Mail>();
             searcher = new IndexSearcher(FSDirectory.open(new File(SystemConfig.getIndexDir())), true);
             Query query = new QueryParser(Version.LUCENE_29, condition
@@ -89,6 +89,7 @@ public class SearchService {
             }
             result.setMailList(mailList);
             result.setTotalCount(topDocs.totalHits);
+            return result;
         } catch (ParseException pe) {
             log.error("検索キーワードのパースに失敗しました。", pe);
             throw new MilmSearchException("検索キーワードが無効です。\n" + pe.getMessage(), pe);
@@ -98,8 +99,28 @@ public class SearchService {
         } finally {
             LuceneUtils.closeQuietly(searcher); 
         }
-        return result;
     }
+    
+    /**
+     * ドキュメントIDからメール本文を取得します。
+     * 
+     * @param scoreDoc ドキュメントのID、ポインタ
+     * @return メール本文
+     * @throws MilmSearchException
+     */
+    public String findMailContent(int scoreDoc) throws MilmSearchException {
+        IndexSearcher searcher = null;
+        try {
+            searcher = new IndexSearcher(FSDirectory.open(new File(SystemConfig.getIndexDir())), true);
+            Document doc = searcher.doc(scoreDoc);
+            return doc.get(FieldNames.TEXT);
+        } catch (Exception e) {
+            log.error("検索中に例外が発生しました。", e);
+            throw new MilmSearchException(e.getMessage(), e);
+        } finally {
+            LuceneUtils.closeQuietly(searcher); 
+        }
+    }    
 
     /**
      * 並び順を作成します。

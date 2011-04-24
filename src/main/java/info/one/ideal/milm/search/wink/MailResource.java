@@ -17,6 +17,7 @@ import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -99,12 +100,24 @@ public class MailResource {
         return Response.ok(feed).build();
     }
 
+    /**
+     * /{id}/content にGETでアクセスで呼び出される処理。
+     * そのIDのメールの本文を返します。 
+     * 
+     * @param id メールのID
+     * @return メール本文
+     */
     @GET
     @Produces("text/plain")
     @Path("{id}/content")
-    public Response mailText() {
-        return null; // TODO
+    public Response mailContent(@PathParam("id") int id) {
+        String content = null;
+        try {
+            content = searchService.findMailContent(id);
+        } catch (MilmSearchException e) {
+            log.error("検索中に障害が発生しました。", e);
+            return Response.serverError().build();
+        }
+        return Response.ok(content).build();
     }
-    
-	
 }
