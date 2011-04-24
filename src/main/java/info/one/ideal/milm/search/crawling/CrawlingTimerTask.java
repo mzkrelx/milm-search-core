@@ -9,13 +9,9 @@ import info.one.ideal.milm.search.SystemConfig;
 import info.one.ideal.milm.search.common.util.DateUtil;
 import info.one.ideal.milm.search.lucene.LuceneUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,8 +19,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.transform.TransformerException;
 
@@ -222,7 +216,7 @@ public class CrawlingTimerTask extends TimerTask {
     }
     
     /**
-     * それぞれのメールのURLのリストを作成します。
+     * 前回最後にインデクシングした月からのそれぞれのメールのURLのリストを作成します。
      * 
      * @param subUrlList 月ごとのメールリストのURLのリスト<br />
      *                   例)[2011-March/date.html, 2011-February/date.html, 2011-January/date.html]
@@ -230,34 +224,26 @@ public class CrawlingTimerTask extends TimerTask {
      *                        そのメールの月はインデクシングされたものもすべて含まれる。これは、この時点では個々のメールの日付がわからないためである。 
      * @return 個々のメールのURLのリスト<br />
      *         例)[2011-March/000794.html, 2011-February/000757.html, 2011-January/000736.html, 2010-December/000681.html]
-     * @throws MalformedURLException
      * @throws IOException
-     * @throws UlTagNotExistsException
      * @throws ParseException 
+     * @throws SAXException 
+     * @throws TransformerException 
      */
-    private List<String> createMailUrlList(List<String> subUrlList, long preLastMailDate)
-            throws MalformedURLException, IOException, UlTagNotExistsException, ParseException {
+    private List<String> createMailUrlList(List<String> subUrlList, long preLastMailDate) 
+            throws ParseException, SAXException, IOException, TransformerException {
         List<String> mailUrlList = new ArrayList<String>();
-        
         for (String subUrlStr : subUrlList) {
             long subUrlDate = this.calcMonthDate(subUrlStr);
             if (!isValidDate(subUrlDate, preLastMailDate)) {
                 continue;
             }
-            BufferedReader br = this.createUrlReader(this.archiveUrlStr + subUrlStr);
-            StringBuffer allDocumentSB = new StringBuffer();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                allDocumentSB.append(line);
-            }
-            String ulDoc = this.extractUlDoc(allDocumentSB.toString());
-            Matcher matcher = Pattern.compile("<LI>\\D*([0-9]+)(.html)\">").matcher(ulDoc);
-            
-            while (matcher.find()) {
-                String mailUrl = matcher.group(1) + matcher.group(2);
-                
-                // 月ごとのURLのdate.htmlの部分をメール番号のhtml名に変換
-                // 例) "2011-January/date.html" → "2011-January/000000.html"
-                mailUrlList.add(subUrlStr.replaceFirst("date.html", mailUrl));  
+            DOMParser parser = new DOMParser();
+            parser.parse("http://sourceforge.jp/projects/setucocms/lists/archive/public/" + subUrlStr);
+            Node contextNode = parser.getDocument();
+            NodeList nodeList = XPathAPI.selectNodeList(contextNode, "//A[@name='start']/following::UL[2]/LI/A[1]/@href");
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+                mailUrlList.add(subUrlStr.replaceFirst("date.html", node.getTextContent()));
             }
         }
         return mailUrlList;
@@ -278,37 +264,6 @@ public class CrawlingTimerTask extends TimerTask {
             return true;
         }
         return false;
-    }
-
-    /**
-     * HTMLドキュメントから必要なULタグ部分を抽出します。
-     * 
-     * @param dateHtmlDoc HTMLドキュメント
-     * @return ULタグ部分の文字列
-     * @throws UlTagNotExistsException
-     */
-    protected String extractUlDoc(String dateHtmlDoc) throws UlTagNotExistsException {
-        Matcher ulMatcher = Pattern.compile("<b>記事数:</b>.*?<ul>.*?</ul>").matcher(dateHtmlDoc);
-        if (!ulMatcher.find()) {
-            throw new UlTagNotExistsException();
-        }
-        return ulMatcher.group();
-    }
-
-    /**
-     * URLにアクセスして読み取るバッファリーダーを作成します。
-     * 
-     * @param urlStr アクセスするURL文字列
-     * @return バッファリーダー
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    private BufferedReader createUrlReader(String urlStr)
-            throws MalformedURLException, IOException {
-        URL monthlyArchiveUrl = new URL(urlStr);
-        URLConnection connection = monthlyArchiveUrl.openConnection();
-        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        return br;
     }
 
 }
