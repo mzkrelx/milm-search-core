@@ -86,7 +86,7 @@ public class MailResource {
                 AtomEntry entry = new AtomEntry();
                 entry.setId(mail.getId());
                 entry.setTitle(new AtomText(mail.getSubject()));
-                entry.getLinks().add(new AtomLink(new SyndLink(null, mail.getMailUrl(), null)));
+                entry.getLinks().add(new AtomLink(new SyndLink("alternate", null, mail.getMailUrl())));
                 entry.setUpdated(mail.getDate());
                 entry.setSummary(new AtomText(mail.getMailSummary()));
                 entry.getAuthors().add(new AtomPerson(new SyndPerson(mail.getFromName(), mail.getFromEmail(), null)));
