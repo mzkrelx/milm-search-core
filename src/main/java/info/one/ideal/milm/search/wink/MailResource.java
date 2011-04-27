@@ -29,7 +29,6 @@ import org.apache.wink.common.model.atom.AtomFeed;
 import org.apache.wink.common.model.atom.AtomLink;
 import org.apache.wink.common.model.atom.AtomPerson;
 import org.apache.wink.common.model.atom.AtomText;
-import org.apache.wink.common.model.opensearch.OpenSearchQuery;
 import org.apache.wink.common.model.synd.SyndLink;
 import org.apache.wink.common.model.synd.SyndPerson;
 
@@ -72,31 +71,35 @@ public class MailResource {
             Response.noContent().build();
         }
         AtomFeed feed = new AtomFeed();
-        feed.setId("setuco-public Mailing List Search");
-        feed.setTitle(new AtomText("setuco-public Mailing List Search"));
-        feed.setUpdated(new Date());
         List<AtomEntry> entryList = feed.getEntries();
-        feed.addOpenSearchQuery(new OpenSearchQuery());
+        
+        SearchCondition condition = new SearchCondition(searchField, queryStr,
+                itemCountPerPage, pageNumber, sortValue);
+
+        SearchResult searchResult = null;
         try {
-            SearchResult searchResult = searchService
-                    .search(new SearchCondition(searchField, queryStr,
-                            itemCountPerPage, pageNumber, sortValue));
-    
-            for (Mail mail : searchResult.getMailList()) {
-                AtomEntry entry = new AtomEntry();
-                entry.setId(mail.getId());
-                entry.setTitle(new AtomText(mail.getSubject()));
-                entry.getLinks().add(new AtomLink(new SyndLink("alternate", null, mail.getMailUrl())));
-                entry.setUpdated(mail.getDate());
-                entry.setSummary(new AtomText(mail.getMailSummary()));
-                entry.getAuthors().add(new AtomPerson(new SyndPerson(mail.getFromName(), mail.getFromEmail(), null)));
-                entryList.add(entry);
-            }
+            searchResult = searchService.search(condition);
         } catch (MilmSearchException e) {
             log.error("検索中に障害が発生しました。", e);
             return Response.serverError().build();
         }
-
+    
+        for (Mail mail : searchResult.getMailList()) {
+            AtomEntry entry = new AtomEntry();
+            entry.setId(mail.getId());
+            entry.setTitle(new AtomText(mail.getSubject()));
+            entry.getLinks().add(new AtomLink(new SyndLink("alternate", null, mail.getMailUrl())));
+            entry.setUpdated(mail.getDate());
+            entry.setSummary(new AtomText(mail.getMailSummary()));
+            entry.getAuthors().add(new AtomPerson(new SyndPerson(mail.getFromName(), mail.getFromEmail(), null)));
+            entryList.add(entry);
+        }
+        feed.setId("setuco-public Mailing List Search");
+        feed.setTitle(new AtomText("setuco-public Mailing List Search"));
+        feed.setUpdated(new Date());
+        feed.setTotalResults(searchResult.getTotalCount());
+        feed.setItemsPerPage(condition.getItemCountPerPage());
+        feed.setStartIndex((condition.getPageNumber() - 1) * condition.getItemCountPerPage() + 1);
         return Response.ok(feed).build();
     }
 
