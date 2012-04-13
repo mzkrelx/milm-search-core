@@ -64,7 +64,7 @@ public class MailResource {
                                 @QueryParam("sortValue") SortValue sortValue,
                                 @QueryParam("pp")        int itemCountPerPage,
                                 @QueryParam("page")      int pageNumber) {
-        log.debug("Now accessed. q=[" + queryStr + "], field=[" + searchField
+        log.info("Now accessed. q=[" + queryStr + "], field=[" + searchField
                 + "], sortValue=[" + sortValue + "], pp=[" + itemCountPerPage
                 + "], page=[" + pageNumber + "]");
         if (queryStr == null || "".equals(queryStr.trim())) {

@@ -187,23 +187,27 @@ public class SearchService {
 	    mail.setDate(new Date(Long.parseLong(doc.get(FieldNames.DATE))));
 		mail.setMailText(doc.get(FieldNames.TEXT));
 		
-		String text = mail.getMailText();
-        switch (searchField) {
-            case subject:
-                /* 件名をハイライト */
-                String subject = mail.getSubject();
-                subject = this.highlight(searchField, queryStr, subject);
-                mail.setSubject(subject);
-                /* 本文を短くしてsummaryにセット */
-                text = this.scrapeMailText(text);
-                mail.setMailText(text);
-                break;
-            default:
-                /* 本文をハイライトしてsummaryにセット */
-                text = this.highlight(searchField, queryStr, text);
-                mail.setMailSummary(text);
-                break;
-        }
+        /* 本文を短くしてsummaryにセット */
+        mail.setMailSummary(this.scrapeMailText(doc.get(FieldNames.TEXT)));
+        
+//      TODO　ハイライトするかどうか検討
+//      String text = mail.getMailText();
+//        switch (searchField) {
+//            case subject:
+//                /* 件名をハイライト */
+//                String subject = mail.getSubject();
+//                subject = this.highlight(searchField, queryStr, subject);
+//                mail.setSubject(subject);
+//                /* 本文を短くしてsummaryにセット */
+//                text = this.scrapeMailText(text);
+//                mail.setMailSummary(text);
+//                break;
+//            default:
+//                /* 本文をハイライトしてsummaryにセット */
+//                text = this.highlight(searchField, queryStr, text);
+//                mail.setMailSummary(text);
+//                break;
+//        }
 		    
 		return mail;
 	}

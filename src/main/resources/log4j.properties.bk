@@ -1,0 +1,11 @@
+# \u30c7\u30d0\u30c3\u30b0\u30ed\u30b0
+log4j.logger.debugLogger=DEBUG,debugAppender
+# debugAppender\u306e\u8a2d\u5b9a\u3002
+# Apeender\u306e\u5177\u8c61\u30af\u30e9\u30b9
+log4j.appender.debugAppender=org.apache.log4j.FileAppender
+# \u51fa\u529b\u5148
+log4j.appender.debugAppender.File=/var/log/milm-search.log
+# \u51fa\u529b\u30ec\u30a4\u30a2\u30a6\u30c8
+log4j.appender.debugAppender.layout=org.apache.log4j.PatternLayout
+# \u30ec\u30a4\u30a2\u30a6\u30c8\u5b9a\u7fa9
+log4j.appender.debugAppender.layout.ConversionPattern=%d %-5p %c - %m [%t] (%F:%L)%n
