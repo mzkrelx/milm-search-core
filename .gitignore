@@ -2,5 +2,7 @@
 /.project
 /.settings/
 /target/
+/project/target/
+/project/project/target/
 /build/
 
