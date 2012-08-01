@@ -238,7 +238,7 @@ public class CrawlingTimerTask extends TimerTask {
                 continue;
             }
             DOMParser parser = new DOMParser();
-            parser.parse("http://sourceforge.jp/projects/setucocms/lists/archive/public/" + subUrlStr);
+            parser.parse(SystemConfig.getArchiveUrl() + subUrlStr);
             Node contextNode = parser.getDocument();
             NodeList nodeList = XPathAPI.selectNodeList(contextNode, "//A[@name='start']/following::UL[2]/LI/A[1]/@href");
             for (int i = 0; i < nodeList.getLength(); i++) {

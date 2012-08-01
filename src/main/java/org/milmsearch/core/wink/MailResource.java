@@ -94,8 +94,8 @@ public class MailResource {
             entry.getAuthors().add(new AtomPerson(new SyndPerson(mail.getFromName(), mail.getFromEmail(), null)));
             entryList.add(entry);
         }
-        feed.setId("setuco-public Mailing List Search");
-        feed.setTitle(new AtomText("setuco-public Mailing List Search"));
+        feed.setId("milm-search Mailing List Search");
+        feed.setTitle(new AtomText("milm-search Mailing List Search"));
         feed.setUpdated(new Date());
         feed.setTotalResults(searchResult.getTotalCount());
         feed.setItemsPerPage(condition.getItemCountPerPage());
