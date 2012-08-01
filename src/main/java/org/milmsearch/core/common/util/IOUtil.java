@@ -2,7 +2,7 @@
   Source	: IOUtil.java
   Date		: 2011/04/18 16:29:19
 **************************************************************/
-package info.one.ideal.milm.search.common.util;
+package org.milmsearch.core.common.util;
 
 import java.io.IOException;
 import java.io.InputStream;

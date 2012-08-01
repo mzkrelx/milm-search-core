@@ -2,7 +2,7 @@
   Source	: FieldNames.java
   Date		: 2011/04/05 21:25:21
 **************************************************************/
-package info.one.ideal.milm.search;
+package org.milmsearch.core;
 
 /**
  * 検索フィールドの定数クラスです。

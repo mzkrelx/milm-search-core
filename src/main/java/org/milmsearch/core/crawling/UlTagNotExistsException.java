@@ -2,7 +2,7 @@
   Source	: UlTagNotExistsException.java
   Date		: 2011/03/07 18:28:15
 **************************************************************/
-package info.one.ideal.milm.search.crawling;
+package org.milmsearch.core.crawling;
 
 
 /**

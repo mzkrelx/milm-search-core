@@ -2,7 +2,7 @@
   Source	: MilmSearchException.java
   Date		: 2011/03/07 18:21:47
 **************************************************************/
-package info.one.ideal.milm.search.crawling;
+package org.milmsearch.core.crawling;
 
 /**
  * チェック例外の基底クラス

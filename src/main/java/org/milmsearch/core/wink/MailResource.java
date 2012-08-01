@@ -2,15 +2,15 @@
   Source  : MailResource.java
   Date    : 2011/03/07 10:30:47
 **************************************************************/
-package info.one.ideal.milm.search.wink;
+package org.milmsearch.core.wink;
 
-import info.one.ideal.milm.search.MilmSearchException;
-import info.one.ideal.milm.search.SearchCondition;
-import info.one.ideal.milm.search.SearchField;
-import info.one.ideal.milm.search.SearchResult;
-import info.one.ideal.milm.search.SearchService;
-import info.one.ideal.milm.search.SortValue;
-import info.one.ideal.milm.search.crawling.Mail;
+import org.milmsearch.core.MilmSearchException;
+import org.milmsearch.core.SearchCondition;
+import org.milmsearch.core.SearchField;
+import org.milmsearch.core.SearchResult;
+import org.milmsearch.core.SearchService;
+import org.milmsearch.core.SortValue;
+import org.milmsearch.core.crawling.Mail;
 
 import java.util.Date;
 import java.util.List;

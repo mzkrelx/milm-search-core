@@ -2,7 +2,7 @@
   Source	: SortValue.java
   Date		: 2011/03/31 22:23:47
 **************************************************************/
-package info.one.ideal.milm.search;
+package org.milmsearch.core;
 
 /**
  * 各並べ替えを表す列挙型です。

@@ -2,7 +2,7 @@
   Source	: SystemConfig.java
   Date		: 2011/03/31 21:58:49
 **************************************************************/
-package info.one.ideal.milm.search;
+package org.milmsearch.core;
 
 import java.util.Properties;
 

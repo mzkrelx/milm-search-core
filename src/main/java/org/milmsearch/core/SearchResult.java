@@ -2,9 +2,9 @@
   Source	: SearchResult.java
   Date		: 2011/04/05 21:54:04
 **************************************************************/
-package info.one.ideal.milm.search;
+package org.milmsearch.core;
 
-import info.one.ideal.milm.search.crawling.Mail;
+import org.milmsearch.core.crawling.Mail;
 
 import java.util.ArrayList;
 import java.util.List;

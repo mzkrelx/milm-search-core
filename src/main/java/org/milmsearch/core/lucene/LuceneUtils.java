@@ -2,7 +2,7 @@
   Source	: LuceneUtils.java
   Date		: 2011/04/05 21:43:11
 **************************************************************/
-package info.one.ideal.milm.search.lucene;
+package org.milmsearch.core.lucene;
 
 import java.io.IOException;
 

@@ -2,7 +2,7 @@
   Source	: Mail.java
   Date		: 2011/03/09 22:48:50
  **************************************************************/
-package info.one.ideal.milm.search.crawling;
+package org.milmsearch.core.crawling;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

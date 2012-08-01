@@ -2,12 +2,12 @@
   Source	: CralingTimerTask.java
   Date		: 2011/03/07 17:35:11
 **************************************************************/
-package info.one.ideal.milm.search.crawling;
+package org.milmsearch.core.crawling;
 
-import info.one.ideal.milm.search.FieldNames;
-import info.one.ideal.milm.search.SystemConfig;
-import info.one.ideal.milm.search.common.util.DateUtil;
-import info.one.ideal.milm.search.lucene.LuceneUtils;
+import org.milmsearch.core.FieldNames;
+import org.milmsearch.core.SystemConfig;
+import org.milmsearch.core.common.util.DateUtil;
+import org.milmsearch.core.lucene.LuceneUtils;
 
 import java.io.File;
 import java.io.IOException;

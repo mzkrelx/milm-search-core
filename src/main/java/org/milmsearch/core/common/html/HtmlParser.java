@@ -2,7 +2,7 @@
   Source	: HtmlParser.java
   Date		: 2011/03/28 23:10:43
  **************************************************************/
-package info.one.ideal.milm.search.common.html;
+package org.milmsearch.core.common.html;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -2,7 +2,7 @@
   Source	: Tag.java
   Date		: 2011/03/28 23:06:46
  **************************************************************/
-package info.one.ideal.milm.search.common.html;
+package org.milmsearch.core.common.html;
 
 /**
  * HTMLのタグ情報クラスです。

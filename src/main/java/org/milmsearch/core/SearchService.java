@@ -2,10 +2,10 @@
   Source  : SearchService.java
   Date    : 2008/12/23 23:59:56
 **************************************************************/
-package info.one.ideal.milm.search;
+package org.milmsearch.core;
 
-import info.one.ideal.milm.search.crawling.Mail;
-import info.one.ideal.milm.search.lucene.LuceneUtils;
+import org.milmsearch.core.crawling.Mail;
+import org.milmsearch.core.lucene.LuceneUtils;
 
 import java.io.File;
 import java.io.IOException;

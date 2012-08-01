@@ -2,7 +2,7 @@
   Source	: Hilighter.java
   Date		: 2011/03/31 23:59:55
 **************************************************************/
-package info.one.ideal.milm.search;
+package org.milmsearch.core;
 
 /**
  * ハイライトに関するクラスです。

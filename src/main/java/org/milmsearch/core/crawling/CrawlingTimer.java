@@ -2,7 +2,7 @@
   Source	: ArchiveCrawler.java
   Date		: 2011/03/07 11:17:08
 **************************************************************/
-package info.one.ideal.milm.search.crawling;
+package org.milmsearch.core.crawling;
 
 import java.util.Timer;
 

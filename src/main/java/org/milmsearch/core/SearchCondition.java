@@ -2,7 +2,7 @@
   Source	: SearchCondition.java
   Date		: 2011/04/05 22:23:27
 **************************************************************/
-package info.one.ideal.milm.search;
+package org.milmsearch.core;
 
 /**
  * 検索条件を表すクラスです。

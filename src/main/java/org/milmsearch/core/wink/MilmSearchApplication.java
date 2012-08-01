@@ -2,7 +2,7 @@
   Source  : MilmSearchApplication.java
   Date    : 2011/03/07 10:30:47
 **************************************************************/
-package info.one.ideal.milm.search.wink;
+package org.milmsearch.core.wink;
 
 import java.util.HashSet;
 import java.util.Set;

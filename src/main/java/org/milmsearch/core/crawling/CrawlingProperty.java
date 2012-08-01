@@ -2,10 +2,10 @@
   Source	: CrawlingProperty.java
   Date		: 2011/04/18 17:00:47
 **************************************************************/
-package info.one.ideal.milm.search.crawling;
+package org.milmsearch.core.crawling;
 
-import info.one.ideal.milm.search.SystemConfig;
-import info.one.ideal.milm.search.common.util.IOUtil;
+import org.milmsearch.core.SystemConfig;
+import org.milmsearch.core.common.util.IOUtil;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

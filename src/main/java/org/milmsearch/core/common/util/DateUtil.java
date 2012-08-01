@@ -2,7 +2,7 @@
   Source	: DateUtil.java
   Date		: 2009/03/29 17:23:58
 **************************************************************/
-package info.one.ideal.milm.search.common.util;
+package org.milmsearch.core.common.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
