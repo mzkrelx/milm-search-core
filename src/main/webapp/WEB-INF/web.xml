@@ -2,7 +2,7 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
   <display-name>milm-search</display-name>
   <listener>
-    <listener-class>info.one.ideal.milm.search.crawling.CrawlingTimer</listener-class>
+    <listener-class>org.milmsearch.core.crawling.CrawlingTimer</listener-class>
   </listener>
   
   <servlet>
@@ -10,7 +10,7 @@
     <servlet-class>org.apache.wink.server.internal.servlet.RestServlet</servlet-class>
     <init-param>
       <param-name>javax.ws.rs.Application</param-name>
-      <param-value>info.one.ideal.milm.search.wink.MilmSearchApplication</param-value>
+      <param-value>org.milmsearch.core.wink.MilmSearchApplication</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
