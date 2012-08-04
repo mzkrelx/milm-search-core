@@ -24,6 +24,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-jcl" %  "1.6.6",
   "org.apache.lucene" % "lucene-analyzers" % "2.9.4",
   "org.apache.lucene" % "lucene-highlighter" % "2.9.4",
-  "nekohtml" % "nekohtml" % "1.9.6.2"
+  "nekohtml" % "nekohtml" % "1.9.6.2",
+  "javax.mail" % "mail" % "1.4.5"
 )
 
