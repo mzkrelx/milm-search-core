@@ -69,7 +69,7 @@ case class SearchConditionScala(
 /**
  * Luceneからメールを検索するクラス
  */
-object SearchService {
+object SearchServiceScala {
 
   /** ロガー */
   private val logger = LoggerFactory.getLogger(getClass)
