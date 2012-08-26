@@ -6,6 +6,9 @@ import javax.ws.rs.core.Response
 import javax.ws.rs.PUT
 import javax.ws.rs.DELETE
 
+/**
+ * ML登録申請情報のAPIリソース
+ */
 @Path("/ml-proposals")
 class MlProposalResource {
   
