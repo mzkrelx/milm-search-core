@@ -6,6 +6,9 @@
     <listener-class>org.milmsearch.core.crawling.CrawlingTimer</listener-class>
   </listener>
 -->    
+  <listener>
+    <listener-class>org.milmsearch.core.Bootstrap</listener-class>
+  </listener>
   <servlet>
     <servlet-name>MilmSearchApp</servlet-name>
     <servlet-class>org.apache.wink.server.internal.servlet.RestServlet</servlet-class>
