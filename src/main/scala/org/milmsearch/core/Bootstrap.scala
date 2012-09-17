@@ -68,6 +68,8 @@ class Bootstrap extends ServletContextListener with Loggable {
       DefaultConnectionIdentifier, vendor)
 
     finalizeHooks += vendor.closeAllConnections_!
+
+    DaoHelper.schemify()
   }
 
   override def contextDestroyed(finalizeevent: ServletContextEvent) {
@@ -75,5 +77,4 @@ class Bootstrap extends ServletContextListener with Loggable {
       withErrlogQuietly { f() }
     }
   }
-
 }

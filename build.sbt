@@ -14,6 +14,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.1" % "test"
 
 // for MilmSearch
 libraryDependencies ++= Seq(
+  "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "javax.servlet" % "servlet-api" % "2.5" % "provided",
   "org.apache.wink" % "wink-server" % "1.1.2-incubating",
   "org.apache.wink" % "wink" % "1.1.2-incubating",
