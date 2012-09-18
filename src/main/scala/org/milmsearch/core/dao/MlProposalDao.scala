@@ -1,14 +1,14 @@
-package org.milmsearch.core.model.dao
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposalStatus
+package org.milmsearch.core.dao
 import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.IdPK
 import net.liftweb.mapper.LongKeyedMapper
 import net.liftweb.mapper.LongKeyedMetaMapper
 import net.liftweb.mapper.MappedEmail
 import net.liftweb.mapper.MappedEnum
-import net.liftweb.mapper.MappedText
 import net.liftweb.mapper.MappedString
+import net.liftweb.mapper.MappedText
+import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.MlArchiveType
 
 /**
  * ML登録申請情報 の DAO

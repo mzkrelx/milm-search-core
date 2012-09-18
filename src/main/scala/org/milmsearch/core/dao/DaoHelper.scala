@@ -1,4 +1,4 @@
-package org.milmsearch.core.model.dao
+package org.milmsearch.core.dao
 import net.liftweb.mapper.Schemifier
 import mapper._
 

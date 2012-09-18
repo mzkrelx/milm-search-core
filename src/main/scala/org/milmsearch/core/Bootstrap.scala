@@ -5,7 +5,7 @@ import scala.collection.mutable.ListBuffer
 import org.h2.tools.Server
 import org.milmsearch.common.LoggingUtil.withErrlog
 import org.milmsearch.common.LoggingUtil.withErrlogQuietly
-import org.milmsearch.core.model.dao.DaoHelper
+import org.milmsearch.core.dao.DaoHelper
 
 import javax.servlet.ServletContextEvent
 import javax.servlet.ServletContextListener

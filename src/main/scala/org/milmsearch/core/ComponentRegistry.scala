@@ -1,4 +1,4 @@
-package org.milmsearch.core.model
+package org.milmsearch.core
 import net.liftweb.util.SimpleInjector
 import dao._
 import service._
@@ -8,6 +8,6 @@ import service._
  * Service と DAO の初期化を行う
  */
 object ComponentRegistry extends SimpleInjector {
-  val mlProposalService = new Inject(new service.MlProposalService) {}
-  val mlProposalDao = new Inject(new dao.MlProposalDao) {}
+  val mlProposalService = new Inject(new MlProposalService) {}
+  val mlProposalDao = new Inject(new MlProposalDao) {}
 }

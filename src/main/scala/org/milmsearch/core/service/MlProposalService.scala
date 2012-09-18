@@ -1,4 +1,4 @@
-package org.milmsearch.core.model.service
+package org.milmsearch.core.service
 import java.net.URL
 import net.liftweb.mapper.QueryParam
 import org.milmsearch.core.domain.MlProposal
