@@ -1,22 +1,20 @@
 package org.milmsearch.core.model.dao
-import net.liftweb.mapper.LongKeyedMapper
-import net.liftweb.mapper.CreatedTrait
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposalStatus
+import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.IdPK
-import net.liftweb.mapper.MappedString
-import net.liftweb.mapper.MappedText
+import net.liftweb.mapper.LongKeyedMapper
+import net.liftweb.mapper.LongKeyedMetaMapper
 import net.liftweb.mapper.MappedEmail
 import net.liftweb.mapper.MappedEnum
-import net.liftweb.mapper.LongKeyedMetaMapper
-import net.liftweb.mapper.CreatedUpdated
-import org.milmsearch.core.model.service.MlProposalStatus
-import org.milmsearch.core.model.service.MlArchiveType
-import org.milmsearch.core.model.service.MlProposal
+import net.liftweb.mapper.MappedText
+import net.liftweb.mapper.MappedString
 
 /**
  * ML登録申請情報 の DAO
  */
 class MlProposalDao {
-  def find(id: Long): Option[MlProposal] = None
+  def find(id: Long): Option[mapper.MlProposal] = None
 }
 
 /**

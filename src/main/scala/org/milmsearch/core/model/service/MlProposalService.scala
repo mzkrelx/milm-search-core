@@ -1,70 +1,7 @@
 package org.milmsearch.core.model.service
 import java.net.URL
 import net.liftweb.mapper.QueryParam
-import org.milmsearch.core.model.dao.MlProposalDaoComponent
-import org.milmsearch.core.model.ComponentRegistry
-
-/**
- * ML登録申請情報のコンパニオンオブジェクト
- */
-/*
-object MlProposal {
-
-  /**
-   * Mapperからインスタンス生成する
-   * 
-   * @param mapper Mapperオブジェクト
-   * @return (ML登録申請情報, ID)
-   */
-  def fromMapper(mapper: MlProposalMapper): (MlProposal, Long) = {
-    // TODO
-    (
-      MlProposal(
-        "サンプル 太郎",
-        "sample@example.com",
-        "サンプルML",
-        MlProposalStatus.New
-      ),
-      0L
-    )
-  }
-}
-*/
-
-/**
- * ML登録申請情報
- * 
- * @param proposerName 申請者名
- * @param proposerEmail 申請者メールアドレス
- * @param mlTitle MLのタイトル
- * @param status 申請状況
- * @param archiveType MLのアーカイブのタイプ
- * @param archiveUrl MLのアーカイブページのURL
- * @param comment コメント
- */
-case class MlProposal(
-  proposerName: String,
-  proposerEmail: String,
-  mlTitle: String,
-  status: MlProposalStatus.Value,
-  archiveType: Option[MlArchiveType.Value] = None,
-  archiveUrl: Option[URL] = None,
-  comment: Option[String] = None
-)
-
-/**
- * MLのアーカイブのタイプ(ソフトウェア)
- */
-object MlArchiveType extends Enumeration {
-  val Mailman = Value
-}
-
-/**
- * ML登録申請の状態
- */
-object MlProposalStatus extends Enumeration {
-  val New, Accepted, Rejected = Value
-}
+import org.milmsearch.core.domain.MlProposal
 
 /**
  * ML登録申請情報を管理するサービス
