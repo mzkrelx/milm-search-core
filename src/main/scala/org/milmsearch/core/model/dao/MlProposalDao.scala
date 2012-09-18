@@ -15,15 +15,8 @@ import org.milmsearch.core.model.service.MlProposal
 /**
  * ML登録申請情報 の DAO
  */
-trait MlProposalDaoComponent {
-  private[model] val mlProposalDao: MlProposalDao
-
-  /**
-   * DAO の実体
-   */
-  class MlProposalDao {
-    def find(id: Long): Option[MlProposal] = None
-  }
+class MlProposalDao {
+  def find(id: Long): Option[MlProposal] = None
 }
 
 /**

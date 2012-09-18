@@ -1,15 +1,13 @@
 package org.milmsearch.core.model
-import org.milmsearch.core.model.service.MlProposalServiceComponent
-import org.milmsearch.core.model.dao.MlProposalDaoComponent
+import net.liftweb.util.SimpleInjector
+import dao._
+import service._
 
 /**
- * CakePattern を用いた DIコンテナ<br/>
+ * Lift Injector を用いた サービスロケーター<br/>
  * Service と DAO の初期化を行う
  */
-object ComponentRegistry extends
-  MlProposalServiceComponent with
-  MlProposalDaoComponent
-{
-  val mlProposalService = new MlProposalService
-  private[model] val mlProposalDao = new MlProposalDao
+object ComponentRegistry extends SimpleInjector {
+  val mlProposalService = new Inject(new service.MlProposalService) {}
+  val mlProposalDao = new Inject(new dao.MlProposalDao) {}
 }
