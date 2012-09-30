@@ -9,12 +9,22 @@ import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposal
 
 /**
  * ML登録申請情報 の DAO
  */
-class MlProposalDao {
-  def find(id: Long): Option[mapper.MlProposal] = None
+trait MlProposalDao {
+  def find(id: Long): Option[MlProposal]
+  def create(mlProposal: MlProposal): Long
+}
+
+/**
+ * MlProposalDao の実装クラス
+ */
+class MlProposalDaoImpl extends MlProposalDao {
+  def find(id: Long) = None
+  def create(mlProposal: MlProposal) = 0L
 }
 
 /**
@@ -25,17 +35,18 @@ package mapper {
   /**
    * ML登録申請情報テーブルの操作を行う
    */
-  private[dao] object MlProposal extends MlProposal
-      with LongKeyedMetaMapper[MlProposal] {
+  private[dao] object MlProposalMetaMapper extends MlProposalMapper
+      with LongKeyedMetaMapper[MlProposalMapper] {
+    override def dbTableName = "mlproposal"
     override def fieldOrder = createdAt :: Nil
   }
   
   /**
    * ML登録申請情報のモデルクラス
    */
-  private[dao] class MlProposal extends LongKeyedMapper[MlProposal]
+  private[dao] class MlProposalMapper extends LongKeyedMapper[MlProposalMapper]
       with IdPK with CreatedUpdated {
-    def getSingleton = MlProposal
+    def getSingleton = MlProposalMetaMapper
   
     object proposerName extends MappedString(this, 200)
     object proposerEmail extends MappedEmail(this, 200)

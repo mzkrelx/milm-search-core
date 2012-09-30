@@ -26,12 +26,14 @@ case class MlProposal(
  * MLのアーカイブのタイプ(ソフトウェア)
  */
 object MlArchiveType extends Enumeration {
-  val Mailman = Value
+  val Mailman = Value("mailman")
 }
 
 /**
  * ML登録申請の状態
  */
 object MlProposalStatus extends Enumeration {
-  val New, Accepted, Rejected = Value
+  val New = Value("new")
+  val Accepted = Value("accepted")
+  val Rejected = Value("rejected")
 }

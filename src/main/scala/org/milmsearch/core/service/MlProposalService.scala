@@ -1,62 +1,49 @@
 package org.milmsearch.core.service
-import java.net.URL
-import net.liftweb.mapper.QueryParam
 import org.milmsearch.core.domain.MlProposal
+import net.liftweb.mapper.QueryParam
+import org.milmsearch.core.dao.Sort
+import org.milmsearch.core.ComponentRegistry
+import org.milmsearch.core.dao.MlProposalDao
 
 /**
  * ML登録申請情報を管理するサービス
  */
-  /**
-   * Service の実体
-   */
-class MlProposalService {
-  
+trait MlProposalService {
+
   /**
    * ML登録申請情報を作成する
    * 
-   * @param proposal ML登録申請情報
+   * @param mlProposal ML登録申請情報
    * @return ID
    */
-  def create(proposal: MlProposal): Long = {
-    // TODO
-    0L
-  }
+  def create(mlProposal: MlProposal): Long
 
   /**
    * 検索条件に合致するML登録申請情報を検索する
    * 
-   * @param queryParams 検索条件
+   * @param range 検索結果の取得範囲
+   * @param sort 検索結果のソート方法
    * @return (ML登録申請情報, ID)のリスト 
    */
-  // TODO
-//    def findAll(?):
-//        List[(MlProposal, Long)] = {
-//      // TODO
-//      Nil
-//    }
+  def find(range: Range, sort: Sort*): List[MlProposal]
 
   /**
    * ML登録申請情報を検索する
    * 
    * @param id ID
-   * @return ML登録申請情報のリスト
+   * @return ML登録申請情報
    */
-  def find(id: Long): Option[MlProposal] = {
-    // TODO
-    None
-  }
+  def findById(id: Long): Option[MlProposal]
 
   /**
    * ML登録申請情報を更新する
    * 
    * @param id ID
-   * @param proposal ML登録申請情報
+   * @param mlProposal ML登録申請情報
    * @return 更新対象が存在したかどうか
    */
-  def update(id: Long, proposal: MlProposal): Boolean = {
-    // TODO
-    false
-  }
+  def update(id: Long, mlProposal: MlProposal): Boolean
+
 
   /**
    * ML登録申請情報を削除する
@@ -64,9 +51,26 @@ class MlProposalService {
    * @param id ID
    * @return 削除対象が存在したかどうか
    */
-  def delete(id: Long): Boolean = {
-    // TODO
-    false
-  }
+  def delete(id: Long): Boolean
+}
 
+/**
+ * MlProposalService の実装クラス
+ */
+class MlProposalServiceImpl extends MlProposalService {
+
+  /**
+   * ML登録申請情報 DAO
+   */
+  private def mpDao = ComponentRegistry.mlProposalDao()
+
+  def create(mlProposal: MlProposal) = mpDao.create(mlProposal)
+
+  def find(range: Range, sort: Sort*) = Nil // TODO
+
+  def findById(id: Long) = None // TODO
+
+  def update(id: Long, proposal: MlProposal) = false // TODO
+
+  def delete(id: Long) = false // TODO
 }

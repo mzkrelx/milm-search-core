@@ -14,6 +14,8 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.1" % "test"
 
 // for MilmSearch
 libraryDependencies ++= Seq(
+  "org.scalamock" %% "scalamock-core" % "2.4",
+  "org.scalamock" %% "scalamock-scalatest-support" % "2.4",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "javax.servlet" % "servlet-api" % "2.5" % "provided",
   "org.apache.wink" % "wink-server" % "1.1.2-incubating",
@@ -26,8 +28,6 @@ libraryDependencies ++= Seq(
   "org.apache.lucene" % "lucene-analyzers" % "2.9.4",
   "org.apache.lucene" % "lucene-highlighter" % "2.9.4",
   "nekohtml" % "nekohtml" % "1.9.6.2",
-  "javax.mail" % "mail" % "1.4.5",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "net.liftweb" %% "lift-mapper" % "2.4",
   "net.liftweb" %% "lift-json" % "2.4"
 )

@@ -1,54 +1,51 @@
 package org.milmsearch.core.api
-import org.scalatest.FunSuite
-import org.apache.wink.client.Resource
-import java.net.URL
-import org.apache.wink.client.RestClient
 import java.net.URI
+import java.net.URL
 
-class MlProposalResourceSuite extends FunSuite {
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.service.MlProposalService
+import org.milmsearch.core.ComponentRegistry
+import org.scalamock.scalatest.MockFactory
+import org.scalamock.ProxyMockFactory
+import org.scalatest.FunSuite
 
-  test("create") {
-    // TODO post body
-    val response = makeResource("/ml-proposals").post("")
+class MlProposalResourceSuite extends FunSuite
+    with MockFactory with ProxyMockFactory {
 
-    expect(201) { response.getStatusCode }
-    
-    // TODO location header test
+  test("create full") {
+    val json = """
+      |{
+      |  "proposerName": "申請者の名前",
+      |  "proposerEmail": "proposer@example.com",
+      |  "mlTitle": "MLタイトル",
+      |  "status": "new",
+      |  "archiveType": "mailman",
+      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "comment": "コメント(MLの説明など)"
+      |}""".stripMargin
+
+    val mlProposal = MlProposal(
+      "申請者の名前",
+      "proposer@example.com",
+      "MLタイトル",
+      MlProposalStatus.New,
+      Some(MlArchiveType.Mailman),
+      Some(new URL("http://localhost/path/to/archive/")),
+      Some("コメント(MLの説明など)")
+    )
+
+    val m = mock[MlProposalService]
+    m expects 'create withArgs(mlProposal) returning 1L
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().create(json)
+    }
+
+    expect(201) { response.getStatus }
+    expect(new URI("/ml-proposal/1")) {
+      response.getMetadata().getFirst("Location")
+    }
   }
-  
-  test("list") {
-    val response = makeResource("/ml-proposals").get()
-
-    expect(200) { response.getStatusCode }
-
-    // TODO response body test
-  }
-  
-  test("show") {
-    // TODO resource id
-    val response = makeResource("/ml-proposals/123").get()
-
-    expect(200) { response.getStatusCode }
-
-    // TODO response body test
-  }
-
-  test("update") {
-    // TODO resource id
-    // TODO put body
-    val response = makeResource("/ml-proposals/123").put("")
-
-    expect(200) { response.getStatusCode }
-  }
-  
-  test("delete") {
-    // TODO resource id
-    val response = makeResource("/ml-proposals/123").delete()
-
-    expect(200) { response.getStatusCode }
-  }
-  
-  private def makeResource(path: String) =
-    new RestClient().resource(
-      new URI("http://localhost:8080/api" + path))
 }
