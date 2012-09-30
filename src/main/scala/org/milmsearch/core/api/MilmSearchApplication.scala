@@ -7,7 +7,7 @@ class MilmSearchApiApplication extends Application {
   override def getClasses(): java.util.Set[Class[_]] = {
     Set[Class[_]](
         classOf[MlProposalResource],
-        classOf[HelloResource]
+        classOf[SampleListResource]
     ).asJava
   }
 }
