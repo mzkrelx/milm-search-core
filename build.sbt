@@ -26,6 +26,8 @@ libraryDependencies ++= Seq(
   "org.apache.lucene" % "lucene-highlighter" % "2.9.4",
   "nekohtml" % "nekohtml" % "1.9.6.2",
   "javax.mail" % "mail" % "1.4.5",
+  "postgresql" % "postgresql" % "9.1-901.jdbc4",
+  "net.liftweb" %% "lift-mapper" % "2.4",
   "net.liftweb" %% "lift-json" % "2.4"
 )
 

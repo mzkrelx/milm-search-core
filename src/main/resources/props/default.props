@@ -1,0 +1,4 @@
+db.driver   = org.postgresql.Driver
+db.url      = jdbc:postgresql://localhost/milmsearch
+db.user     = milmsearch
+db.password = milmsearch
