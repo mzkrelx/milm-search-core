@@ -30,6 +30,10 @@ class Bootstrap extends ServletContextListener with Loggable {
 
   override def contextInitialized(event: ServletContextEvent) {
     withErrlog { initializeDBCon() }
+    withErrlog {
+      initializeDBCon()
+      schemifyDBTable()
+    }
   }
 
   /**
@@ -70,7 +74,13 @@ class Bootstrap extends ServletContextListener with Loggable {
       DefaultConnectionIdentifier, vendor)
 
     finalizeHooks += vendor.closeAllConnections_!
+  }
 
+  /**
+   * データベーステーブルのスキーマの最適化を行う<br/>
+   * (状況に応じて CREATE TABLE や ALTER TABLE が走る)
+   */
+  private def schemifyDBTable() {
     DaoHelper.schemify()
   }
 
