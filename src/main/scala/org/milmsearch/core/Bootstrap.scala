@@ -89,4 +89,5 @@ class Bootstrap extends ServletContextListener with Loggable {
       withErrlogQuietly { f() }
     }
   }
+
 }
