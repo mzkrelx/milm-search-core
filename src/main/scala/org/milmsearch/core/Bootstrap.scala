@@ -15,6 +15,8 @@ import net.liftweb.mapper.StandardDBVendor
 import net.liftweb.mapper.DB
 import net.liftweb.util.Props
 
+import scala.collection.mutable.ListBuffer
+
 /**
  * サーブレットコンテナ(Tomcat等)の起動時に行う処理<br/>
  * 終了時に行う処理もここに書く
@@ -22,9 +24,9 @@ import net.liftweb.util.Props
 class Bootstrap extends ServletContextListener with Loggable {
 
   /**
-   * DB接続マネージャ
+   * コンテキスト終了時に実行したい処理のリスト
    */
-  private var dbManager: Option[ProtoDBVendor] = None
+  private val finalizeHooks: ListBuffer[() => Unit] = ListBuffer()
 
   override def contextInitialized(event: ServletContextEvent) {
     withErrlog { initializeDBCon() }
@@ -44,18 +46,12 @@ class Bootstrap extends ServletContextListener with Loggable {
     DB.defineConnectionManager(
       DefaultConnectionIdentifier, vendor)
 
-    dbManager = Some(vendor)
+    finalizeHooks += vendor.closeAllConnections_! 
   }
 
   override def contextDestroyed(finalizeevent: ServletContextEvent) {
-    withErrlogQuietly { closeDBCon() }
+    finalizeHooks foreach { f =>
+      withErrlogQuietly { f() }
+    }
   }
-
-  /**
-   * データベース接続を切断する
-   */
-  private def closeDBCon() {
-    dbManager foreach { _.closeAllConnections_!() }
-  }
-
 }
