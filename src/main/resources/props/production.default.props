@@ -1,3 +1,6 @@
+### for production environment
+
+## DB settings
 db.driver   = org.postgresql.Driver
 db.url      = jdbc:postgresql://localhost/milmsearch
 db.user     = milmsearch

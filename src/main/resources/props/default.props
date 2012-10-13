@@ -1,4 +1,8 @@
-db.driver   = org.postgresql.Driver
-db.url      = jdbc:postgresql://localhost/milmsearch
-db.user     = milmsearch
-db.password = milmsearch
+### for development environment
+
+## DB settings
+# H2 in-memory database be used default
+#db.driver   = org.h2.Driver
+#db.url      = jdbc:h2:mem:milmsearch;DB_CLOSE_DELAY=-1
+#db.user     = 
+#db.password = 
