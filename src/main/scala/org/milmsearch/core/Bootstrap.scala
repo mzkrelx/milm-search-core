@@ -5,9 +5,11 @@ import scala.collection.mutable.ListBuffer
 import org.h2.tools.Server
 import org.milmsearch.common.LoggingUtil.withErrlog
 import org.milmsearch.common.LoggingUtil.withErrlogQuietly
+import org.milmsearch.core.dao.DaoHelper
 
 import javax.servlet.ServletContextEvent
 import javax.servlet.ServletContextListener
+
 import net.liftweb.common.Loggable
 import net.liftweb.db.DB1.db1ToDb
 import net.liftweb.mapper.DefaultConnectionIdentifier
@@ -28,6 +30,10 @@ class Bootstrap extends ServletContextListener with Loggable {
 
   override def contextInitialized(event: ServletContextEvent) {
     withErrlog { initializeDBCon() }
+    withErrlog {
+      initializeDBCon()
+      schemifyDBTable()
+    }
   }
 
   /**
@@ -68,6 +74,14 @@ class Bootstrap extends ServletContextListener with Loggable {
       DefaultConnectionIdentifier, vendor)
 
     finalizeHooks += vendor.closeAllConnections_!
+  }
+
+  /**
+   * データベーステーブルのスキーマの最適化を行う<br/>
+   * (状況に応じて CREATE TABLE や ALTER TABLE が走る)
+   */
+  private def schemifyDBTable() {
+    DaoHelper.schemify()
   }
 
   override def contextDestroyed(finalizeevent: ServletContextEvent) {
