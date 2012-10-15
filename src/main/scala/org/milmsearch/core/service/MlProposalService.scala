@@ -1,9 +1,8 @@
 package org.milmsearch.core.service
+
 import org.milmsearch.core.domain.MlProposal
-import net.liftweb.mapper.QueryParam
-import org.milmsearch.core.dao.Sort
+import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.ComponentRegistry
-import org.milmsearch.core.dao.MlProposalDao
 
 /**
  * ML登録申請情報を管理するサービス

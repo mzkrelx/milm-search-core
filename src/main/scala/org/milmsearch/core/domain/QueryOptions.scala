@@ -1,4 +1,4 @@
-package org.milmsearch.core.dao
+package org.milmsearch.core.domain
 
 /**
  * 取得するデータの範囲
