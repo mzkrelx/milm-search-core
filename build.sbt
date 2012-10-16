@@ -4,18 +4,8 @@ version := "0.0.1"
 
 scalaVersion := "2.9.1"
 
-// for xsbt-web-plugin
-seq(webSettings :_*)
-
-libraryDependencies += "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
-
-// for ScalaTest
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.1" % "test"
-
 // for MilmSearch
 libraryDependencies ++= Seq(
-  "org.scalamock" %% "scalamock-core" % "2.4",
-  "org.scalamock" %% "scalamock-scalatest-support" % "2.4",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "javax.servlet" % "servlet-api" % "2.5" % "provided",
   "org.apache.wink" % "wink-server" % "1.1.2-incubating",
@@ -31,4 +21,24 @@ libraryDependencies ++= Seq(
   "net.liftweb" %% "lift-mapper" % "2.4",
   "net.liftweb" %% "lift-json" % "2.4"
 )
+
+// for xsbt-web-plugin
+seq(webSettings :_*)
+
+libraryDependencies += "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
+
+// for test
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "1.7.1" % "test",
+  "org.scalamock" %% "scalamock-core" % "2.4",
+  "org.scalamock" %% "scalamock-scalatest-support" % "2.4"
+)
+
+testOptions in Test += Tests.Setup { loader =>
+  loader.loadClass("org.milmsearch.core.test.Boot").getMethod("setup").invoke(null)
+}
+
+testOptions in Test += Tests.Cleanup { loader =>
+  loader.loadClass("org.milmsearch.core.test.Boot").getMethod("cleanup").invoke(null)
+}
 
