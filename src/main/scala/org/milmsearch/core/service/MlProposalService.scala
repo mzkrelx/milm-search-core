@@ -1,5 +1,10 @@
 package org.milmsearch.core.service
 
+import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MlProposalSearchResult
+import org.milmsearch.core.domain.MlProposalSearchResult
+import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.ComponentRegistry
 import org.milmsearch.core.domain.CreateMlProposalRequest
@@ -19,16 +24,26 @@ trait MlProposalService {
   def create(request: CreateMlProposalRequest): Long
 
   /**
-   * 検索条件に合致するML登録申請情報を検索する
+   * 検索結果情報を取得する
    * 
-   * @param range 検索結果の取得範囲
-   * @param sort 検索結果のソート方法
-   * @return (ML登録申請情報, ID)のリスト 
+   * @param page   取得するページ番号と1ページあたりの件数
+   * @param sort   ソート方法
+   * @return 検索結果情報 
    */
-  def find(range: Range, sort: Sort*): List[MlProposal]
-
+  def search(page: Page, sort: Sort): MlProposalSearchResult 
+  
   /**
-   * ML登録申請情報を検索する
+   * 検索結果情報を取得する
+   * 
+   * @param filter 絞り込み条件
+   * @param page   取得するページ番号と1ページあたりの件数
+   * @param sort   ソート方法
+   * @return 検索結果情報 
+   */
+  def search(filter: Filter, page: Page, sort: Sort): MlProposalSearchResult 
+  
+  /**
+   * ML登録申請情報を取得する
    * 
    * @param id ID
    * @return ML登録申請情報
@@ -66,7 +81,19 @@ class MlProposalServiceImpl extends MlProposalService {
 
   def create(request: CreateMlProposalRequest) = mpDao.create(request)
 
-  def find(range: Range, sort: Sort*) = Nil // TODO
+  def search(page: Page, sort: Sort): MlProposalSearchResult = {
+    val mlProposals = mpDao.findAll(page.toRange, sort)
+    val itemsPerPage = if (mlProposals.lengthCompare(page.count.toInt) < 0) 
+      page.count else mlProposals.length
+    MlProposalSearchResult(mpDao.count(), page.toRange.offset, itemsPerPage, mlProposals)
+  }
+
+  def search(filter: Filter, page: Page, sort: Sort): MlProposalSearchResult = {
+    val mlProposals = mpDao.findAll(filter, page.toRange, sort)
+    val itemsPerPage = if (mlProposals.lengthCompare(page.count.toInt) < 0) 
+      page.count else mlProposals.length
+    MlProposalSearchResult(mpDao.count(filter), page.toRange.offset, itemsPerPage, mlProposals)
+  }
 
   def findById(id: Long) = None // TODO
 

@@ -50,6 +50,13 @@ case class CreateMlProposalRequest(
   comment: Option[String] = None
 )
 
+case class MlProposalSearchResult(
+  totalResults: Long,
+  startIndex: Long,
+  itemsPerPage: Long,
+  mlProposals: List[MlProposal]
+)
+
 /**
  * MLのアーカイブのタイプ(ソフトウェア)
  */
@@ -65,4 +72,11 @@ object MlProposalStatus extends Enumeration {
   val New = Value("new")
   val Accepted = Value("accepted")
   val Rejected = Value("rejected")
+}
+
+/**
+ * ML登録申請の絞り込みに使える項目
+ */
+object MlProposalFilterBy extends Enumeration {
+  val Status = Value("status")
 }

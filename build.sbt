@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-log4j12" %  "1.6.6",
   "org.apache.lucene" % "lucene-analyzers" % "2.9.4",
   "org.apache.lucene" % "lucene-highlighter" % "2.9.4",
+  "org.apache.commons" % "commons-lang3" % "3.1",
   "nekohtml" % "nekohtml" % "1.9.6.2",
   "net.liftweb" %% "lift-mapper" % "2.4",
   "net.liftweb" %% "lift-json" % "2.4"

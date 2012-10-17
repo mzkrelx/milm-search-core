@@ -3,7 +3,11 @@ import java.net.URL
 
 import org.milmsearch.core.dao.MlProposalDao
 import org.milmsearch.core.domain.MlArchiveType
+<<<<<<< HEAD
 import org.milmsearch.core.domain.CreateMlProposalRequest
+=======
+import org.milmsearch.core.domain.MlProposalInput
+>>>>>>> リストの取得のざっくり全体の実装とリソースのテスト
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.ComponentRegistry
 import org.scalamock.scalatest.MockFactory
@@ -14,7 +18,11 @@ class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory {
 
   test("create full") {
+<<<<<<< HEAD
     val request = CreateMlProposalRequest(
+=======
+    val mlProposal = MlProposalInput(
+>>>>>>> リストの取得のざっくり全体の実装とリソースのテスト
       "申請者の名前",
       "proposer@example.com",
       "MLタイトル",
