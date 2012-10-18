@@ -3,6 +3,7 @@ import java.net.URI
 import java.net.URL
 import java.util.NoSuchElementException
 import org.apache.commons.lang3.time.DateFormatUtils
+import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
@@ -28,8 +29,12 @@ import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
 import net.liftweb.json.parse
 import org.milmsearch.core.domain.Sort
+import javax.ws.rs.PathParam
+import javax.ws.rs.core.Response.Status
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
+
+class BadRequestException extends Exception
 
 /**
  * ML登録申請情報のAPIリソース
@@ -68,12 +73,11 @@ class MlProposalResource extends Loggable with PageableResource {
   @POST
   @Consumes(Array("application/json"))
   def create(requestBody: String) = {
-    val dto = parse(requestBody).extract[RequestDto]
+    val dto = parse(requestBody).extract[RequestDto] // リクエストbodyのパース、下記RequestDtoを参照
     val id = mpService.create(dto.toDomain)
 
     Response.created(
-      new URI("/ml-proposal/" + id)
-    ).build()
+      new URI("/ml-proposal/" + id)).build()
   }
 
   /**
@@ -176,21 +180,37 @@ class MlProposalResource extends Loggable with PageableResource {
 
   @Path("{id}")
   @DELETE
-  def delete() = {
-    Response.serverError().build()
+  def delete(@PathParam("id") id: String): Response = { // 引数の指定が必要　SampleListResource.scalaを後で参照（cherry-pick後）
+
+    def stringToLong(str: String) =
+      try {
+        str.toLong
+      } catch {
+        case e: NumberFormatException => throw new BadRequestException
+      }
+
+    try {
+      if (mpService.delete(stringToLong(id)))
+        Response.noContent().build()
+      else
+        Response.status(Status.NOT_FOUND).build()
+    } catch {
+      case e: BadRequestException => Response.status(Status.BAD_REQUEST).build() // 400
+      case e => Response.serverError().build()
+    }
   }
 
   /**
    * リクエストボディの変換用オブジェクト
    */
   case class RequestDto(
-      proposerName: String,
-      proposerEmail: String,
-      mlTitle: String,
-      status: String,
-      archiveType: String,
-      archiveUrl: String,
-      comment: String) {
+    proposerName: String,
+    proposerEmail: String,
+    mlTitle: String,
+    status: String,
+    archiveType: String,
+    archiveUrl: String,
+    comment: String) {
 
     /**
      * ドメインオブジェクトに変換する
