@@ -29,7 +29,6 @@ class Bootstrap extends ServletContextListener with Loggable {
   private val finalizeHooks: ListBuffer[() => Unit] = ListBuffer()
 
   override def contextInitialized(event: ServletContextEvent) {
-    withErrlog { initializeDBCon() }
     withErrlog {
       initializeDBCon()
       schemifyDBTable()
