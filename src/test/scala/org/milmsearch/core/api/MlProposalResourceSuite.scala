@@ -50,8 +50,7 @@ class MlProposalResourceSuite extends FunSuite
       MlProposalStatus.New,
       Some(MlArchiveType.Mailman),
       Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)")
-    )
+      Some("コメント(MLの説明など)"))
 
     val m = mock[MlProposalService]
     m expects 'create withArgs(request) returning 1L
@@ -65,7 +64,7 @@ class MlProposalResourceSuite extends FunSuite
       response.getMetadata().getFirst("Location")
     }
   }
-
+  
   test("createFilter 絞り込み項目と値を指定した場合") {
     val filter = new MlProposalResource invokePrivate
       PrivateMethod[Option[Filter[MLPFilterBy.type]]](
@@ -541,4 +540,68 @@ class MlProposalResourceSuite extends FunSuite
       |}""".stripMargin replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
+  test("delete_正常") {
+    // mockは戻り値なしで良い。
+    val id = "1"
+
+    val m = mock[MlProposalService]
+    m expects 'delete withArgs (1L) returning true
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().delete(id)
+    }
+
+    expect(204) {
+      response.getStatus
+    }
+  }
+
+  test("delete_id該当なし") {
+    // mockは戻り値なしで良い。
+    val id = "1"
+
+    val m = mock[MlProposalService]
+    m expects 'delete withArgs (1L) returning false
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().delete(id)
+    }
+
+    expect(404) {
+      response.getStatus
+    }
+  }
+
+  test("delete_id数値エラー") {
+    // mockは戻り値なしで良い。
+    val id = "a"
+
+    val m = mock[MlProposalService]
+    //m expects 'delete withArgs (1L) returning true
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().delete(id)
+    }
+
+    expect(400) {
+      response.getStatus
+    }
+  }
+  
+    test("delete_サーバエラー") {
+    // mockが例外を発生させる
+    val id = "1"
+
+    val m = mock[MlProposalService]
+    m expects 'delete withArgs (1L) throws new RuntimeException("Server Error!")
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().delete(id)
+    }
+
+    expect(500) {
+      response.getStatus
+    }
+  }
+
 }
