@@ -46,7 +46,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
   }
 
   test("toBy ステータスが承認済みを変換") {
-    expect(By(MLPMMapper.status, MLPStatus.Accepted)) {
+    expect(By(MLPMMapper.status, MLPStatus.Accepted.toString)) {
       new MlProposalDaoImpl().toBy(
         Filter(MLPFilterBy.Status, MLPStatus.Accepted))
     }
@@ -75,7 +75,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         | updated_at
       | ) VALUES (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
       List(1, "name1", "sample@sample.com", "title",
-        1, 1, "http://sample.com", "message",
+        "accepted", "other", "http://sample.com", "message",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
 
     val mps = new MlProposalDaoImpl().findAll(Range(0, 10))
@@ -117,15 +117,15 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
       List(
         // 1 件目
         1, "name1", "sample@sample.com", "title",
-        0, 1, "http://sample.com", "message",
+        "new", "other", "http://sample.com", "message",
         "2012-10-10 15:10:11", "2012-10-11 10:10:11",
         // 2 件目
         2, "name2", "sample2@sample.com", "title2",
-        1, 1, "http://sample.com2", "message2",
+        "accepted", "other", "http://sample.com2", "message2",
         "2012-10-10 11:10:11", "2012-10-11 10:10:11",
         // 3 件目 検索対象・ステータスが Rejected(2)
         3, "name3", "sample3@sample.com", "title3",
-        2, 1, "http://sample.com3", "message3",
+        "rejected", "other", "http://sample.com3", "message3",
         "2012-10-10 12:10:11", "2012-10-11 10:10:11"))
 
     val mps = new MlProposalDaoImpl().findAll(
@@ -155,15 +155,15 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
       List(
         // 1 件目
         1, "name1", "sample@sample.com", "title",
-        1, 1, "http://sample.com", "message",
+        "accepted", "other", "http://sample.com", "message",
         "2012-10-10 15:10:11", "2012-10-11 10:10:11",
         // 2 件目
         2, "name2", "sample2@sample.com", "title2",
-        2, 1, "http://sample.com2", "message2",
+        "rejected", "other", "http://sample.com2", "message2",
         "2012-10-10 11:10:11", "2012-10-11 10:10:11",
         // 3 件目
         3, "name3", "sample3@sample.com", "title3",
-        2, 1, "http://sample.com3", "message3",
+        "rejected", "other", "http://sample.com3", "message3",
         "2012-10-10 12:10:11", "2012-10-11 10:10:11"))
 
     val mps = new MlProposalDaoImpl().findAll(
@@ -196,15 +196,15 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
       List(
         // 1 件目
         1, "name1", "sample@sample.com", "title",
-        1, 1, "http://sample.com", "message",
+        "accepted", "other", "http://sample.com", "message",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11",
         // 2 件目
         2, "name2", "sample2@sample.com", "title2",
-        2, 1, "http://sample.com2", "message2",
+        "rejected", "other", "http://sample.com2", "message2",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11",
         // 3 件目
         3, "name3", "sample3@sample.com", "title3",
-        2, 1, "http://sample.com3", "message3",
+        "rejected", "other", "http://sample.com3", "message3",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
 
     val mps = new MlProposalDaoImpl().findAll(Range(1, 1))
