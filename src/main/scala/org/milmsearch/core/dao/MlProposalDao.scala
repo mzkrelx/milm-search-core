@@ -25,6 +25,10 @@ import mapper.{MlProposalMetaMapper => MLPMMapper}
 import mapper.{MlProposalMapper => MLPMapper}
 import scala.collection.mutable.ListBuffer
 import net.liftweb.mapper.QueryParam
+import net.liftweb.common.Box
+import net.liftweb.common.Full
+import net.liftweb.common.Empty
+import net.liftweb.common.Failure
 
 /**
  * ML登録申請情報 の DAO
@@ -45,6 +49,15 @@ trait MlProposalDao {
 
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
+  
+  def delete(id: Long) = {
+    val result: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
+    result match {
+      case Full(row) => mapper.MlProposalMetaMapper.delete_!(row)
+      case Empty => false
+      case Failure(message, e, _) => throw e openOr new RuntimeException(message)
+    }
+  }
 
   /** 検索条件を指定して、件数を数えます。
    *

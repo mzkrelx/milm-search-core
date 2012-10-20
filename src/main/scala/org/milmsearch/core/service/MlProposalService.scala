@@ -53,7 +53,6 @@ trait MlProposalService {
    */
   def update(id: Long, mlProposal: MlProposal): Boolean
 
-
   /**
    * ML登録申請情報を削除する
    *
@@ -95,5 +94,7 @@ class MlProposalServiceImpl extends MlProposalService {
 
   def update(id: Long, proposal: MlProposal) = false // TODO
 
-  def delete(id: Long) = false // TODO
+  def delete(id: Long) = mpDao.delete(id) 
+
 }
+
