@@ -50,22 +50,14 @@ trait MlProposalDao {
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
   
-  def delete(id: Long) = {
-    val result: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
-    result match {
-      case Full(row) => mapper.MlProposalMetaMapper.delete_!(row)
-      case Empty => false
-      case Failure(message, e, _) => throw e openOr new RuntimeException(message)
-    }
-  }
+  def delete(id: Long): Boolean
 
   /** 検索条件を指定して、件数を数えます。
    *
    * @param filter 検索条件
    * @return Long 件数
    */
-  def count(filter: Option[Filter[MLPFilterBy.type]] = None):
-      Long
+  def count(filter: Option[Filter[MLPFilterBy.type]] = None): Long
 }
 
 /**
@@ -130,7 +122,15 @@ class MlProposalDaoImpl extends MlProposalDao {
         "Can't convert Filter to By")
     }, DaoHelper.toAscOrDesc(sort.sortOrder))
   }
-
+  
+  def delete(id: Long): Boolean = {
+  val result: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
+    result match {
+      case Full(row) => mapper.MlProposalMetaMapper.delete_!(row)
+      case Empty => false
+      case Failure(message, e, _) => throw e openOr new RuntimeException(message)
+    }
+  }
 }
 
 /**
