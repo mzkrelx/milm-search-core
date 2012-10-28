@@ -15,7 +15,7 @@ case class Range(offset: Long, limit: Long)
  */
 case class Page(page: Long, count: Long) {
   def toRange(): Range = {
-    Range(page - 1 * count, count)
+    Range(if (page == 1) 0 else (page - 1) * count, count)
   }
 }
 

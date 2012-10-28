@@ -84,14 +84,14 @@ class MlProposalServiceImpl extends MlProposalService {
   def search(page: Page, sort: Sort): MlProposalSearchResult = {
     val mlProposals = mpDao.findAll(page.toRange, sort)
     val itemsPerPage = if (mlProposals.lengthCompare(page.count.toInt) < 0) 
-      page.count else mlProposals.length
-    MlProposalSearchResult(mpDao.count(), page.toRange.offset, itemsPerPage, mlProposals)
+      mlProposals.length else page.count 
+    MlProposalSearchResult(mpDao.count(), page.toRange.offset + 1, itemsPerPage, mlProposals)
   }
 
   def search(filter: Filter, page: Page, sort: Sort): MlProposalSearchResult = {
     val mlProposals = mpDao.findAll(filter, page.toRange, sort)
     val itemsPerPage = if (mlProposals.lengthCompare(page.count.toInt) < 0) 
-      page.count else mlProposals.length
+      mlProposals.length else page.count 
     MlProposalSearchResult(mpDao.count(filter), page.toRange.offset, itemsPerPage, mlProposals)
   }
 
