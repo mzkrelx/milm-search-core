@@ -2,11 +2,7 @@ package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
 import org.milmsearch.core.domain.MlArchiveType
-<<<<<<< HEAD
 import org.milmsearch.core.domain.CreateMlProposalRequest
-=======
-import org.milmsearch.core.domain.MlProposalInput
->>>>>>> リストの取得のざっくり全体の実装とリソースのテスト
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.service.MlProposalService
 import org.milmsearch.core.ComponentRegistry
@@ -39,11 +35,7 @@ class MlProposalResourceSuite extends FunSuite
       |  "comment": "コメント(MLの説明など)"
       |}""".stripMargin
 
-<<<<<<< HEAD
     val request = CreateMlProposalRequest(
-=======
-    val mlProposal = MlProposalInput(
->>>>>>> リストの取得のざっくり全体の実装とリソースのテスト
       "申請者の名前",
       "proposer@example.com",
       "MLタイトル",

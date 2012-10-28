@@ -70,6 +70,11 @@ trait MlProposalService {
 }
 
 /**
+ * 検索に失敗したときの例外
+ */
+class SearchFailedException(msg: String) extends Exception(msg)
+
+/**
  * MlProposalService の実装クラス
  */
 class MlProposalServiceImpl extends MlProposalService {
@@ -89,10 +94,13 @@ class MlProposalServiceImpl extends MlProposalService {
   }
 
   def search(filter: Filter, page: Page, sort: Sort): MlProposalSearchResult = {
+    if (filter.value == "") {
+      throw new SearchFailedException("Filter value is empty.")
+    }
     val mlProposals = mpDao.findAll(filter, page.toRange, sort)
     val itemsPerPage = if (mlProposals.lengthCompare(page.count.toInt) < 0) 
       mlProposals.length else page.count 
-    MlProposalSearchResult(mpDao.count(filter), page.toRange.offset, itemsPerPage, mlProposals)
+    MlProposalSearchResult(mpDao.count(filter), page.toRange.offset + 1, itemsPerPage, mlProposals)
   }
 
   def findById(id: Long) = None // TODO
