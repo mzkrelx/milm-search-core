@@ -54,7 +54,7 @@ package mapper {
     object status extends MappedEnum(this, MlProposalStatus)
     object archiveType extends MappedEnum(this, MlArchiveType)
     object archiveUrl extends MappedText(this)
-    object comment extends MappedText(this)
+    object message extends MappedText(this)
   }
 
 }
