@@ -1,15 +1,15 @@
 package org.milmsearch.core.dao
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MlProposalStatus
 import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.IdPK
 import net.liftweb.mapper.LongKeyedMapper
 import net.liftweb.mapper.LongKeyedMetaMapper
 import net.liftweb.mapper.MappedEmail
 import net.liftweb.mapper.MappedEnum
-import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
-import org.milmsearch.core.domain.MlProposalStatus
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposal
+import net.liftweb.mapper.MappedString
 
 /**
  * ML登録申請情報 の DAO
@@ -37,7 +37,7 @@ package mapper {
    */
   private[dao] object MlProposalMetaMapper extends MlProposalMapper
       with LongKeyedMetaMapper[MlProposalMapper] {
-    override def dbTableName = "mlproposal"
+    override def dbTableName = "ml_proposal"
     override def fieldOrder = createdAt :: Nil
   }
   

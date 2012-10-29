@@ -15,7 +15,9 @@ import net.liftweb.db.DB1.db1ToDb
 import net.liftweb.mapper.DefaultConnectionIdentifier
 import net.liftweb.mapper.StandardDBVendor
 import net.liftweb.mapper.DB
+import net.liftweb.mapper.MapperRules
 import net.liftweb.util.Props
+import net.liftweb.util.StringHelpers
 
 /**
  * サーブレットコンテナ(Tomcat等)の起動時に行う処理<br/>
@@ -80,6 +82,10 @@ class Bootstrap extends ServletContextListener with Loggable {
    * (状況に応じて CREATE TABLE や ALTER TABLE が走る)
    */
   private def schemifyDBTable() {
+    // テーブル名・カラム名には snake_case を用いる
+    MapperRules.tableName  = (_, name) => StringHelpers.snakify(name)
+    MapperRules.columnName = (_, name) => StringHelpers.snakify(name)
+    
     DaoHelper.schemify()
   }
 
