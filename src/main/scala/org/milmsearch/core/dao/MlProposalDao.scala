@@ -38,7 +38,10 @@ package mapper {
   private[dao] object MlProposalMetaMapper extends MlProposalMapper
       with LongKeyedMetaMapper[MlProposalMapper] {
     override def dbTableName = "ml_proposal"
-    override def fieldOrder = createdAt :: Nil
+    override def fieldOrder = List(
+      id, proposerName, proposerEmail, mlTitle, status,
+      archiveType, archiveUrl, message, createdAt, updatedAt
+    )
   }
   
   /**
