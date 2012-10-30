@@ -1,8 +1,36 @@
 package org.milmsearch.core.domain
 import java.net.URL
+import java.util.Date
 
 /**
  * ML登録申請情報
+ * 
+ * @param id ID
+ * @param proposerName 申請者名
+ * @param proposerEmail 申請者メールアドレス
+ * @param mlTitle MLのタイトル
+ * @param status 申請状況
+ * @param archiveType MLのアーカイブのタイプ
+ * @param archiveUrl MLのアーカイブページのURL
+ * @param comment コメント
+ * @param createdAt 作成日時
+ * @param updatedAt 更新日時
+ */
+case class MlProposal(
+  id: Long,
+  proposerName: String,
+  proposerEmail: String,
+  mlTitle: String,
+  status: MlProposalStatus.Value,
+  archiveType: Option[MlArchiveType.Value] = None,
+  archiveUrl: Option[URL] = None,
+  comment: Option[String] = None,
+  createdAt: Date,
+  updatedAt: Date
+)
+
+/**
+ * ML登録申請の入力情報
  * 
  * @param proposerName 申請者名
  * @param proposerEmail 申請者メールアドレス
@@ -12,7 +40,7 @@ import java.net.URL
  * @param archiveUrl MLのアーカイブページのURL
  * @param comment コメント
  */
-case class MlProposal(
+case class CreateMlProposalRequest(
   proposerName: String,
   proposerEmail: String,
   mlTitle: String,
@@ -27,6 +55,7 @@ case class MlProposal(
  */
 object MlArchiveType extends Enumeration {
   val Mailman = Value("mailman")
+  val Other   = Value("other")
 }
 
 /**

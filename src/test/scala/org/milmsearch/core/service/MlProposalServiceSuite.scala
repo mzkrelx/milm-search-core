@@ -3,7 +3,7 @@ import java.net.URL
 
 import org.milmsearch.core.dao.MlProposalDao
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.ComponentRegistry
 import org.scalamock.scalatest.MockFactory
@@ -14,7 +14,7 @@ class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory {
 
   test("create full") {
-    val mlProposal = MlProposal(
+    val request = CreateMlProposalRequest(
       "申請者の名前",
       "proposer@example.com",
       "MLタイトル",
@@ -25,11 +25,11 @@ class MlProposalServiceSuite extends FunSuite
     )
 
     val m = mock[MlProposalDao]
-    m expects 'create withArgs(mlProposal) returning 1L
+    m expects 'create withArgs(request) returning 1L
 
     expect(1L) {
       ComponentRegistry.mlProposalDao.doWith(m) {
-        new MlProposalServiceImpl().create(mlProposal)
+        new MlProposalServiceImpl().create(request)
       }
     }
   }
