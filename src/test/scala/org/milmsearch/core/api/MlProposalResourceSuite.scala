@@ -3,7 +3,7 @@ import java.net.URI
 import java.net.URL
 
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.service.MlProposalService
 import org.milmsearch.core.ComponentRegistry
@@ -26,7 +26,7 @@ class MlProposalResourceSuite extends FunSuite
       |  "comment": "コメント(MLの説明など)"
       |}""".stripMargin
 
-    val mlProposal = MlProposal(
+    val request = CreateMlProposalRequest(
       "申請者の名前",
       "proposer@example.com",
       "MLタイトル",
@@ -37,7 +37,7 @@ class MlProposalResourceSuite extends FunSuite
     )
 
     val m = mock[MlProposalService]
-    m expects 'create withArgs(mlProposal) returning 1L
+    m expects 'create withArgs(request) returning 1L
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
       new MlProposalResource().create(json)

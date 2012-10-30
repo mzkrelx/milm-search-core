@@ -3,7 +3,7 @@ import java.net.URI
 import java.net.URL
 
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.ComponentRegistry
 
@@ -97,7 +97,7 @@ class MlProposalResource {
      * ドメインオブジェクトに変換する
      */
     def toDomain =
-      MlProposal(
+      CreateMlProposalRequest(
         proposerName,
         proposerEmail,
         mlTitle,

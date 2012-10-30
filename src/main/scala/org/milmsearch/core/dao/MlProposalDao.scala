@@ -1,22 +1,24 @@
 package org.milmsearch.core.dao
+import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.MlProposalStatus
+
 import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.IdPK
 import net.liftweb.mapper.LongKeyedMapper
 import net.liftweb.mapper.LongKeyedMetaMapper
 import net.liftweb.mapper.MappedEmail
 import net.liftweb.mapper.MappedEnum
-import net.liftweb.mapper.MappedText
 import net.liftweb.mapper.MappedString
+import net.liftweb.mapper.MappedText
 
 /**
  * ML登録申請情報 の DAO
  */
 trait MlProposalDao {
   def find(id: Long): Option[MlProposal]
-  def create(mlProposal: MlProposal): Long
+  def create(request: CreateMlProposalRequest): Long
 }
 
 /**
@@ -24,7 +26,7 @@ trait MlProposalDao {
  */
 class MlProposalDaoImpl extends MlProposalDao {
   def find(id: Long) = None
-  def create(mlProposal: MlProposal) = 0L
+  def create(request: CreateMlProposalRequest) = 0L
 }
 
 /**

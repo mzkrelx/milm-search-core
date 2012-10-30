@@ -1,8 +1,9 @@
 package org.milmsearch.core.service
 
-import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.ComponentRegistry
+import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.MlProposal
 
 /**
  * ML登録申請情報を管理するサービス
@@ -15,7 +16,7 @@ trait MlProposalService {
    * @param mlProposal ML登録申請情報
    * @return ID
    */
-  def create(mlProposal: MlProposal): Long
+  def create(request: CreateMlProposalRequest): Long
 
   /**
    * 検索条件に合致するML登録申請情報を検索する
@@ -63,7 +64,7 @@ class MlProposalServiceImpl extends MlProposalService {
    */
   private def mpDao = ComponentRegistry.mlProposalDao()
 
-  def create(mlProposal: MlProposal) = mpDao.create(mlProposal)
+  def create(request: CreateMlProposalRequest) = mpDao.create(request)
 
   def find(range: Range, sort: Sort*) = Nil // TODO
 
