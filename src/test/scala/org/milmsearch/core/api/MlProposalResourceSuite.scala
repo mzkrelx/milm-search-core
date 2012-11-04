@@ -19,6 +19,8 @@ import java.util.Calendar
 import java.text.SimpleDateFormat
 import org.milmsearch.core.domain.MlProposalSearchResult
 import org.apache.commons.lang3.time.DateUtils
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFBy}
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSBy}
 
 class MlProposalResourceSuite extends FunSuite
     with MockFactory with ProxyMockFactory {
@@ -77,9 +79,9 @@ class MlProposalResourceSuite extends FunSuite
     )
     
     m expects 'search withArgs(
-      Filter(Symbol("status"), "new"),
+      Filter(MLPFBy.Status, "new"),
       Page(2, 20),
-      Sort(Symbol("mlTitle"), SortOrder.Ascending)
+      Sort(MLPSBy.MlTitle, SortOrder.Ascending)
     ) returning MlProposalSearchResult(100, 21, 20, mlProposals.toList)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -129,7 +131,7 @@ class MlProposalResourceSuite extends FunSuite
     
     m expects 'search withArgs(
       Page(1, 10),
-      Sort(Symbol("id"), SortOrder.Ascending)
+      Sort(MLPSBy.Id, SortOrder.Ascending)
     ) returning MlProposalSearchResult(100, 1, 10, mlProposals.toList)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -164,6 +166,11 @@ class MlProposalResourceSuite extends FunSuite
     expect(400) { response.getStatus() }
   }
   
+  test("get when filterBy is invalid") {
+    val response = new MlProposalResource().list("hello", "new", "mlTitle", "ascending", 2, 20);
+    expect(400) { response.getStatus() }
+  }
+  
   test("get when filterValue is null") {
     val response = new MlProposalResource().list("status", null, "mlTitle", "ascending", 2, 20);
     expect(400) { response.getStatus() }
@@ -188,9 +195,9 @@ class MlProposalResourceSuite extends FunSuite
     )
     
     m expects 'search withArgs(
-      Filter(Symbol("status"), "new"),
+      Filter(MLPFBy.Status, "new"),
       Page(2, 20),
-      Sort(Symbol("id"), SortOrder.Ascending)
+      Sort(MLPSBy.Id, SortOrder.Ascending)
     ) returning MlProposalSearchResult(100, 21, 20, mlProposals.toList)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -220,6 +227,11 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
   
+  test("get when sortBy is invalid") {
+    val response = new MlProposalResource().list("status", "new", "hello", "ascending", 2, 20);
+    expect(400) { response.getStatus() }
+  }
+  
   test("get when sortOrder is null") {
     val m = mock[MlProposalService]
     val cal = Calendar.getInstance()
@@ -239,9 +251,9 @@ class MlProposalResourceSuite extends FunSuite
     )
     
     m expects 'search withArgs(
-      Filter(Symbol("status"), "new"),
+      Filter(MLPFBy.Status, "new"),
       Page(2, 20),
-      Sort(Symbol("mlTitle"), SortOrder.Ascending)
+      Sort(MLPSBy.MlTitle, SortOrder.Ascending)
     ) returning MlProposalSearchResult(100, 21, 20, mlProposals.toList)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -295,9 +307,9 @@ class MlProposalResourceSuite extends FunSuite
     )
     
     m expects 'search withArgs(
-      Filter(Symbol("status"), "new"),
+      Filter(MLPFBy.Status, "new"),
       Page(1, 20),
-      Sort(Symbol("mlTitle"), SortOrder.Ascending)
+      Sort(MLPSBy.MlTitle, SortOrder.Ascending)
     ) returning MlProposalSearchResult(100, 1, 20, mlProposals.toList)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -351,9 +363,9 @@ class MlProposalResourceSuite extends FunSuite
     )
     
     m expects 'search withArgs(
-      Filter(Symbol("status"), "new"),
+      Filter(MLPFBy.Status, "new"),
       Page(1, 10),
-      Sort(Symbol("mlTitle"), SortOrder.Ascending)
+      Sort(MLPSBy.MlTitle, SortOrder.Ascending)
     ) returning MlProposalSearchResult(100, 1, 10, mlProposals.toList)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -398,7 +410,7 @@ class MlProposalResourceSuite extends FunSuite
     
     m expects 'search withArgs(
       Page(1, 10),
-      Sort(Symbol("mlTitle"), SortOrder.Ascending)
+      Sort(MLPSBy.MlTitle, SortOrder.Ascending)
     ) returning MlProposalSearchResult(0, 1, 10, Nil)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -419,9 +431,9 @@ class MlProposalResourceSuite extends FunSuite
     val m = mock[MlProposalService]
     
     m expects 'search withArgs(
-      Filter(Symbol("status"), "new"),
+      Filter(MLPFBy.Status, "new"),
       Page(1, 10),
-      Sort(Symbol("mlTitle"), SortOrder.Ascending)
+      Sort(MLPSBy.MlTitle, SortOrder.Ascending)
     ) returning MlProposalSearchResult(0, 1, 10, Nil)
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {

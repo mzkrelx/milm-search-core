@@ -29,6 +29,7 @@ import net.liftweb.json.ShortTypeHints
 import net.liftweb.json.parse
 import org.milmsearch.core.domain.MlProposalFilterBy
 import org.milmsearch.core.domain.MlProposalSortBy
+import java.util.NoSuchElementException
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
   
@@ -114,6 +115,10 @@ Accept-Charset: utf-8"
       getList(filterBy, filterValue, sortBy, sortOrder, startPage, count)
     } catch {
       case e: BadQueryParameterException => {
+        error(e)
+        Response.status(Response.Status.BAD_REQUEST).build()
+      }
+      case e: NoSuchElementException => {
         error(e)
         Response.status(Response.Status.BAD_REQUEST).build()
       }
