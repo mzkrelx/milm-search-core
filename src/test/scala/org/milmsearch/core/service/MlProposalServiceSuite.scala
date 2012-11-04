@@ -16,6 +16,8 @@ import org.scalamock.scalatest.MockFactory
 import org.scalamock.ProxyMockFactory
 import org.scalatest.FunSuite
 import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSBy}
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFBy}
 
 class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory {
@@ -59,12 +61,12 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Range(20, 20), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Range(20, 20), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
     m expects 'count returning 100L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 20), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Page(2, 20), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(100)(searchResult.totalResults)
@@ -72,27 +74,15 @@ class MlProposalServiceSuite extends FunSuite
     expect(20)(searchResult.itemsPerPage)
     expect(21)(searchResult.mlProposals.apply(0).id)
   }
-  
-  test("search when sortColumn is empty") {
-    intercept[NoSuchFieldException] {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(Symbol(""), SortOrder.Ascending))
-    }
-  }  
-
-  test("search when sortColumn is invalid") {
-    intercept[NoSuchFieldException] {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(Symbol("hello"), SortOrder.Ascending))
-    }
-  }  
 
   test("search result is empty") {
     val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Range(0, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Range(0, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         Nil
     m expects 'count returning 0L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(0)(searchResult.totalResults)
@@ -119,12 +109,12 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Range(0, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Range(0, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
     m expects 'count returning 10L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(10)(searchResult.totalResults)
@@ -135,12 +125,12 @@ class MlProposalServiceSuite extends FunSuite
 
   test("search result is 10 items then page is 2") {
     val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Range(10, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Range(10, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         Nil
     m expects 'count returning 10L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Page(2, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(10)(searchResult.totalResults)
@@ -167,12 +157,12 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Range(0, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Range(0, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
     m expects 'count returning 11L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(11)(searchResult.totalResults)
@@ -199,12 +189,12 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Range(10, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Range(10, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
     m expects 'count returning 11L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Page(2, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(11)(searchResult.totalResults)
@@ -231,12 +221,12 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Range(10, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Range(10, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
     m expects 'count returning 21L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Page(2, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(21)(searchResult.totalResults)
@@ -263,14 +253,14 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Filter(Symbol("status"), "new"), 
-        Range(20, 20), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Filter(MLPFBy.Status, MlProposalStatus.New), 
+        Range(20, 20), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
-    m expects 'count withArgs(Filter(Symbol("status"), "new")) returning 100L
+    m expects 'count withArgs(Filter(MLPFBy.Status, MlProposalStatus.New)) returning 100L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(2, 20), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.withName("status"), MlProposalStatus.withName("new")), 
+        Page(2, 20), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(100)(searchResult.totalResults)
@@ -279,92 +269,30 @@ class MlProposalServiceSuite extends FunSuite
     expect(21)(searchResult.mlProposals.apply(0).id)
   }
   
-  test("search by filter when filterColumn is empty") {
-    intercept[NoSuchFieldException] {
-      new MlProposalServiceImpl().search(Filter(Symbol(""), "new"), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
-    }
-  }
-  
-  test("search by filter when filterColumn is mlTitle") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 21 to 21) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
-
-    m expects 'findAll withArgs(Filter(Symbol("mlTitle"), "MLタイトル21"), 
-        Range(0, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count withArgs(Filter(Symbol("mlTitle"), "MLタイトル21")) returning 1L
-
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("mlTitle"), "MLタイトル21"), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
-    }
-    
-    expect(1)(searchResult.totalResults)
-    expect(1)(searchResult.startIndex)
-    expect(1)(searchResult.itemsPerPage)
-    expect(21)(searchResult.mlProposals.apply(0).id)
-  }
-  
   test("search by filter when filterValue is not enum value") {
     intercept[NoSuchFieldException] {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "hello"), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, "hello"), 
+        Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
   }
   
   test("search by filter when filterValue is empty") {
     intercept[SearchFailedException] {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), ""), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, ""), 
+        Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
   }
   
-  test("search by filter when filterColumn and filterValue are empty") {
-    intercept[SearchFailedException] {
-      new MlProposalServiceImpl().search(Filter(Symbol(""), ""), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
-    }
-  }
-  
-  test("search by filter when sortColumn is empty") {
-    intercept[NoSuchFieldException] {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(1, 10), Sort(Symbol(""), SortOrder.Ascending))
-    }
-  }  
-
-  test("search by filter when sortColumn is invalid") {
-    intercept[NoSuchFieldException] {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(1, 10), Sort(Symbol("hello"), SortOrder.Ascending))
-    }
-  }  
-
   test("search by filter result is empty") {
     val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Filter(Symbol("status"), "new"), 
-        Range(0, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Filter(MLPFBy.Status, "new"), 
+        Range(0, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         Nil
-    m expects 'count withArgs(Filter(Symbol("status"), "new")) returning 0L
+    m expects 'count withArgs(Filter(MLPFBy.Status, "new")) returning 0L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, "new"), 
+        Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(0)(searchResult.totalResults)
@@ -391,14 +319,14 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Filter(Symbol("status"), "new"), 
-        Range(0, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Filter(MLPFBy.Status, "new"), 
+        Range(0, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
-    m expects 'count withArgs(Filter(Symbol("status"), "new")) returning 10L
+    m expects 'count withArgs(Filter(MLPFBy.Status, "new")) returning 10L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, "new"), 
+        Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(10)(searchResult.totalResults)
@@ -409,14 +337,14 @@ class MlProposalServiceSuite extends FunSuite
 
   test("search by filter result is 10 items then page is 2") {
     val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Filter(Symbol("status"), "new"), 
-        Range(10, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Filter(MLPFBy.Status, "new"), 
+        Range(10, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         Nil
-    m expects 'count withArgs(Filter(Symbol("status"), "new")) returning 10L
+    m expects 'count withArgs(Filter(MLPFBy.Status, "new")) returning 10L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(2, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, "new"), 
+        Page(2, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(10)(searchResult.totalResults)
@@ -443,14 +371,14 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Filter(Symbol("status"), "new"), 
-        Range(0, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Filter(MLPFBy.Status, "new"), 
+        Range(0, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
-    m expects 'count withArgs(Filter(Symbol("status"), "new")) returning 11L
+    m expects 'count withArgs(Filter(MLPFBy.Status, "new")) returning 11L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(1, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, "new"), 
+        Page(1, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(11)(searchResult.totalResults)
@@ -477,14 +405,14 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Filter(Symbol("status"), "new"), 
-        Range(10, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Filter(MLPFBy.Status, "new"), 
+        Range(10, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
-    m expects 'count withArgs(Filter(Symbol("status"), "new")) returning 11L
+    m expects 'count withArgs(Filter(MLPFBy.Status, "new")) returning 11L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(2, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, "new"), 
+        Page(2, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(11)(searchResult.totalResults)
@@ -511,14 +439,14 @@ class MlProposalServiceSuite extends FunSuite
       createdAt
     )
 
-    m expects 'findAll withArgs(Filter(Symbol("status"), "new"), 
-        Range(10, 10), Sort(Symbol("id"), SortOrder.Ascending)) returning
+    m expects 'findAll withArgs(Filter(MLPFBy.Status, "new"), 
+        Range(10, 10), Sort(MLPSBy.Id, SortOrder.Ascending)) returning
         mlProposals.toList
-    m expects 'count withArgs(Filter(Symbol("status"), "new")) returning 21L
+    m expects 'count withArgs(Filter(MLPFBy.Status, "new")) returning 21L
 
     val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(Symbol("status"), "new"), 
-        Page(2, 10), Sort(Symbol("id"), SortOrder.Ascending))
+      new MlProposalServiceImpl().search(Filter(MLPFBy.Status, "new"), 
+        Page(2, 10), Sort(MLPSBy.Id, SortOrder.Ascending))
     }
     
     expect(21)(searchResult.totalResults)
