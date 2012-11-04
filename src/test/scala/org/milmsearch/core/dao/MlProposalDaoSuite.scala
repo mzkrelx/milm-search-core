@@ -1,4 +1,9 @@
 package org.milmsearch.core.dao
+import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposalFilterBy
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFBy}
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSBy}
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
@@ -6,13 +11,17 @@ import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.Bootstrap
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FunSuite
+import mapper.{MlProposalMetaMapper => MLPMMapper}
+import net.liftweb.mapper.Ascending
 import net.liftweb.mapper.By
 import net.liftweb.mapper.DB
+import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.Schemifier
-import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlProposalFilterBy
+import java.net.URL
+import org.apache.commons.lang3.time.DateFormatUtils
+import org.scalatest.BeforeAndAfter
 
-class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll {
+class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndAfter {
   // TODO
   test("insert full") { pending }
   
@@ -20,70 +29,23 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll {
    * 全てのテストの前処理
    */
   override def beforeAll() {
-    Schemifier.schemify(true, Schemifier.infoF _,
-      mapper.MlProposalMetaMapper
-    )
+    Schemifier.schemify(true, Schemifier.infoF _, MLPMMapper)
   }
   
-  test("toMappedField id to id") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.id) {
-      mpDao.toMappedField(mapper.MlProposalField.Id)
+  after {
+    DB.runUpdate("TRUNCATE TABLE ML_PROPOSAL", Nil)
+  }
+  
+  test("toBy status accepted") {
+    expect(By(MLPMMapper.status, MlProposalStatus.Accepted)) {
+      new MlProposalDaoImpl().toBy(Filter(MLPFBy.Status, MlProposalStatus.Accepted))
     }
   }
   
-  test("toMappedField proposerName to proposerName") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.proposerName)(mpDao.toMappedField(mapper.MlProposalField.ProposerName))
-  }
-  
-  test("toMappedField proposerEmail to proposerEmail") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.proposerEmail)(mpDao.toMappedField(mapper.MlProposalField.ProposerEmail))
-  }
-  
-  test("toMappedField mlTitle to mlTitle") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.mlTitle)(mpDao.toMappedField(mapper.MlProposalField.MlTitle))
-  }
-  
-  test("toMappedField status to status") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.status)(mpDao.toMappedField(mapper.MlProposalField.Status))
-  }
-
-  test("toMappedField archiveType to archiveType") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.archiveType)(mpDao.toMappedField(mapper.MlProposalField.ArchiveType))
-  }
-
-  test("toMappedField archiveUrl to archiveUrl") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.archiveUrl)(mpDao.toMappedField(mapper.MlProposalField.ArchiveUrl))
-  }
-
-  test("toMappedField comment to message") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.message)(mpDao.toMappedField(mapper.MlProposalField.Comment))
-  }
-
-  test("toMappedField createdAt to createdAt") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.createdAt)(mpDao.toMappedField(mapper.MlProposalField.CreatedAt))
-  }
-
-  test("toMappedField updatedAt to updatedAt") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(mapper.MlProposalMetaMapper.updatedAt)(mpDao.toMappedField(mapper.MlProposalField.UpdatedAt))
-  }
-  
-  test("toBy") {
-    val mpDao = new MlProposalDaoImpl()
-    expect(
-      By(mapper.MlProposalMetaMapper.status, MlProposalStatus.Accepted)
-    ) (mpDao.toBy(
-      Filter(MlProposalFilterBy.Status, MlProposalStatus.Accepted))
-    )
+  test("toOrderBy id asc") {
+    expect(OrderBy(MLPMMapper.id, Ascending)) {
+      new MlProposalDaoImpl().toOrderBy(Sort(MLPSBy.Id, SortOrder.Ascending))
+    }
   }
   
   test("findAll") {
@@ -93,11 +55,101 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll {
           "2012-10-10 10:10:11", "2012-10-11 10:10:11"
         )
     )
-    val mpDao = new MlProposalDaoImpl()
-    val mps = mpDao.findAll(Range(0, 10), Sort('id, SortOrder.Ascending))
-    println("!!!!" + mps)
-    val mp = mps.head
-    expect(1)(mp.id)
+    val mp = new MlProposalDaoImpl().findAll(Range(0, 10),
+        Sort(MLPSBy.Id, SortOrder.Ascending)).head
+    expect(1) {
+      mp.id
+    }
+    expect("name1") {
+      mp.proposerName
+    }
+    expect("sample@sample.com") {
+      mp.proposerEmail
+    }
+    expect("title") {
+      mp.mlTitle
+    }
+    expect(MlProposalStatus.Accepted) {
+      mp.status
+    }
+    expect(Some(MlArchiveType.Other)) {
+      mp.archiveType
+    }
+    expect(Some(new URL("http://sample.com"))) {
+      mp.archiveUrl
+    }
+    expect(Some("message")) {
+      mp.comment
+    }
+    expect("2012-10-10T10:10:11") {
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.createdAt)
+    }
+    expect("2012-10-11T10:10:11") {
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.updatedAt)
+    }    
+  }
+
+  test("findAll filter range sort") {
+    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
+        List(1, "name1", "sample@sample.com", "title", 
+          1, 1, "http://sample.com", "message",
+          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+        )
+    )
+    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
+        List(2, "name2", "sample2@sample.com", "title2", 
+          2, 1, "http://sample.com2", "message2",
+          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+        )
+    )
+    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
+        List(3, "name3", "sample3@sample.com", "title3", 
+          2, 1, "http://sample.com3", "message3",
+          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+        )
+    )
+    val mps = new MlProposalDaoImpl().findAll(
+        Filter(MLPFBy.Status, MlProposalStatus.Rejected), 
+        Range(0, 10),
+        Sort(MLPSBy.Id, SortOrder.Descending))
+    expect(2) {
+      mps.length
+    }
+    expect(3) {
+      mps.head.id
+    }
+    expect(2) {
+      mps.tail.head.id
+    }
   }
   
+  test("findAll range") {
+    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
+        List(1, "name1", "sample@sample.com", "title", 
+          1, 1, "http://sample.com", "message",
+          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+        )
+    )
+    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
+        List(2, "name2", "sample2@sample.com", "title2", 
+          2, 1, "http://sample.com2", "message2",
+          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+        )
+    )
+    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
+        List(3, "name3", "sample3@sample.com", "title3", 
+          2, 1, "http://sample.com3", "message3",
+          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+        )
+    )
+    val mps = new MlProposalDaoImpl().findAll(
+        Range(1, 1),
+        Sort(MLPSBy.Id, SortOrder.Ascending))
+    expect(1) {
+      mps.length
+    }
+    expect(2) {
+      mps.head.id
+    }
+  }  
 }

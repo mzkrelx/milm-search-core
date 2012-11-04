@@ -27,11 +27,11 @@ import net.liftweb.mapper.Mapper
 import net.liftweb.mapper.MaxRows
 import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.StartAt
-import mapper.{MlProposalField => MLPField}
 import org.milmsearch.core.domain.{MlProposalSortBy => MLPSBy}
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPBy}
 import mapper.{MlProposalMetaMapper => MLPMMapper}
 import mapper.{MlProposalMapper => MLPMapper}
+import org.milmsearch.core.domain.SortOrder
 
 class NoSuchFieldException(msg: String) extends Exception(msg)
 class UnexpectedValueException(msg: String) extends Exception(msg)
@@ -106,17 +106,23 @@ class MlProposalDaoImpl extends MlProposalDao {
   }
   
   def toOrderBy(sort: Sort[MLPSBy.type]) = {
-    OrderBy(toMappedField(MLPField.withName(
-        sort.column.toString())), DaoHelper.toAscOrDesc(sort.sortOrder))
-  }
-  
-  def toMappedField(field: MLPField.Value) = {
-    mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
+    val field = sort.column match {
+      case MLPSBy.Id            => MLPMMapper.id
+      case MLPSBy.ProposerName  => MLPMMapper.proposerName
+      case MLPSBy.ProposerEmail => MLPMMapper.proposerEmail
+      case MLPSBy.MlTitle       => MLPMMapper.mlTitle
+      case MLPSBy.Status        => MLPMMapper.status
+      case MLPSBy.ArchiveType   => MLPMMapper.archiveType
+      case MLPSBy.ArchiveUrl    => MLPMMapper.archiveUrl
+      case MLPSBy.CreatedAt     => MLPMMapper.createdAt
+      case MLPSBy.UpdatedAt     => MLPMMapper.updatedAt
+      case _ => throw new NoSuchFieldException(
+        "Can't convert Filter to By")
+    }
+    OrderBy(field, DaoHelper.toAscOrDesc(sort.sortOrder))
   }
   
 }
-
-
 
 /**
  * O/R マッパー
@@ -149,19 +155,6 @@ package mapper {
     object archiveType extends MappedEnum(this, MlArchiveType)
     object archiveUrl extends MappedText(this)
     object message extends MappedText(this)
-  }
-  
-  private[dao] object MlProposalField extends Enumeration {
-    val Id = Value("id")
-    val ProposerName = Value("proposerName")
-    val ProposerEmail = Value("proposerEmail")
-    val MlTitle = Value("mlTitle")
-    val Status = Value("status")
-    val ArchiveType = Value("archiveType")
-    val ArchiveUrl = Value("archiveUrl")
-    val Comment = Value("message")
-    val CreatedAt = Value("createdAt")
-    val UpdatedAt = Value("updatedAt")
   }
 
 }
