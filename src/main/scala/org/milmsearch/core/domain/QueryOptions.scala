@@ -1,9 +1,9 @@
 package org.milmsearch.core.domain
 
 /**
- * 絞り込み条件
+ * 絞り込み条件.
  */
-case class Filter(column: Symbol, value: String)
+case class Filter[ENUM <: Enumeration](column: ENUM#Value, value: Any)
 
 /**
  * 取得するデータの範囲

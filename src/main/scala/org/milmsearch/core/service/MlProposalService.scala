@@ -9,6 +9,7 @@ import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.ComponentRegistry
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MlProposalFilterBy
 
 /**
  * ML登録申請情報を管理するサービス
@@ -40,7 +41,7 @@ trait MlProposalService {
    * @param sort   ソート方法
    * @return 検索結果情報 
    */
-  def search(filter: Filter, page: Page, sort: Sort): MlProposalSearchResult 
+  def search(filter: Filter[MlProposalFilterBy.type], page: Page, sort: Sort): MlProposalSearchResult 
   
   /**
    * ML登録申請情報を取得する
@@ -93,7 +94,8 @@ class MlProposalServiceImpl extends MlProposalService {
     MlProposalSearchResult(mpDao.count(), page.toRange.offset + 1, itemsPerPage, mlProposals)
   }
 
-  def search(filter: Filter, page: Page, sort: Sort): MlProposalSearchResult = {
+  def search(filter: Filter[MlProposalFilterBy.type],
+      page: Page, sort: Sort): MlProposalSearchResult = {
     if (filter.value == "") {
       throw new SearchFailedException("Filter value is empty.")
     }

@@ -1,7 +1,6 @@
 package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
-
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
@@ -12,7 +11,6 @@ import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.ComponentRegistry
-
 import javax.ws.rs.core.Response
 import javax.ws.rs.Consumes
 import javax.ws.rs.DELETE
@@ -29,6 +27,7 @@ import net.liftweb.json.FieldSerializer
 import net.liftweb.json.Serialization
 import net.liftweb.json.ShortTypeHints
 import net.liftweb.json.parse
+import org.milmsearch.core.domain.MlProposalFilterBy
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
   
@@ -173,7 +172,8 @@ Accept-Charset: utf-8"
           "Invalid filter. Please query filterBy and filterValue at the same time.")
       case (Some(by), None) => throw new BadQueryParameterException(
           "Invalid filter. Please query filterBy and filterValue at the same time.")
-      case (Some(by), Some(value)) => Some(Filter(Symbol(by), value))
+      case (Some(by), Some(value)) =>
+        Some(Filter(MlProposalFilterBy.withName(by), value))
       case _ => None
     }
     

@@ -1,24 +1,24 @@
 package org.milmsearch.core.dao
+import java.net.URL
 import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
-import org.milmsearch.core.domain.MlProposalStatus
-
-import java.net.URL
-import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
-import org.milmsearch.core.domain.SortOrder
 import net.liftweb.mapper.MappedField.mapToType
-import net.liftweb.mapper.Ascending
+import net.liftweb.mapper.AscOrDesc
 import net.liftweb.mapper.BaseOwnedMappedField
 import net.liftweb.mapper.By
 import net.liftweb.mapper.CreatedUpdated
-import net.liftweb.mapper.Descending
 import net.liftweb.mapper.IdPK
+import net.liftweb.mapper.IdPK$id$
+import net.liftweb.mapper.IdPK$id$
 import net.liftweb.mapper.IndexItem
 import net.liftweb.mapper.LongKeyedMapper
 import net.liftweb.mapper.LongKeyedMetaMapper
+import net.liftweb.mapper.MappedEmail
 import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.MappedField
 import net.liftweb.mapper.MappedString
@@ -27,7 +27,10 @@ import net.liftweb.mapper.Mapper
 import net.liftweb.mapper.MaxRows
 import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.StartAt
-import net.liftweb.mapper.MappedEmail
+import mapper.{MlProposalField => MLPField}
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPBy}
+import mapper.{MlProposalMetaMapper => MLPMMapper}
+import mapper.{MlProposalMapper => MLPMapper}
 
 class NoSuchFieldException(msg: String) extends Exception(msg)
 class UnexpectedValueException(msg: String) extends Exception(msg)
@@ -37,10 +40,11 @@ class UnexpectedValueException(msg: String) extends Exception(msg)
  */
 trait MlProposalDao {
   def findAll(range: Range, sort: Sort): List[MlProposal]
-  def findAll(filter: Filter, range: Range, sort: Sort): List[MlProposal]
+  def findAll[T](filter: Filter[MLPBy.type],
+    range: Range, sort: Sort): List[MlProposal]
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
-  def count(filter: Filter): Long
+  def count(filter: Filter[MLPBy.type]): Long
   def count(): Long
 }
 
@@ -59,7 +63,7 @@ class MlProposalDaoImpl extends MlProposalDao {
     ) map { toDomain }   
   }
   
-  def findAll(filter: Filter, range: Range, sort: Sort): List[MlProposal] = {
+  def findAll[T](filter: Filter[MLPBy.type], range: Range, sort: Sort): List[MlProposal] = {
     mapper.MlProposalMetaMapper.findAll(
       toBy(filter),
       StartAt(range.offset),
@@ -68,7 +72,7 @@ class MlProposalDaoImpl extends MlProposalDao {
     ) map { toDomain }    
   }
 
-  def count(filter: Filter): Long = {
+  def count(filter: Filter[MLPBy.type]): Long = {
     mapper.MlProposalMetaMapper.count(toBy(filter))
   }
   
@@ -91,32 +95,22 @@ class MlProposalDaoImpl extends MlProposalDao {
     )
   }
   
-  def toBy(filter: Filter) = {
-    By(toMappedField(filter.column), filter.value)
+  def toBy(filter: Filter[MLPBy.type]) = {
+    filter match {
+      case Filter(MLPBy.Status, v: MLPStatus.Value)
+        => By(MLPMMapper.status, v)
+      case _ => throw new NoSuchFieldException(
+        "Can't convert Filter to By")
+    }
   }
   
   def toOrderBy(sort: Sort) = {
-    OrderBy(toMappedField(sort.column), toAscOrDesc(sort.sortOrder))
+    OrderBy(toMappedField(MLPField.withName(
+        sort.column.name)), DaoHelper.toAscOrDesc(sort.sortOrder))
   }
   
-  def toMappedField(field: Symbol) = {
-    field match {
-      case mapper.MlProposalField.ProposerName => mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
-      case mapper.MlProposalField.ProposerEmail => mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
-      case mapper.MlProposalField.MlTitle => mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
-      case mapper.MlProposalField.Status => mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
-      case mapper.MlProposalField.ArchiveType => mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
-      case mapper.MlProposalField.ArchiveUrl => mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
-      case mapper.MlProposalField.Comment => mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
-      case s: Symbol => throw new NoSuchFieldException("Invalid field name symbol.[%s]" format s)
-    }
-  }
-  
-  def toAscOrDesc(order: SortOrder.Value) = {
-    order match {
-      case SortOrder.Ascending => Ascending
-      case SortOrder.Descending => Descending
-    }
+  def toMappedField(field: MLPField.Value) = {
+    mapper.MlProposalMetaMapper.fieldByName(field.toString()).open_!
   }
   
 }
@@ -150,20 +144,23 @@ package mapper {
     object proposerName extends MappedString(this, 200)
     object proposerEmail extends MappedEmail(this, 200)
     object mlTitle extends MappedString(this, 200)
-    object status extends MappedEnum(this, MlProposalStatus)
+    object status extends MappedEnum(this, MLPStatus)
     object archiveType extends MappedEnum(this, MlArchiveType)
     object archiveUrl extends MappedText(this)
     object message extends MappedText(this)
   }
   
   private[dao] object MlProposalField extends Enumeration {
+    val Id = Value("id")
     val ProposerName = Value("proposerName")
     val ProposerEmail = Value("proposerEmail")
     val MlTitle = Value("mlTitle")
     val Status = Value("status")
     val ArchiveType = Value("archiveType")
     val ArchiveUrl = Value("archiveUrl")
-    val Comment = Value("comment")
+    val Comment = Value("message")
+    val CreatedAt = Value("createdAt")
+    val UpdatedAt = Value("updatedAt")
   }
 
 }

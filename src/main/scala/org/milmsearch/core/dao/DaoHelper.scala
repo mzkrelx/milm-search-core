@@ -1,6 +1,10 @@
 package org.milmsearch.core.dao
 import net.liftweb.mapper.Schemifier
 import mapper._
+import net.liftweb.mapper.AscOrDesc
+import net.liftweb.mapper.Descending
+import net.liftweb.mapper.Ascending
+import org.milmsearch.core.domain.SortOrder
 
 /**
  * DAO 関連のヘルパークラス
@@ -15,4 +19,14 @@ object DaoHelper {
       MlProposalMetaMapper
     )
   }
+  
+  /**
+   * ドメインのソートをマッパーのソートに変換します。
+   */
+  def toAscOrDesc(order: SortOrder.Value): AscOrDesc = {
+    order match {
+      case SortOrder.Ascending => Ascending
+      case SortOrder.Descending => Descending
+    }
+  }  
 }
