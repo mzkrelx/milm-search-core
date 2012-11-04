@@ -92,7 +92,6 @@ object MlProposalSortBy extends Enumeration {
   val Status        = Value("status")
   val ArchiveType   = Value("archiveType")
   val ArchiveUrl    = Value("archiveUrl")
-  val Comment       = Value("comment")
   val CreatedAt     = Value("createdAt")
   val UpdatedAt     = Value("updatedAt")
 }
