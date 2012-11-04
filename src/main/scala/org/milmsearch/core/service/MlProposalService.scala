@@ -10,6 +10,7 @@ import org.milmsearch.core.ComponentRegistry
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.MlProposalFilterBy
+import org.milmsearch.core.domain.MlProposalSortBy
 
 /**
  * ML登録申請情報を管理するサービス
@@ -31,7 +32,7 @@ trait MlProposalService {
    * @param sort   ソート方法
    * @return 検索結果情報 
    */
-  def search(page: Page, sort: Sort): MlProposalSearchResult 
+  def search(page: Page, sort: Sort[MlProposalSortBy.type]): MlProposalSearchResult 
   
   /**
    * 検索結果情報を取得する
@@ -41,7 +42,8 @@ trait MlProposalService {
    * @param sort   ソート方法
    * @return 検索結果情報 
    */
-  def search(filter: Filter[MlProposalFilterBy.type], page: Page, sort: Sort): MlProposalSearchResult 
+  def search(filter: Filter[MlProposalFilterBy.type], page: Page, 
+      sort: Sort[MlProposalSortBy.type]): MlProposalSearchResult 
   
   /**
    * ML登録申請情報を取得する
@@ -87,7 +89,7 @@ class MlProposalServiceImpl extends MlProposalService {
 
   def create(request: CreateMlProposalRequest) = mpDao.create(request)
 
-  def search(page: Page, sort: Sort): MlProposalSearchResult = {
+  def search(page: Page, sort: Sort[MlProposalSortBy.type]): MlProposalSearchResult = {
     val mlProposals = mpDao.findAll(page.toRange, sort)
     val itemsPerPage = if (mlProposals.lengthCompare(page.count.toInt) < 0) 
       mlProposals.length else page.count 
@@ -95,7 +97,7 @@ class MlProposalServiceImpl extends MlProposalService {
   }
 
   def search(filter: Filter[MlProposalFilterBy.type],
-      page: Page, sort: Sort): MlProposalSearchResult = {
+      page: Page, sort: Sort[MlProposalSortBy.type]): MlProposalSearchResult = {
     if (filter.value == "") {
       throw new SearchFailedException("Filter value is empty.")
     }

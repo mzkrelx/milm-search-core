@@ -22,7 +22,7 @@ case class Page(page: Long, count: Long) {
 /**
  * 取得するデータのソート方法
  */
-case class Sort(column: Symbol, sortOrder: SortOrder.Value)
+case class Sort[ENUM <: Enumeration](column: ENUM#Value, sortOrder: SortOrder.Value)
 
 /**
  * ソート順序

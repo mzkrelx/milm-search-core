@@ -28,6 +28,7 @@ import net.liftweb.json.Serialization
 import net.liftweb.json.ShortTypeHints
 import net.liftweb.json.parse
 import org.milmsearch.core.domain.MlProposalFilterBy
+import org.milmsearch.core.domain.MlProposalSortBy
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
   
@@ -45,7 +46,7 @@ class MlProposalResource extends Logger {
   /**
    * GETのクエリパラムのデフォルト値
    */
-  private val defaultSortBy = "id"
+  private val defaultSortBy = MlProposalSortBy.Id
   private val defaultStartPage = 1
   private val defaultCount = 10
   
@@ -188,7 +189,7 @@ Accept-Charset: utf-8"
     )
 
     val sort = Sort(
-      if (sortBy == null) Symbol(defaultSortBy) else Symbol(sortBy),
+      if (sortBy == null) defaultSortBy else MlProposalSortBy.withName(sortBy),
       sortOrder match {
         case "ascending" | null => SortOrder.Ascending
         case "descending" => SortOrder.Descending

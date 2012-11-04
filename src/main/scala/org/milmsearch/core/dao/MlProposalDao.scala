@@ -28,6 +28,7 @@ import net.liftweb.mapper.MaxRows
 import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.StartAt
 import mapper.{MlProposalField => MLPField}
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSBy}
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPBy}
 import mapper.{MlProposalMetaMapper => MLPMMapper}
 import mapper.{MlProposalMapper => MLPMapper}
@@ -39,9 +40,9 @@ class UnexpectedValueException(msg: String) extends Exception(msg)
  * ML登録申請情報 の DAO
  */
 trait MlProposalDao {
-  def findAll(range: Range, sort: Sort): List[MlProposal]
-  def findAll[T](filter: Filter[MLPBy.type],
-    range: Range, sort: Sort): List[MlProposal]
+  def findAll(range: Range, sort: Sort[MLPSBy.type]): List[MlProposal]
+  def findAll[T](filter: Filter[MLPBy.type], range: Range, 
+      sort: Sort[MLPSBy.type]): List[MlProposal]
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
   def count(filter: Filter[MLPBy.type]): Long
@@ -55,7 +56,7 @@ class MlProposalDaoImpl extends MlProposalDao {
   def find(id: Long) = None
   def create(request: CreateMlProposalRequest) = 0L
 
-  def findAll(range: Range, sort: Sort): List[MlProposal] = {
+  def findAll(range: Range, sort: Sort[MLPSBy.type]): List[MlProposal] = {
     mapper.MlProposalMetaMapper.findAll(
       StartAt(range.offset),
       MaxRows(range.limit),
@@ -63,7 +64,7 @@ class MlProposalDaoImpl extends MlProposalDao {
     ) map { toDomain }   
   }
   
-  def findAll[T](filter: Filter[MLPBy.type], range: Range, sort: Sort): List[MlProposal] = {
+  def findAll[T](filter: Filter[MLPBy.type], range: Range, sort: Sort[MLPSBy.type]): List[MlProposal] = {
     mapper.MlProposalMetaMapper.findAll(
       toBy(filter),
       StartAt(range.offset),
@@ -104,9 +105,9 @@ class MlProposalDaoImpl extends MlProposalDao {
     }
   }
   
-  def toOrderBy(sort: Sort) = {
+  def toOrderBy(sort: Sort[MLPSBy.type]) = {
     OrderBy(toMappedField(MLPField.withName(
-        sort.column.name)), DaoHelper.toAscOrDesc(sort.sortOrder))
+        sort.column.toString())), DaoHelper.toAscOrDesc(sort.sortOrder))
   }
   
   def toMappedField(field: MLPField.Value) = {

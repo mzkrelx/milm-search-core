@@ -69,7 +69,7 @@ object MlArchiveType extends Enumeration {
  * ML登録申請の状態
  */
 object MlProposalStatus extends Enumeration {
-  val New = Value("new")
+  val New      = Value("new")
   val Accepted = Value("accepted")
   val Rejected = Value("rejected")
 }
@@ -79,4 +79,20 @@ object MlProposalStatus extends Enumeration {
  */
 object MlProposalFilterBy extends Enumeration {
   val Status = Value("status")
+}
+
+/**
+ * ML登録申請の並べ替えに使える項目
+ */
+object MlProposalSortBy extends Enumeration {
+  val Id            = Value("id")
+  val ProposerName  = Value("proposerName")
+  val ProposerEmail = Value("proposerEmail")
+  val MlTitle       = Value("mlTitle")
+  val Status        = Value("status")
+  val ArchiveType   = Value("archiveType")
+  val ArchiveUrl    = Value("archiveUrl")
+  val Comment       = Value("comment")
+  val CreatedAt     = Value("createdAt")
+  val UpdatedAt     = Value("updatedAt")
 }
