@@ -5,7 +5,6 @@ import org.apache.commons.lang3.time.DateFormatUtils
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.CreateMlProposalRequest
-import org.milmsearch.core.domain.MlProposalSearchResult
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Sort
@@ -23,9 +22,7 @@ import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import net.liftweb.common.Loggable
 import net.liftweb.json.DefaultFormats
-import net.liftweb.json.FieldSerializer
 import net.liftweb.json.Serialization
-import net.liftweb.json.ShortTypeHints
 import net.liftweb.json.parse
 import org.milmsearch.core.domain.MlProposalFilterBy
 import org.milmsearch.core.domain.MlProposalSortBy
