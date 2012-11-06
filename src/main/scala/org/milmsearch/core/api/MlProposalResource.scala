@@ -21,7 +21,7 @@ import javax.ws.rs.PUT
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
-import net.liftweb.common.Logger
+import net.liftweb.common.Loggable
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.FieldSerializer
 import net.liftweb.json.Serialization
@@ -37,7 +37,7 @@ class BadQueryParameterException(msg: String) extends Exception(msg)
  * ML登録申請情報のAPIリソース
  */
 @Path("/ml-proposals")
-class MlProposalResource extends Logger {
+class MlProposalResource extends Loggable {
   // for lift-json
   implicit val formats = DefaultFormats
 
@@ -108,11 +108,11 @@ class MlProposalResource extends Logger {
       getList(filterBy, filterValue, sortBy, sortOrder, startPage, count)
     } catch {
       case e: BadQueryParameterException => {
-        error(e)
+        logger.error(e)
         Response.status(Response.Status.BAD_REQUEST).build()
       }
       case e: NoSuchElementException => {
-        error(e)
+        logger.error(e)
         Response.status(Response.Status.BAD_REQUEST).build()
       }
     }
