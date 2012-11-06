@@ -20,9 +20,14 @@ case class Page(page: Long, count: Long) {
 }
 
 /**
+ * ソート項目の列挙型
+ */
+trait SortByEnum extends Enumeration {}
+
+/**
  * 取得するデータのソート方法
  */
-case class Sort[ENUM <: Enumeration](column: ENUM#Value, sortOrder: SortOrder.Value)
+case class Sort[ENUM <: SortByEnum](column: ENUM#Value, sortOrder: SortOrder.Value)
 
 /**
  * ソート順序

@@ -84,7 +84,7 @@ object MlProposalFilterBy extends Enumeration {
 /**
  * ML登録申請の並べ替えに使える項目
  */
-object MlProposalSortBy extends Enumeration {
+object MlProposalSortBy extends SortByEnum {
   val Id            = Value("id")
   val ProposerName  = Value("proposerName")
   val ProposerEmail = Value("proposerEmail")

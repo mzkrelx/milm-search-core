@@ -37,22 +37,14 @@ class BadQueryParameterException(msg: String) extends Exception(msg)
  * ML登録申請情報のAPIリソース
  */
 @Path("/ml-proposals")
-class MlProposalResource extends Loggable {
+class MlProposalResource extends Loggable with PageableResource {
   // for lift-json
   implicit val formats = DefaultFormats
 
   /** ML登録申請管理サービス */
   private def mpService = ComponentRegistry.mlProposalService.vend
   
-  /**
-   * GETのクエリパラムのデフォルト値
-   */
-  private val defaultSortBy = MlProposalSortBy.Id
-  private val defaultStartPage = 1
-  private val defaultCount = 10
-  
-  /** 1ページの項目数の上限値 */
-  private val maxCount = 100
+  protected val defaultSortBy = MlProposalSortBy.Id
 
   private val dateFormat = DateFormatUtils.ISO_DATETIME_FORMAT
 
