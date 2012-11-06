@@ -86,14 +86,7 @@ class MlProposalResource extends Logger {
   }
 
   /**
-   * "?filterBy=絞り込み項目&
-filterValue=絞り込み項目の値&
-sortBy=ソート列名&
-sortOrder=昇順か逆順か&
-count=1ページの項目数&
-startPage=ぺージ番号"
-"Accept: ""application/json""
-Accept-Charset: utf-8"
+   * ML登録申請情報の一覧を取得します。
    * 
    * @param filterBy 絞り込み項目
    * @param filterValue 絞り込み項目の値
@@ -101,7 +94,7 @@ Accept-Charset: utf-8"
    * @param sortOrder 昇順か逆順か
    * @param count 1ページの項目数
    * @param startPage ぺージ番号
-   * @return 200(OK)
+   * @return 200(OK) or 400(Bad Request)
    */
   @GET
   @Produces(Array("application/json"))
@@ -254,5 +247,3 @@ case class SearchResultDto(
   itemsPerPage: Long,
   mlProposals: List[MlProposalDto]
 )
-  
-  
