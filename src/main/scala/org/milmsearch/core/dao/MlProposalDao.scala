@@ -25,6 +25,9 @@ import mapper.{MlProposalMetaMapper => MLPMMapper}
 import mapper.{MlProposalMapper => MLPMapper}
 import scala.collection.mutable.ListBuffer
 import net.liftweb.mapper.QueryParam
+import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposal
 import net.liftweb.common.Box
 import net.liftweb.common.Full
 import net.liftweb.common.Empty
@@ -124,7 +127,7 @@ class MlProposalDaoImpl extends MlProposalDao {
   }
   
   def delete(id: Long): Boolean = {
-  val result: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
+    val result: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
     result match {
       case Full(row) => mapper.MlProposalMetaMapper.delete_!(row)
       case Empty => false
