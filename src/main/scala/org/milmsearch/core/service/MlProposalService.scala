@@ -27,6 +27,7 @@ trait MlProposalService {
   def create(request: CreateMlProposalRequest): Long
 
   /**
+<<<<<<< HEAD
    * 検索結果情報を取得する
    *
    * @param filter 検索条件
@@ -51,10 +52,10 @@ trait MlProposalService {
    * ML登録申請情報を更新する
    *
    * @param id ID
-   * @param mlProposal ML登録申請情報
+   * @param UpdateMlProposalRequest ML登録申請情報
    * @return 更新対象が存在したかどうか
    */
-  def update(id: Long, mlProposal: MlProposal): Boolean
+  def update(id: Long, request: CreateMlProposalRequest): Boolean
 
   /**
    * ML登録申請情報を削除する
@@ -96,7 +97,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
 
   def findById(id: Long) = None // TODO
 
-  def update(id: Long, proposal: MlProposal) = false // TODO
+  def update(id: Long, request: CreateMlProposalRequest) = mpDao.update(id, request)
 
   def delete(id: Long) = {
     try {
