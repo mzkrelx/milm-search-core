@@ -3,7 +3,6 @@ import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.MlProposalStatus
-
 import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.IdPK
 import net.liftweb.mapper.LongKeyedMapper
@@ -12,6 +11,10 @@ import net.liftweb.mapper.MappedEmail
 import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
+import net.liftweb.common.Box
+import net.liftweb.common.Full
+import net.liftweb.common.Empty
+import net.liftweb.common.Failure
 
 /**
  * ML登録申請情報 の DAO
@@ -19,6 +22,7 @@ import net.liftweb.mapper.MappedText
 trait MlProposalDao {
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
+  def update(id: Long, request: CreateMlProposalRequest): Boolean{}
 }
 
 /**
@@ -27,6 +31,14 @@ trait MlProposalDao {
 class MlProposalDaoImpl extends MlProposalDao {
   def find(id: Long) = None
   def create(request: CreateMlProposalRequest) = 0L
+  def update(id: Long, request: CreateMlProposalRequest) = {
+    val target: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
+    target match {
+      case Full(row) => mapper.MlProposalMetaMapper.save(row)
+      case Empty => false
+      case Failure(message, e, _) => throw e openOr new RuntimeException(message)
+    }
+  }
 }
 
 /**
@@ -45,14 +57,14 @@ package mapper {
       archiveType, archiveUrl, message, createdAt, updatedAt
     )
   }
-  
+
   /**
    * ML登録申請情報のモデルクラス
    */
   private[dao] class MlProposalMapper extends LongKeyedMapper[MlProposalMapper]
       with IdPK with CreatedUpdated {
     def getSingleton = MlProposalMetaMapper
-  
+
     object proposerName extends MappedString(this, 200)
     object proposerEmail extends MappedEmail(this, 200)
     object mlTitle extends MappedString(this, 200)

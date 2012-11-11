@@ -4,7 +4,7 @@ import java.util.Date
 
 /**
  * ML登録申請情報
- * 
+ *
  * @param id ID
  * @param proposerName 申請者名
  * @param proposerEmail 申請者メールアドレス
@@ -31,7 +31,7 @@ case class MlProposal(
 
 /**
  * ML登録申請の入力情報
- * 
+ *
  * @param proposerName 申請者名
  * @param proposerEmail 申請者メールアドレス
  * @param mlTitle MLのタイトル

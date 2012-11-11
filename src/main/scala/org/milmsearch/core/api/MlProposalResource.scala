@@ -2,11 +2,12 @@ package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
 
-import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.ComponentRegistry
 
+import javax.ws.rs.core.Response.Status
 import javax.ws.rs.core.Response
 import javax.ws.rs.Consumes
 import javax.ws.rs.DELETE
@@ -14,6 +15,7 @@ import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.PUT
 import javax.ws.rs.Path
+import javax.ws.rs.PathParam
 import net.liftweb.json.parse
 import net.liftweb.json.DefaultFormats
 
@@ -42,7 +44,7 @@ class MlProposalResource {
    *   "comment": "コメント(MLの説明など)"
    * }
    * </pre>
-   * 
+   *
    * @param requestBody JSON形式のML登録申請情報
    * @return 201(Created)
    */
@@ -70,8 +72,19 @@ class MlProposalResource {
 
   @Path("{id}")
   @PUT
-  def update() = {
-    Response.serverError().build()
+  def update(@PathParam("id") id: String, requestBody: String) : Response = {
+    val dto = parse(requestBody).extract[RequestDto]
+    val result = mpService.update(id.toLong, dto.toDomain)
+
+    try {
+	    if(result){
+	    	Response.noContent().build()
+	    } else {
+	    	Response.status(Status.NOT_FOUND).build()
+	    }
+    } catch {
+      case e => Response.serverError().build()
+    }
   }
 
   @Path("{id}")
