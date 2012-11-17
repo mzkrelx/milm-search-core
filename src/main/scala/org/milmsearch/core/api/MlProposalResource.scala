@@ -44,7 +44,7 @@ class MlProposalResource extends Loggable with PageableResource {
   /** ML登録申請管理サービス */
   private def mpService = ComponentRegistry.mlProposalService.vend
   
-  protected val defaultSortBy = MlProposalSortBy.Id
+  protected val defaultSortBy = MlProposalSortBy.MlTitle
 
   private val dateFormat = DateFormatUtils.ISO_DATETIME_FORMAT
 

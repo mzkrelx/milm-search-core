@@ -1,51 +1,55 @@
 package org.milmsearch.core.dao
 import java.net.URL
 import org.milmsearch.core.domain.CreateMlProposalRequest
-import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
-import net.liftweb.mapper.MappedField.mapToType
-import net.liftweb.mapper.AscOrDesc
-import net.liftweb.mapper.BaseOwnedMappedField
-import net.liftweb.mapper.By
-import net.liftweb.mapper.CreatedUpdated
-import net.liftweb.mapper.IdPK
-import net.liftweb.mapper.IdPK$id$
-import net.liftweb.mapper.IdPK$id$
-import net.liftweb.mapper.IndexItem
-import net.liftweb.mapper.LongKeyedMapper
-import net.liftweb.mapper.LongKeyedMetaMapper
-import net.liftweb.mapper.MappedEmail
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
 import net.liftweb.mapper.MappedEnum
-import net.liftweb.mapper.MappedField
 import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
-import net.liftweb.mapper.Mapper
-import net.liftweb.mapper.MaxRows
+import net.liftweb.mapper.LongKeyedMapper
 import net.liftweb.mapper.OrderBy
+import net.liftweb.mapper.LongKeyedMetaMapper
+import net.liftweb.mapper.MappedEmail
+import net.liftweb.mapper.IdPK
+import net.liftweb.mapper.CreatedUpdated
+import net.liftweb.mapper.By
 import net.liftweb.mapper.StartAt
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSBy}
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPBy}
+import net.liftweb.mapper.MaxRows
 import mapper.{MlProposalMetaMapper => MLPMMapper}
 import mapper.{MlProposalMapper => MLPMapper}
-import org.milmsearch.core.domain.SortOrder
-
-class NoSuchFieldException(msg: String) extends Exception(msg)
-class UnexpectedValueException(msg: String) extends Exception(msg)
 
 /**
  * ML登録申請情報 の DAO
  */
 trait MlProposalDao {
-  def findAll(range: Range, sort: Sort[MLPSBy.type]): List[MlProposal]
-  def findAll[T](filter: Filter[MLPBy.type], range: Range, 
-      sort: Sort[MLPSBy.type]): List[MlProposal]
+  
+  /** 取得範囲と並び順を指定して、ML登録申請情報を検索します。
+   * 
+   * @param range 取得範囲
+   * @param sort  並び順
+   * @return List[MlProposal] ML登録申請情報のリスト
+   */
+  def findAll(range: Range, sort: Sort[MLPSortBy.type]): List[MlProposal]
+  
+  /** 検索条件と取得範囲と並び順を指定して、ML登録申請情報を検索します。
+   * 
+   * @param filter 検索条件
+   * @param range  取得範囲
+   * @param sort   並び順
+   * @return List[MlProposal] ML登録申請情報のリスト
+   */
+  def findAll(filter: Filter[MLPFilterBy.type], range: Range, 
+      sort: Sort[MLPSortBy.type]): List[MlProposal]
+  
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
-  def count(filter: Filter[MLPBy.type]): Long
+  def count(filter: Filter[MLPFilterBy.type]): Long
   def count(): Long
 }
 
@@ -56,32 +60,28 @@ class MlProposalDaoImpl extends MlProposalDao {
   def find(id: Long) = None
   def create(request: CreateMlProposalRequest) = 0L
 
-  def findAll(range: Range, sort: Sort[MLPSBy.type]): List[MlProposal] = {
-    mapper.MlProposalMetaMapper.findAll(
+  def findAll(range: Range, sort: Sort[MLPSortBy.type]): List[MlProposal] =
+    MLPMMapper.findAll(
       StartAt(range.offset),
       MaxRows(range.limit),
       toOrderBy(sort)
-    ) map { toDomain }   
-  }
+    ) map toDomain   
   
-  def findAll[T](filter: Filter[MLPBy.type], range: Range, sort: Sort[MLPSBy.type]): List[MlProposal] = {
-    mapper.MlProposalMetaMapper.findAll(
+  def findAll(filter: Filter[MLPFilterBy.type], range: Range,
+      sort: Sort[MLPSortBy.type]): List[MlProposal] =
+    MLPMMapper.findAll(
       toBy(filter),
       StartAt(range.offset),
       MaxRows(range.limit),
       toOrderBy(sort)
-    ) map { toDomain }    
-  }
+    ) map toDomain    
 
-  def count(filter: Filter[MLPBy.type]): Long = {
-    mapper.MlProposalMetaMapper.count(toBy(filter))
-  }
+  def count(filter: Filter[MLPFilterBy.type]): Long =
+    MLPMMapper.count(toBy(filter))
   
-  def count(): Long = {
-    mapper.MlProposalMetaMapper.count()
-  }
+  def count(): Long = MLPMMapper.count()
   
-  private def toDomain(mapper: org.milmsearch.core.dao.mapper.MlProposalMapper) = {
+  private def toDomain(mapper: org.milmsearch.core.dao.mapper.MlProposalMapper) =
     MlProposal(
       mapper.id.get,
       mapper.proposerName.get,
@@ -92,34 +92,27 @@ class MlProposalDaoImpl extends MlProposalDao {
       Option(new URL(mapper.archiveUrl.get)),
       Option(mapper.message.get),
       mapper.createdAt.get,
-      mapper.updatedAt.get
-    )
-  }
+      mapper.updatedAt.get)
   
-  def toBy(filter: Filter[MLPBy.type]) = {
-    filter match {
-      case Filter(MLPBy.Status, v: MLPStatus.Value)
+  def toBy(filter: Filter[MLPFilterBy.type]) = filter match {
+      case Filter(MLPFilterBy.Status, v: MLPStatus.Value)
         => By(MLPMMapper.status, v)
       case _ => throw new NoSuchFieldException(
         "Can't convert Filter to By")
     }
-  }
   
-  def toOrderBy(sort: Sort[MLPSBy.type]) = {
-    val field = sort.column match {
-      case MLPSBy.Id            => MLPMMapper.id
-      case MLPSBy.ProposerName  => MLPMMapper.proposerName
-      case MLPSBy.ProposerEmail => MLPMMapper.proposerEmail
-      case MLPSBy.MlTitle       => MLPMMapper.mlTitle
-      case MLPSBy.Status        => MLPMMapper.status
-      case MLPSBy.ArchiveType   => MLPMMapper.archiveType
-      case MLPSBy.ArchiveUrl    => MLPMMapper.archiveUrl
-      case MLPSBy.CreatedAt     => MLPMMapper.createdAt
-      case MLPSBy.UpdatedAt     => MLPMMapper.updatedAt
+  def toOrderBy(sort: Sort[MLPSortBy.type]) = {
+    import MLPSortBy._
+    import MLPMMapper._
+    OrderBy(sort.column match {
+      case MlTitle       => mlTitle
+      case Status        => status
+      case ArchiveType   => archiveType
+      case CreatedAt     => createdAt
+      case UpdatedAt     => updatedAt
       case _ => throw new NoSuchFieldException(
         "Can't convert Filter to By")
-    }
-    OrderBy(field, DaoHelper.toAscOrDesc(sort.sortOrder))
+    }, DaoHelper.toAscOrDesc(sort.sortOrder))
   }
   
 }
@@ -137,8 +130,7 @@ package mapper {
     override def dbTableName = "ml_proposal"
     override def fieldOrder = List(
       id, proposerName, proposerEmail, mlTitle, status,
-      archiveType, archiveUrl, message, createdAt, updatedAt
-    )
+      archiveType, archiveUrl, message, createdAt, updatedAt)
   }
   
   /**
