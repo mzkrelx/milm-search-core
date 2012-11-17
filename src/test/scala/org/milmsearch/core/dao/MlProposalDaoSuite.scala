@@ -2,8 +2,8 @@ package org.milmsearch.core.dao
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposalFilterBy
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFBy}
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSBy}
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
@@ -38,13 +38,13 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
   
   test("toBy status accepted") {
     expect(By(MLPMMapper.status, MlProposalStatus.Accepted)) {
-      new MlProposalDaoImpl().toBy(Filter(MLPFBy.Status, MlProposalStatus.Accepted))
+      new MlProposalDaoImpl().toBy(Filter(MLPFilterBy.Status, MlProposalStatus.Accepted))
     }
   }
   
-  test("toOrderBy id asc") {
-    expect(OrderBy(MLPMMapper.id, Ascending)) {
-      new MlProposalDaoImpl().toOrderBy(Sort(MLPSBy.Id, SortOrder.Ascending))
+  test("toOrderBy createdAt asc") {
+    expect(OrderBy(MLPMMapper.createdAt, Ascending)) {
+      new MlProposalDaoImpl().toOrderBy(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
     }
   }
   
@@ -56,7 +56,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
         )
     )
     val mp = new MlProposalDaoImpl().findAll(Range(0, 10),
-        Sort(MLPSBy.Id, SortOrder.Ascending)).head
+        Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)).head
     expect(1) {
       mp.id
     }
@@ -93,25 +93,26 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
     DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
         List(1, "name1", "sample@sample.com", "title", 
           1, 1, "http://sample.com", "message",
-          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+          "2012-10-10 15:10:11", "2012-10-11 10:10:11"
         )
     )
     DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
         List(2, "name2", "sample2@sample.com", "title2", 
           2, 1, "http://sample.com2", "message2",
-          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+          "2012-10-10 11:10:11", "2012-10-11 10:10:11"
         )
     )
     DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
         List(3, "name3", "sample3@sample.com", "title3", 
           2, 1, "http://sample.com3", "message3",
-          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
+          "2012-10-10 12:10:11", "2012-10-11 10:10:11"
         )
     )
     val mps = new MlProposalDaoImpl().findAll(
-        Filter(MLPFBy.Status, MlProposalStatus.Rejected), 
+        Filter(MLPFilterBy.Status, MlProposalStatus.Rejected), 
         Range(0, 10),
-        Sort(MLPSBy.Id, SortOrder.Descending))
+        Sort(MLPSortBy.CreatedAt, SortOrder.Descending))
+    // id でいうと 3, 2 の 2 件の結果になる
     expect(2) {
       mps.length
     }
@@ -144,7 +145,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
     )
     val mps = new MlProposalDaoImpl().findAll(
         Range(1, 1),
-        Sort(MLPSBy.Id, SortOrder.Ascending))
+        Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
     expect(1) {
       mps.length
     }

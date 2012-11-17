@@ -100,9 +100,9 @@ class MlProposalResource extends Loggable with PageableResource {
       def createFileter = {
         (filterBy, filterValue) match {
           case (null, null) => None
-          case (by, value)  => 
+          case (by: String, value: String) =>  
             try {
-              Some(Filter(MlProposalFilterBy.withName(by), value.toInt))
+              Some(Filter(MlProposalFilterBy.withName(by), value))
             } catch {
               case e: NoSuchElementException => throw new BadQueryParameterException(e.getMessage())
             }
@@ -114,9 +114,9 @@ class MlProposalResource extends Loggable with PageableResource {
       def createPage = {
         val sp = ResourceHelper.getLongParam(startPage, "startPage") getOrElse defaultStartPage
         val co = ResourceHelper.getLongParam(count, "count") getOrElse defaultCount
-        if (sp < 1) throw new BadQueryParameterException(
+        if (sp <= 0) throw new BadQueryParameterException(
             "Invalid startPage value. [%d]" format sp)
-        if (co < 0 | co > maxCount) throw new BadQueryParameterException(
+        if (co <= 0 | co > maxCount) throw new BadQueryParameterException(
             "Invalid count value. [%d]" format co)
         Page(sp, co)
       }
@@ -142,10 +142,6 @@ class MlProposalResource extends Loggable with PageableResource {
       
     } catch {
       case e: BadQueryParameterException => {
-        logger.error(e)
-        Response.status(Response.Status.BAD_REQUEST).build()
-      }
-      case e: NoSuchElementException => {
         logger.error(e)
         Response.status(Response.Status.BAD_REQUEST).build()
       }
