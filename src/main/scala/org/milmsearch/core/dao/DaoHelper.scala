@@ -23,10 +23,9 @@ object DaoHelper {
   /**
    * ドメインのソートをマッパーのソートに変換します。
    */
-  def toAscOrDesc(order: SortOrder.Value): AscOrDesc = {
+  def toAscOrDesc(order: SortOrder.Value): AscOrDesc =
     order match {
       case SortOrder.Ascending => Ascending
       case SortOrder.Descending => Descending
     }
-  }  
 }
