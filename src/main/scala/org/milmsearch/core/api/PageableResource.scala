@@ -9,10 +9,10 @@ trait PageableResource {
   
   protected val defaultSortBy: SortByEnum#Value
   protected val defaultSortOrder = SortOrder.Ascending
-  protected val defaultStartPage = 1
-  protected val defaultCount = 10
+  protected val defaultStartPage = 1L
+  protected val defaultCount = 10L
   
   /** 1ページの項目数の上限値 */
-  protected val maxCount = 100
+  protected val maxCount = 100L
   
 }
