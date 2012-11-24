@@ -60,7 +60,7 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
 
-  test("get by all params") {
+  test("list パラメータがすべて正常値の場合") {
     val m = mock[MlProposalService]
     val cal = Calendar.getInstance()
     cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
@@ -111,7 +111,7 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
 
-  test("get by default params") {
+  test("list パラメータが全て null の場合") {
     val m = mock[MlProposalService]
     val cal = Calendar.getInstance()
     cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
@@ -161,22 +161,22 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
 
-  test("get when filterBy is null") {
+  test("list 絞り込み項目が null で且つ絞り込み値が指定された場合") {
     val response = new MlProposalResource().list(null, "new", "mlTitle", "ascending", "2", "20")
     expect(400) { response.getStatus() }
   }
   
-  test("get when filterBy is invalid") {
+  test("list 絞り込み項目が存在しない項目名の場合") {
     val response = new MlProposalResource().list("hello", "new", "mlTitle", "ascending", "2", "20")
     expect(400) { response.getStatus() }
   }
   
-  test("get when filterValue is null") {
+  test("list 絞り込み値が null の場合") {
     val response = new MlProposalResource().list("status", null, "mlTitle", "ascending", "2", "20")
     expect(400) { response.getStatus() }
   }
   
-  test("get when sortBy is null") {
+  test("list ソート列名が null の場合") {
     val m = mock[MlProposalService]
     val cal = Calendar.getInstance()
     cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
@@ -227,12 +227,12 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
   
-  test("get when sortBy is invalid") {
+  test("list ソート列名が存在しない項目名の場合") {
     val response = new MlProposalResource().list("status", "new", "hello", "ascending", "2", "20")
     expect(400) { response.getStatus() }
   }
   
-  test("get when sortOrder is null") {
+  test("list 並び順が null の場合") {
     val m = mock[MlProposalService]
     val cal = Calendar.getInstance()
     cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
@@ -283,37 +283,37 @@ class MlProposalResourceSuite extends FunSuite
     }
   }  
 
-  test("get when sortOrder is invalid") {
+  test("list 並び順が規定外の場合") {
     val response = new MlProposalResource().list("status", "new", "mlTitle", "invalid", "1", "10")
     expect(400) { response.getStatus() }
   }
   
-  test("get when startPage is 0") {
+  test("list ページ番号に 0 を指定した場合") {
     val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "0", "20")
     expect(400) { response.getStatus() }
   }
   
-  test("get when startPage is -1") {
+  test("list ページ番号に -1 を指定した場合") {
     val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "-1", "20")
     expect(400) { response.getStatus() }
   }
   
-  test("get when count is 0") {
+  test("list 項目数に 0 を指定した場合") {
     val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "1", "0")
     expect(400) { response.getStatus() }
   }
   
-  test("get when count is -1") {
+  test("list 項目数に -1 を指定した場合") {
     val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "1", "-1")
     expect(400) { response.getStatus() }
   }
   
-  test("get when count is 101") {
+  test("list 項目数に 101 を指定した場合") {
     val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "1", "101")
     expect(400) { response.getStatus() }
   }
   
-  test("get any items by no filter") {
+  test("list 絞り込みを指定せずに取得結果 0 件の場合") {
     val m = mock[MlProposalService]
     
     m expects 'search withArgs(
@@ -335,7 +335,7 @@ class MlProposalResourceSuite extends FunSuite
     expect(json) { response.getEntity() }
   }
 
-  test("get any items by filter") {
+  test("list 絞り込みを指定して取得結果 0 件の場合") {
     val m = mock[MlProposalService]
     
     m expects 'search withArgs(
