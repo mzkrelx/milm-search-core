@@ -46,7 +46,7 @@ class MlProposalResource extends Loggable with PageableResource {
   
   protected val defaultSortBy = MlProposalSortBy.MlTitle
 
-  private val dateFormat = DateFormatUtils.ISO_DATETIME_FORMAT
+  private val dateFormat = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
 
   /**
    * ML登録申請情報を作成する<br/>
@@ -82,20 +82,20 @@ class MlProposalResource extends Loggable with PageableResource {
    * 
    * @param filterBy 絞り込み項目
    * @param filterValue 絞り込み項目の値
-   * @param sortBy ソート列名
-   * @param sortOrder 昇順か逆順か
    * @param count 1ページの項目数
    * @param startPage ぺージ番号
+   * @param sortBy ソート列名
+   * @param sortOrder 昇順か逆順か
    * @return 200(OK) or 400(Bad Request)
    */
   @GET
   @Produces(Array("application/json"))
   def list(@QueryParam("filterBy") filterBy: String, 
            @QueryParam("filterValue") filterValue: String, 
-           @QueryParam("sortBy") sortBy: String, 
-           @QueryParam("sortOrder") sortOrder: String, 
            @QueryParam("startPage") startPage: String, 
-           @QueryParam("count") count: String) = {
+           @QueryParam("count") count: String,
+           @QueryParam("sortBy") sortBy: String, 
+           @QueryParam("sortOrder") sortOrder: String) = {
     try {
       def createFileter = {
         (filterBy, filterValue) match {

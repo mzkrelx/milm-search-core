@@ -21,6 +21,7 @@ import org.milmsearch.core.domain.MlProposalSearchResult
 import org.apache.commons.lang3.time.DateUtils
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
 import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.test.util.DateUtil
 
 class MlProposalResourceSuite extends FunSuite
     with MockFactory with ProxyMockFactory {
@@ -62,182 +63,287 @@ class MlProposalResourceSuite extends FunSuite
 
   test("list パラメータがすべて正常値の場合") {
     val m = mock[MlProposalService]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 21 to 40) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
-    
     m expects 'search withArgs(
       Filter(MLPFilterBy.Status, "new"),
       Page(2, 20),
       Sort(MLPSortBy.ArchiveType, SortOrder.Ascending)
-    ) returning MlProposalSearchResult(100, 21, 20, mlProposals.toList)
+    ) returning MlProposalSearchResult(100, 21, 20, 
+        createMlProposalsTestData(21, 40))
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().list("status", "new", "archiveType", "ascending", "2", "20")
+      new MlProposalResource().list(
+        filterBy    = "status", 
+        filterValue = "new", 
+        startPage   = "2", 
+        count       = "20",
+        sortBy      = "archiveType", 
+        sortOrder   = "ascending") 
     }
+    
     expect(200) { response.getStatus() }
-
-    val json = """{
-      |"totalResults":100,
-      |"startIndex":21,
-      |"itemsPerPage":20,
-      |"mlProposals":[{
-        |"id":21,
-        |"proposerName":"申請者の名前",
-        |"proposerEmail":"proposer@example.com",
-        |"mlTitle":"MLタイトル21",
-        |"status":"new",
-        |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
-        |"comment":"コメント(MLの説明など)",
-        |"createdAt":"2012-10-28T10:20:30",
-        |"updatedAt":"2012-10-28T10:20:30"
-      |}""".stripMargin.replaceAll("\n", "")
-      
-    expect(json) {
-      response.getEntity.toString.substring(0, json.length)
-    }
+    expect(
+      createMlProposalsJson(100, 21, 20, 
+      createMlProposalJsons(21, 40))
+    ) { response.getEntity.toString }
   }
 
   test("list パラメータが全て null の場合") {
     val m = mock[MlProposalService]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 1 to 10) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
-    
     m expects 'search withArgs(
       Page(1, 10),
       Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
-    ) returning MlProposalSearchResult(100, 1, 10, mlProposals.toList)
+    ) returning MlProposalSearchResult(100, 1, 10, 
+        createMlProposalsTestData(1, 10))
+
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().list(null, null, null, null, null, null)
+      new MlProposalResource().list(
+        filterBy    = null, 
+        filterValue = null, 
+        startPage   = null, 
+        count       = null,
+        sortBy      = null, 
+        sortOrder   = null) 
     }
+    
     expect(200) { response.getStatus() }
-
-    val json = """{
-      |"totalResults":100,
-      |"startIndex":1,
-      |"itemsPerPage":10,
-      |"mlProposals":[{
-        |"id":1,
-        |"proposerName":"申請者の名前",
-        |"proposerEmail":"proposer@example.com",
-        |"mlTitle":"MLタイトル1",
-        |"status":"new",
-        |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
-        |"comment":"コメント(MLの説明など)",
-        |"createdAt":"2012-10-28T10:20:30",
-        |"updatedAt":"2012-10-28T10:20:30"
-      |}""".stripMargin.replaceAll("\n", "")
-      
-    expect(json) {
-      response.getEntity.toString.substring(0, json.length)
-    }
+    expect(
+      createMlProposalsJson(
+        totalResults = 100,
+        startIndex   = 1,
+        itemsPerPage = 10, 
+        createMlProposalJsons(1, 10))
+    ) { response.getEntity.toString }    
   }
 
   test("list 絞り込み項目が null で且つ絞り込み値が指定された場合") {
-    val response = new MlProposalResource().list(null, "new", "mlTitle", "ascending", "2", "20")
+    val response = new MlProposalResource().list(
+      filterBy    = null, 
+      filterValue = "new", 
+      startPage   = "2", 
+      count       = "20",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending") 
+      
     expect(400) { response.getStatus() }
   }
   
   test("list 絞り込み項目が存在しない項目名の場合") {
-    val response = new MlProposalResource().list("hello", "new", "mlTitle", "ascending", "2", "20")
+    val response = new MlProposalResource().list(
+      filterBy    = "hello", 
+      filterValue = "new", 
+      startPage   = "2", 
+      count       = "20",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending") 
+      
     expect(400) { response.getStatus() }
   }
   
   test("list 絞り込み値が null の場合") {
-    val response = new MlProposalResource().list("status", null, "mlTitle", "ascending", "2", "20")
+    val response = new MlProposalResource().list(
+      filterBy    = "status", 
+      filterValue = null, 
+      startPage   = "2", 
+      count       = "20",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending") 
+      
     expect(400) { response.getStatus() }
   }
   
   test("list ソート列名が null の場合") {
     val m = mock[MlProposalService]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 21 to 40) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
-    
     m expects 'search withArgs(
-      Filter(MLPFilterBy.Status, "new"),
       Page(2, 20),
       Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
-    ) returning MlProposalSearchResult(100, 21, 20, mlProposals.toList)
+    ) returning MlProposalSearchResult(100, 21, 20, 
+        createMlProposalsTestData(21, 40))
+
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().list("status", "new", null, "ascending", "2", "20")
+      new MlProposalResource().list(
+        filterBy    = null, 
+        filterValue = null, 
+        startPage   = "2", 
+        count       = "20",
+        sortBy      = null, 
+        sortOrder   = "ascending") 
     }
+    
     expect(200) { response.getStatus() }
-
-    val json = """{
-      |"totalResults":100,
-      |"startIndex":21,
-      |"itemsPerPage":20,
-      |"mlProposals":[{
-        |"id":21,
-        |"proposerName":"申請者の名前",
-        |"proposerEmail":"proposer@example.com",
-        |"mlTitle":"MLタイトル21",
-        |"status":"new",
-        |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
-        |"comment":"コメント(MLの説明など)",
-        |"createdAt":"2012-10-28T10:20:30",
-        |"updatedAt":"2012-10-28T10:20:30"
-      |}""".stripMargin.replaceAll("\n", "")
-      
-    expect(json) {
-      response.getEntity.toString.substring(0, json.length)
-    }
+    expect(
+      createMlProposalsJson(
+        totalResults = 100,
+        startIndex   = 21,
+        itemsPerPage = 20, 
+        createMlProposalJsons(21, 40))
+    ) { response.getEntity.toString }    
   }
   
   test("list ソート列名が存在しない項目名の場合") {
-    val response = new MlProposalResource().list("status", "new", "hello", "ascending", "2", "20")
+    val response = new MlProposalResource().list(
+    filterBy    = "status", 
+    filterValue = "new", 
+    startPage   = "2", 
+    count       = "20",
+    sortBy      = "hello", 
+    sortOrder   = "ascending") 
+    
     expect(400) { response.getStatus() }
   }
   
   test("list 並び順が null の場合") {
     val m = mock[MlProposalService]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 21 to 40) yield MlProposal(
+    m expects 'search withArgs(
+      Filter(MLPFilterBy.Status, "new"),
+      Page(2, 20),
+      Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
+    ) returning MlProposalSearchResult(100, 21, 20, 
+        createMlProposalsTestData(21, 40))
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().list(
+        filterBy    = "status", 
+        filterValue = "new", 
+        startPage   = "2", 
+        count       = "20",
+        sortBy      = "mlTitle", 
+        sortOrder   = null) 
+    }
+    
+    expect(200) { response.getStatus() }
+    expect(
+      createMlProposalsJson(100, 21, 20, 
+      createMlProposalJsons(21, 40))
+    ) { response.getEntity.toString }    
+  }  
+
+  test("list 並び順が規定外の場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status", 
+      filterValue = "new", 
+      startPage   = "1", 
+      count       = "10",
+      sortBy      = "mlTitle", 
+      sortOrder   = "invalid")     
+    expect(400) { response.getStatus() }
+  }
+  
+  test("list ページ番号に 0 を指定した場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status", 
+      filterValue = "new", 
+      startPage   = "0", 
+      count       = "20",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending")     
+    expect(400) { response.getStatus() }
+  }
+  
+  test("list ページ番号に -1 を指定した場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status", 
+      filterValue = "new", 
+      startPage   = "-1", 
+      count       = "20",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending")     
+    expect(400) { response.getStatus() }
+  }
+  
+  test("list 項目数に 0 を指定した場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status", 
+      filterValue = "new", 
+      startPage   = "1", 
+      count       = "0",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending")         
+    expect(400) { response.getStatus() }
+  }
+  
+  test("list 項目数に -1 を指定した場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status", 
+      filterValue = "new", 
+      startPage   = "1", 
+      count       = "-1",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending")         
+    expect(400) { response.getStatus() }
+  }
+  
+  test("list 項目数に 101 を指定した場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status", 
+      filterValue = "new", 
+      startPage   = "1", 
+      count       = "101",
+      sortBy      = "mlTitle", 
+      sortOrder   = "ascending")         
+    expect(400) { response.getStatus() }
+  }
+  
+  test("list 絞り込みを指定せずに取得結果 0 件の場合") {
+    val m = mock[MlProposalService]
+    m expects 'search withArgs(
+      Page(1, 10),
+      Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
+    ) returning MlProposalSearchResult(0, 1, 10, Nil)
+
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().list(
+        filterBy    = null, 
+        filterValue = null, 
+        startPage   = "1", 
+        count       = "10",
+        sortBy      = "mlTitle", 
+        sortOrder   = "ascending") 
+    }
+    
+    expect(200) { response.getStatus() }
+    expect(
+      createMlProposalsJson(
+        totalResults = 0,
+        startIndex   = 1,
+        itemsPerPage = 10, 
+        Nil)
+    ) { response.getEntity.toString }        
+  }
+
+  test("list 絞り込みを指定して取得結果 0 件の場合") {
+    val m = mock[MlProposalService]
+    m expects 'search withArgs(
+      Filter(MLPFilterBy.Status, "new"),
+      Page(1, 10),
+      Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
+    ) returning MlProposalSearchResult(0, 1, 10, Nil)
+
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().list(
+        filterBy    = "status", 
+        filterValue = "new", 
+        startPage   = "1", 
+        count       = "10",
+        sortBy      = "mlTitle", 
+        sortOrder   = "ascending") 
+    }
+    
+    expect(200) { response.getStatus() }
+    expect(
+      createMlProposalsJson(
+        totalResults = 0,
+        startIndex   = 1,
+        itemsPerPage = 10, 
+        Nil)
+    ) { response.getEntity.toString }     
+  }
+  
+  private def createMlProposalsTestData(startId: Int, endId: Int): List[MlProposal] = {
+    val mlProposals = for (i <- startId to endId) yield MlProposal(
       i,
       "申請者の名前",
       "proposer@example.com",
@@ -246,116 +352,33 @@ class MlProposalResourceSuite extends FunSuite
       Some(MlArchiveType.Mailman),
       Some(new URL("http://localhost/path/to/archive/")),
       Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
+      DateUtil.createDate("2012/10/28 10:20:30"),
+      DateUtil.createDate("2012/10/28 10:20:30")
     )
-    
-    m expects 'search withArgs(
-      Filter(MLPFilterBy.Status, "new"),
-      Page(2, 20),
-      Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
-    ) returning MlProposalSearchResult(100, 21, 20, mlProposals.toList)
-
-    val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().list("status", "new", "mlTitle", null, "2", "20")
-    }
-    expect(200) { response.getStatus() }
-
-    val json = """{
-      |"totalResults":100,
-      |"startIndex":21,
-      |"itemsPerPage":20,
-      |"mlProposals":[{
-        |"id":21,
-        |"proposerName":"申請者の名前",
-        |"proposerEmail":"proposer@example.com",
-        |"mlTitle":"MLタイトル21",
-        |"status":"new",
-        |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
-        |"comment":"コメント(MLの説明など)",
-        |"createdAt":"2012-10-28T10:20:30",
-        |"updatedAt":"2012-10-28T10:20:30"
-      |}""".stripMargin.replaceAll("\n", "")
+    mlProposals toList
+  }
+  
+  private def createMlProposalJsons(startId: Int, endId: Int): Seq[String] =
+    for (i <- startId to endId) yield """{
+      |"id":%s,
+      |"proposerName":"申請者の名前",
+      |"proposerEmail":"proposer@example.com",
+      |"mlTitle":"MLタイトル%s",
+      |"status":"new",
+      |"archiveType":"mailman",
+      |"archiveUrl":"http://localhost/path/to/archive/",
+      |"comment":"コメント(MLの説明など)",
+      |"createdAt":"2012-10-28T10:20:30+09:00",
+      |"updatedAt":"2012-10-28T10:20:30+09:00"
+      |}""".stripMargin.replaceAll("\n", "") format (i, i)
       
-    expect(json) {
-      response.getEntity.toString.substring(0, json.length)
-    }
-  }  
-
-  test("list 並び順が規定外の場合") {
-    val response = new MlProposalResource().list("status", "new", "mlTitle", "invalid", "1", "10")
-    expect(400) { response.getStatus() }
-  }
-  
-  test("list ページ番号に 0 を指定した場合") {
-    val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "0", "20")
-    expect(400) { response.getStatus() }
-  }
-  
-  test("list ページ番号に -1 を指定した場合") {
-    val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "-1", "20")
-    expect(400) { response.getStatus() }
-  }
-  
-  test("list 項目数に 0 を指定した場合") {
-    val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "1", "0")
-    expect(400) { response.getStatus() }
-  }
-  
-  test("list 項目数に -1 を指定した場合") {
-    val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "1", "-1")
-    expect(400) { response.getStatus() }
-  }
-  
-  test("list 項目数に 101 を指定した場合") {
-    val response = new MlProposalResource().list("status", "new", "mlTitle", "ascending", "1", "101")
-    expect(400) { response.getStatus() }
-  }
-  
-  test("list 絞り込みを指定せずに取得結果 0 件の場合") {
-    val m = mock[MlProposalService]
-    
-    m expects 'search withArgs(
-      Page(1, 10),
-      Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
-    ) returning MlProposalSearchResult(0, 1, 10, Nil)
-
-    val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().list(null, null, "mlTitle", "ascending", "1", "10")
-    }
-    expect(200) { response.getStatus() }
-    
-    val json = """{
-      |"totalResults":0,
-      |"startIndex":1,
-      |"itemsPerPage":10,
-      |"mlProposals":[]
-      |}""".stripMargin.replaceAll("\n", "")
-    expect(json) { response.getEntity() }
-  }
-
-  test("list 絞り込みを指定して取得結果 0 件の場合") {
-    val m = mock[MlProposalService]
-    
-    m expects 'search withArgs(
-      Filter(MLPFilterBy.Status, "new"),
-      Page(1, 10),
-      Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
-    ) returning MlProposalSearchResult(0, 1, 10, Nil)
-
-    val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().list("status", "new", "mlTitle", "ascending", "1", "10")
-    }
-    expect(200) { response.getStatus() }
-    
-    val json = """{
-      |"totalResults":0,
-      |"startIndex":1,
-      |"itemsPerPage":10,
-      |"mlProposals":[]
-      |}""".stripMargin.replaceAll("\n", "")
-    expect(json) { response.getEntity() }
-  }
-
+  private def createMlProposalsJson(totalResults: Int, 
+      startIndex: Int, itemsPerPage: Int, mlProposalJsons: Seq[String]) =
+    """{
+      |"totalResults":%s,
+      |"startIndex":%s,
+      |"itemsPerPage":%s,
+      |"mlProposals":[%s]}""".format(totalResults, startIndex, 
+        itemsPerPage, mlProposalJsons mkString ",") 
+        .stripMargin.replaceAll("\n", "")
 }
