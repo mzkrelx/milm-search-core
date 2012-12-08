@@ -12,13 +12,13 @@ import net.liftweb.mapper.Ascending
 import net.liftweb.mapper.Descending
 
 class DaoHelperSuite extends FunSuite {
-  
-  test("toAscOrDesc of asc") {
+
+  test("toAscOrDesc Ascending の場合") {
     expect(Ascending)(DaoHelper.toAscOrDesc(SortOrder.Ascending))
   }
-  
-  test("toAscOrDesc of desc") {
+
+  test("toAscOrDesc Descending の場合") {
     expect(Descending)(DaoHelper.toAscOrDesc(SortOrder.Descending))
   }
-  
+
 }

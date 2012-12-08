@@ -6,7 +6,6 @@ import org.milmsearch.core.dao.MlProposalDao
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposal
-import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
@@ -14,20 +13,24 @@ import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.ComponentRegistry
 import org.scalamock.scalatest.MockFactory
 import org.scalamock.ProxyMockFactory
+import org.scalamock.Mock
 import org.scalatest.FunSuite
 import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
 import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.test.util.MockCreatable
+import org.milmsearch.core.test.util.DateUtil
 
 class MlProposalServiceSuite extends FunSuite
-    with MockFactory with ProxyMockFactory {
+    with MockFactory with ProxyMockFactory with MockCreatable {
 
   test("create full") {
     val request = CreateMlProposalRequest(
       "申請者の名前",
       "proposer@example.com",
       "MLタイトル",
-      MlProposalStatus.New,
+      MLPStatus.New,
       Some(MlArchiveType.Mailman),
       Some(new URL("http://localhost/path/to/archive/")),
       Some("コメント(MLの説明など)\nほげほげ)")
@@ -42,416 +45,437 @@ class MlProposalServiceSuite extends FunSuite
       }
     }
   }
-  
-  test("search") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 21 to 40) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
 
-    m expects 'findAll withArgs(Range(20, 20), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count returning 100L
+  test("search 検索条件なしで20件ずつの2ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(None, Range(20, 20),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (21 to 40 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count returning 100L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = None,
+          page   = Page(2, 20),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 20), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(100)(searchResult.totalResults)
     expect(21)(searchResult.startIndex)
     expect(20)(searchResult.itemsPerPage)
     expect(21)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search result is empty") {
-    val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Range(0, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        Nil
-    m expects 'count returning 0L
+  test("search 検索結果がないとき") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(None, Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning Nil
+        m expects 'count returning 0L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = None,
+          page   = Page(1, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(0)(searchResult.totalResults)
     expect(1)(searchResult.startIndex)
     expect(0)(searchResult.itemsPerPage)
     expect(Nil)(searchResult.mlProposals)
-  }  
+  }
 
-  test("search result is 10 items then page is 1") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 1 to 10) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
+  test("search 検索結果が10件で、10件ずつ1ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(None, Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (1 to 10 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count returning 10L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = None,
+          page   = Page(1, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    m expects 'findAll withArgs(Range(0, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count returning 10L
-
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(10)(searchResult.totalResults)
     expect(1)(searchResult.startIndex)
     expect(10)(searchResult.itemsPerPage)
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search result is 10 items then page is 2") {
-    val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Range(10, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        Nil
-    m expects 'count returning 10L
+  test("search 検索結果が10件で、10件ずつ2ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(None, Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning Nil
+        m expects 'count returning 10L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = None,
+          page   = Page(2, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(10)(searchResult.totalResults)
     expect(11)(searchResult.startIndex)
     expect(0)(searchResult.itemsPerPage)
     expect(Nil)(searchResult.mlProposals)
   }
 
-  test("search result is 11 items then page is 1") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 1 to 10) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
+  test("search 検索結果が11件で、10件ずつ1ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(None, Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (1 to 10 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count returning 11L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = None,
+          page   = Page(1, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    m expects 'findAll withArgs(Range(0, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count returning 11L
-
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(11)(searchResult.totalResults)
     expect(1)(searchResult.startIndex)
     expect(10)(searchResult.itemsPerPage)
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
-  
-  test("search result is 11 items then page is 2") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 11 to 11) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
 
-    m expects 'findAll withArgs(Range(10, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count returning 11L
+  test("search 検索結果が11件で、10件ずつ2ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(None, Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (11 to 11 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count returning 11L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = None,
+          page   = Page(2, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(11)(searchResult.totalResults)
     expect(11)(searchResult.startIndex)
     expect(1)(searchResult.itemsPerPage)
     expect(11)(searchResult.mlProposals.apply(0).id)
-  }  
-  
-  test("search result is 21 items then page is 2") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 11 to 20) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
+  }
 
-    m expects 'findAll withArgs(Range(10, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count returning 21L
+  test("search 検索結果が21件で、10件ずつ2ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(None, Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (11 to 20 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count returning 21L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = None,
+          page   = Page(2, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Page(2, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(21)(searchResult.totalResults)
     expect(11)(searchResult.startIndex)
     expect(10)(searchResult.itemsPerPage)
     expect(11)(searchResult.mlProposals.apply(0).id)
   }
-  
-  test("search by filter") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 21 to 40) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
 
-    m expects 'findAll withArgs(Filter(MLPFilterBy.Status, MlProposalStatus.New), 
-        Range(20, 20), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count withArgs(Filter(MLPFilterBy.Status, MlProposalStatus.New)) returning 100L
+  test("search 検索条件を指定した検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(
+            Some(Filter(MLPFilterBy.Status, MLPStatus.New)),
+            Range(20, 20),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (21 to 40 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count returning 100L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = Some(Filter(MLPFilterBy.withName("status"),
+            MLPStatus.withName("new"))),
+          page   = Page(2, 20),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.withName("status"), MlProposalStatus.withName("new")), 
-        Page(2, 20), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(100)(searchResult.totalResults)
     expect(21)(searchResult.startIndex)
     expect(20)(searchResult.itemsPerPage)
     expect(21)(searchResult.mlProposals.apply(0).id)
   }
-  
-  test("search by filter when filterValue is not enum value") {
+
+  test("search ステータスの検索値が存在しない値の場合") {
     intercept[NoSuchFieldException] {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, "hello"), 
-        Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+      new MlProposalServiceImpl().search(
+        Some(Filter(MLPFilterBy.Status, "hello")),
+        Page(1, 10),
+        Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
     }
   }
-  
-  test("search by filter when filterValue is empty") {
-    intercept[SearchFailedException] {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, ""), 
-        Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-  }
-  
-  test("search by filter result is empty") {
-    val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Filter(MLPFilterBy.Status, "new"), 
-        Range(0, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        Nil
-    m expects 'count withArgs(Filter(MLPFilterBy.Status, "new")) returning 0L
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, "new"), 
-        Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+  test("search ステータスの検索値が空文字の場合") {
+    intercept[NoSuchFieldException] {
+      new MlProposalServiceImpl().search(
+        Some(Filter(MLPFilterBy.Status, "")),
+        Page(1, 10),
+        Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
     }
-    
+  }
+
+  test("search 検索条件を指定して、結果が0件の場合") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(
+            Some(Filter(MLPFilterBy.Status, MLPStatus.New)),
+            Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning Nil
+        m expects 'count returning 0L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = Some(Filter(MLPFilterBy.Status, MLPStatus.New)),
+          page   = Page(1, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
+
     expect(0)(searchResult.totalResults)
     expect(1)(searchResult.startIndex)
     expect(0)(searchResult.itemsPerPage)
     expect(Nil)(searchResult.mlProposals)
-  }  
+  }
 
-  test("search by filter result is 10 items then page is 1") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 1 to 10) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
+  test("search 検索条件を指定して、検索結果が10件で、10件ずつ1ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(
+            Some(Filter(MLPFilterBy.Status, "new")),
+            Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (1 to 10 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count withArgs(
+            Some(Filter(MLPFilterBy.Status, "new"))
+          ) returning 10L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = Some(Filter(MLPFilterBy.Status, "new")),
+          page   = Page(1, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    m expects 'findAll withArgs(Filter(MLPFilterBy.Status, "new"), 
-        Range(0, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count withArgs(Filter(MLPFilterBy.Status, "new")) returning 10L
-
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, "new"), 
-        Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(10)(searchResult.totalResults)
     expect(1)(searchResult.startIndex)
     expect(10)(searchResult.itemsPerPage)
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search by filter result is 10 items then page is 2") {
-    val m = mock[MlProposalDao]
-    m expects 'findAll withArgs(Filter(MLPFilterBy.Status, "new"), 
-        Range(10, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        Nil
-    m expects 'count withArgs(Filter(MLPFilterBy.Status, "new")) returning 10L
+  test("search 検索条件を指定して、検索結果が10件で、10件ずつ2ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(
+            Some(Filter(MLPFilterBy.Status, "new")),
+            Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning Nil
+        m expects 'count withArgs(
+            Some(Filter(MLPFilterBy.Status, "new"))
+          ) returning 10L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = Some(Filter(MLPFilterBy.Status, "new")),
+          page   = Page(2, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, "new"), 
-        Page(2, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(10)(searchResult.totalResults)
     expect(11)(searchResult.startIndex)
     expect(0)(searchResult.itemsPerPage)
     expect(Nil)(searchResult.mlProposals)
   }
 
-  test("search by filter result is 11 items then page is 1") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 1 to 10) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
+  test("search 検索条件を指定して、検索結果が11件で、10件ずつ1ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(
+            Some(Filter(MLPFilterBy.Status, "new")),
+            Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (1 to 10 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count withArgs(
+            Some(Filter(MLPFilterBy.Status, "new"))
+          ) returning 11L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = Some(Filter(MLPFilterBy.Status, "new")),
+          page   = Page(1, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    m expects 'findAll withArgs(Filter(MLPFilterBy.Status, "new"), 
-        Range(0, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count withArgs(Filter(MLPFilterBy.Status, "new")) returning 11L
-
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, "new"), 
-        Page(1, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(11)(searchResult.totalResults)
     expect(1)(searchResult.startIndex)
     expect(10)(searchResult.itemsPerPage)
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
-  
-  test("search by filter result is 11 items then page is 2") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 11 to 11) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
 
-    m expects 'findAll withArgs(Filter(MLPFilterBy.Status, "new"), 
-        Range(10, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count withArgs(Filter(MLPFilterBy.Status, "new")) returning 11L
+  test("search 検索条件を指定して、検索結果が11件で、10件ずつ2ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(
+            Some(Filter(MLPFilterBy.Status, "new")),
+            Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (11 to 11 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count withArgs(
+            Some(Filter(MLPFilterBy.Status, "new"))
+          ) returning 11L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = Some(Filter(MLPFilterBy.Status, "new")),
+          page   = Page(2, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, "new"), 
-        Page(2, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(11)(searchResult.totalResults)
     expect(11)(searchResult.startIndex)
     expect(1)(searchResult.itemsPerPage)
     expect(11)(searchResult.mlProposals.apply(0).id)
-  }  
-  
-  test("search by filter result is 21 items then page is 2") {
-    val m = mock[MlProposalDao]
-    val cal = Calendar.getInstance()
-    cal.set(2012, Calendar.OCTOBER, 28, 10, 20, 30)
-    val createdAt = cal.getTime()
-    val mlProposals = for (i <- 11 to 20) yield MlProposal(
-      i,
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル" + i,
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"),
-      createdAt,
-      createdAt
-    )
+  }
 
-    m expects 'findAll withArgs(Filter(MLPFilterBy.Status, "new"), 
-        Range(10, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)) returning
-        mlProposals.toList
-    m expects 'count withArgs(Filter(MLPFilterBy.Status, "new")) returning 21L
+  test("search 検索条件を指定して、検索結果が21件で、10件ずつ2ページ目のデータを検索") {
+    val searchResult = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'findAll withArgs(
+            Some(Filter(MLPFilterBy.Status, "new")),
+            Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+          ) returning (11 to 20 map { i => MlProposal(
+            i,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル" + i,
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))
+          } toList)
+        m expects 'count withArgs(
+            Some(Filter(MLPFilterBy.Status, "new"))
+          ) returning 21L
+      }) {
+        new MlProposalServiceImpl().search(
+          filter = Some(Filter(MLPFilterBy.Status, "new")),
+          page   = Page(2, 10),
+          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+      }
 
-    val searchResult = ComponentRegistry.mlProposalDao.doWith(m) {
-      new MlProposalServiceImpl().search(Filter(MLPFilterBy.Status, "new"), 
-        Page(2, 10), Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-    
     expect(21)(searchResult.totalResults)
     expect(11)(searchResult.startIndex)
     expect(10)(searchResult.itemsPerPage)
     expect(11)(searchResult.mlProposals.apply(0).id)
-  }    
+  }
 }

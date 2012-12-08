@@ -2,7 +2,6 @@ package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
 import java.util.NoSuchElementException
-
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.Filter
@@ -13,10 +12,8 @@ import org.milmsearch.core.domain.MlProposalSearchResult
 import org.milmsearch.core.domain.MlProposalSortBy
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.Page
-import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.ComponentRegistry
-
 import javax.ws.rs.core.Response
 import javax.ws.rs.Consumes
 import javax.ws.rs.DELETE
@@ -27,12 +24,13 @@ import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import net.liftweb.common.Loggable
-import net.liftweb.json.parse
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
+import net.liftweb.json.parse
+import org.milmsearch.core.domain.Sort
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
-  
+
 /**
  * ML登録申請情報のAPIリソース
  */
@@ -43,7 +41,7 @@ class MlProposalResource extends Loggable with PageableResource {
 
   /** ML登録申請管理サービス */
   private def mpService = ComponentRegistry.mlProposalService.vend
-  
+
   protected val defaultSortBy = MlProposalSortBy.MlTitle
 
   private val dateFormat = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
@@ -62,7 +60,7 @@ class MlProposalResource extends Loggable with PageableResource {
    *   "comment": "コメント(MLの説明など)"
    * }
    * </pre>
-   * 
+   *
    * @param requestBody JSON形式のML登録申請情報
    * @return 201(Created)
    */
@@ -79,7 +77,7 @@ class MlProposalResource extends Loggable with PageableResource {
 
   /**
    * ML登録申請情報の一覧を取得します。
-   * 
+   *
    * @param filterBy 絞り込み項目
    * @param filterValue 絞り込み項目の値
    * @param count 1ページの項目数
@@ -90,17 +88,17 @@ class MlProposalResource extends Loggable with PageableResource {
    */
   @GET
   @Produces(Array("application/json"))
-  def list(@QueryParam("filterBy") filterBy: String, 
-           @QueryParam("filterValue") filterValue: String, 
-           @QueryParam("startPage") startPage: String, 
-           @QueryParam("count") count: String,
-           @QueryParam("sortBy") sortBy: String, 
-           @QueryParam("sortOrder") sortOrder: String) = {
+  def list(@QueryParam("filterBy")    filterBy:    String,
+           @QueryParam("filterValue") filterValue: String,
+           @QueryParam("startPage")   startPage:   String,
+           @QueryParam("count")       count:       String,
+           @QueryParam("sortBy")      sortBy:      String,
+           @QueryParam("sortOrder")   sortOrder:   String) = {
     try {
-      def createFileter = {
+      def createFilter: Option[Filter[MlProposalFilterBy.type]] = {
         (filterBy, filterValue) match {
           case (null, null) => None
-          case (by: String, value: String) =>  
+          case (by: String, value: String) =>
             try {
               Some(Filter(MlProposalFilterBy.withName(by), value))
             } catch {
@@ -110,7 +108,7 @@ class MlProposalResource extends Loggable with PageableResource {
               "Invalid filter. Please query filterBy and filterValue at the same time.")
         }
       }
-      
+
       def createPage = {
         val sp = ResourceHelper.getLongParam(startPage, "startPage") getOrElse defaultStartPage
         val co = ResourceHelper.getLongParam(count, "count") getOrElse defaultCount
@@ -120,26 +118,24 @@ class MlProposalResource extends Loggable with PageableResource {
             "Invalid count value. [%d]" format co)
         Page(sp, co)
       }
-  
-      def createSort =
-        try {
-          (sortBy, sortOrder) match {
-            case (null, null)  => Sort(defaultSortBy, defaultSortOrder)
-            case (null, order) => Sort(defaultSortBy, SortOrder.withName(order))
-            case (by, null)    => Sort(MlProposalSortBy.withName(by), defaultSortOrder)
-            case (by, order)   => Sort(MlProposalSortBy.withName(by), SortOrder.withName(order))
-          }
-        } catch {
-          case e: NoSuchElementException => throw new BadQueryParameterException(e.getMessage())
-        }
 
-      def createSearchResult = createFileter match {
-        case Some(filter) => mpService.search(filter, createPage, createSort)
-        case None => mpService.search(createPage, createSort)
+      def createSort: Option[Sort[MlProposalSortBy.type]] = {
+        (sortBy, sortOrder) match {
+          case (null, null) => None
+          case (by: String, order: String) =>
+            try {
+              Some(Sort(MlProposalSortBy.withName(by), SortOrder.withName(order)))
+            } catch {
+              case e: NoSuchElementException => throw new BadQueryParameterException(e.getMessage())
+            }
+          case _ => throw new BadQueryParameterException(
+              "Invalid sort. Please query sortBy and sortOrder at the same time.")
+        }
       }
-   
-      Response.ok(toDto(createSearchResult).toJson).build()
-      
+
+      Response.ok(toDto(mpService.search(
+        createFilter, createPage, createSort)).toJson).build()
+
     } catch {
       case e: BadQueryParameterException => {
         logger.error(e)
@@ -191,23 +187,23 @@ class MlProposalResource extends Loggable with PageableResource {
         Some(new URL(archiveUrl)),
         Some(comment))
   }
-  
+
   private def toDto(result: MlProposalSearchResult): SearchResultDto =
     SearchResultDto(
       result.totalResults, result.startIndex, result.itemsPerPage,
       result.mlProposals map toDto)
-  
+
   private def toDto(mlp: MlProposal): MlProposalDto =
     MlProposalDto(
       mlp.id, mlp.proposerName, mlp.proposerEmail, mlp.mlTitle, mlp.status.toString,
       mlp.archiveType map { _.toString } getOrElse "",
       mlp.archiveUrl map { _.toString } getOrElse "",
-      mlp.comment getOrElse "", 
-      dateFormat.format(mlp.createdAt), 
+      mlp.comment getOrElse "",
+      dateFormat.format(mlp.createdAt),
       dateFormat.format(mlp.updatedAt))
 }
 
-  
+
 /**
  * ML登録申請ドメインの変換用オブジェクト
  */
@@ -233,6 +229,6 @@ case class SearchResultDto(
     mlProposals: List[MlProposalDto]) {
   // for lift-json
   implicit val formats = DefaultFormats
-  
+
   def toJson(): String = Serialization.write(this)
 }

@@ -68,9 +68,9 @@ class MlProposalResourceSuite extends FunSuite
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            Filter(MLPFilterBy.Status, "new"),
+            Some(Filter(MLPFilterBy.Status, "new")),
             Page(2, 20),
-            Sort(MLPSortBy.ArchiveType, SortOrder.Ascending)
+            Some(Sort(MLPSortBy.ArchiveType, SortOrder.Ascending))
           ) returning MlProposalSearchResult(100, 21, 20,
               21 to 40 map { i => MlProposal(
                 i,
@@ -122,8 +122,7 @@ class MlProposalResourceSuite extends FunSuite
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            Page(1, 10),
-            Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
+            None, Page(1, 10), None
           ) returning MlProposalSearchResult(100, 1, 10,
               1 to 10 map { i => MlProposal(
                 i,
@@ -208,122 +207,39 @@ class MlProposalResourceSuite extends FunSuite
   }
 
   test("list ソート列名が null の場合") {
-    val response = ComponentRegistry.mlProposalService.doWith(
-      createMock[MlProposalService] {
-        _ expects 'search withArgs (
-            Page(2, 20),
-            Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
-          ) returning MlProposalSearchResult(100, 21, 20,
-              21 to 40 map { i => MlProposal(
-                i,
-                "申請者の名前",
-                "proposer@example.com",
-                "MLタイトル" + i,
-                MlProposalStatus.New,
-                Some(MlArchiveType.Mailman),
-                Some(new URL("http://localhost/path/to/archive/")),
-                Some("コメント(MLの説明など)"),
-                DateUtil.createDate("2012/10/28 10:20:30"),
-                DateUtil.createDate("2012/10/28 10:20:30"))
-              } toList)
-      }) {
-        new MlProposalResource().list(
-          filterBy    = null,
-          filterValue = null,
-          startPage   = "2",
-          count       = "20",
-          sortBy      = null,
-          sortOrder   = "ascending")
-      }
+    val response = new MlProposalResource().list(
+      filterBy    = null,
+      filterValue = null,
+      startPage   = "2",
+      count       = "20",
+      sortBy      = null,
+      sortOrder   = "ascending")
 
-    expect(200) { response.getStatus() }
-    expect(
-      """{
-      |"totalResults":100,
-      |"startIndex":21,
-      |"itemsPerPage":20,
-      |"mlProposals":[%s]
-      |}""".stripMargin format (21 to 40 map { i =>
-        """{
-        |"id":%s,
-        |"proposerName":"申請者の名前",
-        |"proposerEmail":"proposer@example.com",
-        |"mlTitle":"MLタイトル%s",
-        |"status":"new",
-        |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
-        |"comment":"コメント(MLの説明など)",
-        |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
-        |}""".stripMargin format (i, i)
-      } mkString ",") replaceAll ("\n", "")
-    ) { response.getEntity.toString }
+    expect(400) { response.getStatus() }
   }
 
   test("list ソート列名が存在しない項目名の場合") {
     val response = new MlProposalResource().list(
-    filterBy    = "status",
-    filterValue = "new",
-    startPage   = "2",
-    count       = "20",
-    sortBy      = "hello",
-    sortOrder   = "ascending")
+      filterBy    = "status",
+      filterValue = "new",
+      startPage   = "2",
+      count       = "20",
+      sortBy      = "hello",
+      sortOrder   = "ascending")
 
     expect(400) { response.getStatus() }
   }
 
   test("list 並び順が null の場合") {
-    val response = ComponentRegistry.mlProposalService.doWith(
-      createMock[MlProposalService] {
-        _ expects 'search withArgs (
-            Filter(MLPFilterBy.Status, "new"),
-            Page(2, 20),
-            Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
-          ) returning MlProposalSearchResult(100, 21, 20,
-              21 to 40 map { i => MlProposal(
-                i,
-                "申請者の名前",
-                "proposer@example.com",
-                "MLタイトル" + i,
-                MlProposalStatus.New,
-                Some(MlArchiveType.Mailman),
-                Some(new URL("http://localhost/path/to/archive/")),
-                Some("コメント(MLの説明など)"),
-                DateUtil.createDate("2012/10/28 10:20:30"),
-                DateUtil.createDate("2012/10/28 10:20:30"))
-              } toList)
-      }) {
-        new MlProposalResource().list(
-          filterBy    = "status",
-          filterValue = "new",
-          startPage   = "2",
-          count       = "20",
-          sortBy      = "mlTitle",
-          sortOrder   = null)
-      }
+    val response = new MlProposalResource().list(
+      filterBy    = "status",
+      filterValue = "new",
+      startPage   = "2",
+      count       = "20",
+      sortBy      = "mlTitle",
+      sortOrder   = null)
 
-    expect(200) { response.getStatus() }
-    expect(
-      """{
-      |"totalResults":100,
-      |"startIndex":21,
-      |"itemsPerPage":20,
-      |"mlProposals":[%s]
-      |}""".stripMargin format (21 to 40 map { i =>
-        """{
-        |"id":%s,
-        |"proposerName":"申請者の名前",
-        |"proposerEmail":"proposer@example.com",
-        |"mlTitle":"MLタイトル%s",
-        |"status":"new",
-        |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
-        |"comment":"コメント(MLの説明など)",
-        |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
-        |}""".stripMargin format (i, i)
-      } mkString ",") replaceAll ("\n", "")
-    ) { response.getEntity.toString }
+    expect(400) { response.getStatus() }
   }
 
   test("list 並び順が規定外の場合") {
@@ -334,6 +250,7 @@ class MlProposalResourceSuite extends FunSuite
       count       = "10",
       sortBy      = "mlTitle",
       sortOrder   = "invalid")
+
     expect(400) { response.getStatus() }
   }
 
@@ -345,6 +262,7 @@ class MlProposalResourceSuite extends FunSuite
       count       = "20",
       sortBy      = "mlTitle",
       sortOrder   = "ascending")
+
     expect(400) { response.getStatus() }
   }
 
@@ -356,6 +274,19 @@ class MlProposalResourceSuite extends FunSuite
       count       = "20",
       sortBy      = "mlTitle",
       sortOrder   = "ascending")
+
+    expect(400) { response.getStatus() }
+  }
+
+  test("list ページ番号に 'a' を指定した場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status",
+      filterValue = "new",
+      startPage   = "a",
+      count       = "20",
+      sortBy      = "mlTitle",
+      sortOrder   = "ascending")
+
     expect(400) { response.getStatus() }
   }
 
@@ -367,6 +298,7 @@ class MlProposalResourceSuite extends FunSuite
       count       = "0",
       sortBy      = "mlTitle",
       sortOrder   = "ascending")
+
     expect(400) { response.getStatus() }
   }
 
@@ -378,6 +310,19 @@ class MlProposalResourceSuite extends FunSuite
       count       = "-1",
       sortBy      = "mlTitle",
       sortOrder   = "ascending")
+
+    expect(400) { response.getStatus() }
+  }
+
+  test("list 項目数に 'a' を指定した場合") {
+    val response = new MlProposalResource().list(
+      filterBy    = "status",
+      filterValue = "new",
+      startPage   = "1",
+      count       = "a",
+      sortBy      = "mlTitle",
+      sortOrder   = "ascending")
+
     expect(400) { response.getStatus() }
   }
 
@@ -397,8 +342,8 @@ class MlProposalResourceSuite extends FunSuite
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            Page(1, 10),
-            Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
+            None, Page(1, 10),
+            Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending))
           ) returning MlProposalSearchResult(0, 1, 10, Nil)
       }) {
         new MlProposalResource().list(
@@ -416,8 +361,8 @@ class MlProposalResourceSuite extends FunSuite
       |"totalResults":0,
       |"startIndex":1,
       |"itemsPerPage":10,
-      |"mlProposals":[%s]
-      |}""".stripMargin format "" replaceAll ("\n", "")
+      |"mlProposals":[]
+      |}""".stripMargin replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
 
@@ -425,9 +370,9 @@ class MlProposalResourceSuite extends FunSuite
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            Filter(MLPFilterBy.Status, "new"),
+            Some(Filter(MLPFilterBy.Status, "new")),
             Page(1, 10),
-            Sort(MLPSortBy.MlTitle, SortOrder.Ascending)
+            Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending))
           ) returning MlProposalSearchResult(0, 1, 10, Nil)
       }) {
         new MlProposalResource().list(
@@ -445,8 +390,8 @@ class MlProposalResourceSuite extends FunSuite
       |"totalResults":0,
       |"startIndex":1,
       |"itemsPerPage":10,
-      |"mlProposals":[%s]
-      |}""".stripMargin format "" replaceAll ("\n", "")
+      |"mlProposals":[]
+      |}""".stripMargin replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
 }

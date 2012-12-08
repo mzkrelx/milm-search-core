@@ -23,34 +23,34 @@ import net.liftweb.mapper.StartAt
 import net.liftweb.mapper.MaxRows
 import mapper.{MlProposalMetaMapper => MLPMMapper}
 import mapper.{MlProposalMapper => MLPMapper}
+import scala.collection.mutable.ListBuffer
+import net.liftweb.mapper.QueryParam
 
 /**
  * ML登録申請情報 の DAO
  */
 trait MlProposalDao {
-  
-  /** 取得範囲と並び順を指定して、ML登録申請情報を検索します。
-   * 
-   * @param range 取得範囲
-   * @param sort  並び順
-   * @return List[MlProposal] ML登録申請情報のリスト
-   */
-  def findAll(range: Range, sort: Sort[MLPSortBy.type]): List[MlProposal]
-  
+
   /** 検索条件と取得範囲と並び順を指定して、ML登録申請情報を検索します。
-   * 
+   *
    * @param filter 検索条件
    * @param range  取得範囲
    * @param sort   並び順
    * @return List[MlProposal] ML登録申請情報のリスト
    */
-  def findAll(filter: Filter[MLPFilterBy.type], range: Range, 
-      sort: Sort[MLPSortBy.type]): List[MlProposal]
-  
+  def findAll(filter: Option[Filter[MLPFilterBy.type]],
+      range: Range,
+      sort:   Option[Sort[MLPSortBy.type]]): List[MlProposal]
+
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
-  def count(filter: Filter[MLPFilterBy.type]): Long
-  def count(): Long
+
+  /** 検索条件を指定して、件数を数えます。
+   *
+   * @param filter 検索条件
+   * @return Long 件数
+   */
+  def count(filter: Option[Filter[MLPFilterBy.type]]): Long
 }
 
 /**
@@ -60,28 +60,23 @@ class MlProposalDaoImpl extends MlProposalDao {
   def find(id: Long) = None
   def create(request: CreateMlProposalRequest) = 0L
 
-  def findAll(range: Range, sort: Sort[MLPSortBy.type]): List[MlProposal] =
-    MLPMMapper.findAll(
+  def findAll(filter: Option[Filter[MLPFilterBy.type]],
+      range: Range,
+      sort:  Option[Sort[MLPSortBy.type]]): List[MlProposal] = {
+    val queryParams = ListBuffer[QueryParam[MLPMapper]](
       StartAt(range.offset),
-      MaxRows(range.limit),
-      toOrderBy(sort)
-    ) map toDomain   
-  
-  def findAll(filter: Filter[MLPFilterBy.type], range: Range,
-      sort: Sort[MLPSortBy.type]): List[MlProposal] =
-    MLPMMapper.findAll(
-      toBy(filter),
-      StartAt(range.offset),
-      MaxRows(range.limit),
-      toOrderBy(sort)
-    ) map toDomain    
+      MaxRows(range.limit))
+    if (sort.isDefined)   queryParams += toOrderBy(sort.get)
+    if (filter.isDefined) queryParams += toBy(filter.get)
 
-  def count(filter: Filter[MLPFilterBy.type]): Long =
-    MLPMMapper.count(toBy(filter))
-  
-  def count(): Long = MLPMMapper.count()
-  
-  private def toDomain(mapper: org.milmsearch.core.dao.mapper.MlProposalMapper) =
+    MLPMMapper.findAll(queryParams: _*) map toDomain
+  }
+
+  def count(filter: Option[Filter[MLPFilterBy.type]]): Long =
+    if (filter.isDefined) MLPMMapper.count(toBy(filter.get))
+    else MLPMMapper.count()
+
+  private def toDomain(mapper: MLPMapper) =
     MlProposal(
       mapper.id.get,
       mapper.proposerName.get,
@@ -93,14 +88,14 @@ class MlProposalDaoImpl extends MlProposalDao {
       Option(mapper.message.get),
       mapper.createdAt.get,
       mapper.updatedAt.get)
-  
+
   def toBy(filter: Filter[MLPFilterBy.type]) = filter match {
-      case Filter(MLPFilterBy.Status, v: MLPStatus.Value)
-        => By(MLPMMapper.status, v)
-      case _ => throw new NoSuchFieldException(
-        "Can't convert Filter to By")
-    }
-  
+    case Filter(MLPFilterBy.Status, v: MLPStatus.Value) =>
+      By(MLPMMapper.status, v)
+    case _ => throw new NoSuchFieldException(
+      "Can't convert Filter to By")
+  }
+
   def toOrderBy(sort: Sort[MLPSortBy.type]) = {
     import MLPSortBy._
     import MLPMMapper._
@@ -114,7 +109,7 @@ class MlProposalDaoImpl extends MlProposalDao {
         "Can't convert Filter to By")
     }, DaoHelper.toAscOrDesc(sort.sortOrder))
   }
-  
+
 }
 
 /**
@@ -132,14 +127,14 @@ package mapper {
       id, proposerName, proposerEmail, mlTitle, status,
       archiveType, archiveUrl, message, createdAt, updatedAt)
   }
-  
+
   /**
    * ML登録申請情報のモデルクラス
    */
   private[dao] class MlProposalMapper extends LongKeyedMapper[MlProposalMapper]
       with IdPK with CreatedUpdated {
     def getSingleton = MlProposalMetaMapper
-  
+
     object proposerName extends MappedString(this, 200)
     object proposerEmail extends MappedEmail(this, 200)
     object mlTitle extends MappedString(this, 200)

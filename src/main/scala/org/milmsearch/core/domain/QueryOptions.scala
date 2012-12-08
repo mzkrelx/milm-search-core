@@ -16,9 +16,8 @@ case class Range(offset: Long, limit: Long)
 case class Page(page: Long, count: Long) {
   require(page  > 0, "page must be positive number")
   require(count > 0, "count must be positive number")
-  
-  def toRange(): Range =
-    Range(if (page == 1) 0 else (page - 1) * count, count)
+
+  def toRange() = Range((page - 1) * count, count)
 }
 
 /**

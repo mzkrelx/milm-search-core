@@ -1,10 +1,9 @@
 package org.milmsearch.core.dao
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposalFilterBy
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
 import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
-import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
@@ -24,133 +23,179 @@ import org.scalatest.BeforeAndAfter
 class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndAfter {
   // TODO
   test("insert full") { pending }
-  
+
   /**
    * 全てのテストの前処理
    */
   override def beforeAll() {
     Schemifier.schemify(true, Schemifier.infoF _, MLPMMapper)
   }
-  
+
   after {
     DB.runUpdate("TRUNCATE TABLE ML_PROPOSAL", Nil)
   }
-  
-  test("toBy status accepted") {
-    expect(By(MLPMMapper.status, MlProposalStatus.Accepted)) {
-      new MlProposalDaoImpl().toBy(Filter(MLPFilterBy.Status, MlProposalStatus.Accepted))
+
+  test("toBy ステータスが承認済みを変換") {
+    expect(By(MLPMMapper.status, MLPStatus.Accepted)) {
+      new MlProposalDaoImpl().toBy(
+        Filter(MLPFilterBy.Status, MLPStatus.Accepted))
     }
-  }
-  
-  test("toOrderBy createdAt asc") {
-    expect(OrderBy(MLPMMapper.createdAt, Ascending)) {
-      new MlProposalDaoImpl().toOrderBy(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    }
-  }
-  
-  test("findAll") {
-    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
-        List(1, "name1", "sample@sample.com", "title", 
-          1, 1, "http://sample.com", "message",
-          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
-        )
-    )
-    val mp = new MlProposalDaoImpl().findAll(Range(0, 10),
-        Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)).head
-    expect(1) {
-      mp.id
-    }
-    expect("name1") {
-      mp.proposerName
-    }
-    expect("sample@sample.com") {
-      mp.proposerEmail
-    }
-    expect("title") {
-      mp.mlTitle
-    }
-    expect(MlProposalStatus.Accepted) {
-      mp.status
-    }
-    expect(Some(MlArchiveType.Other)) {
-      mp.archiveType
-    }
-    expect(Some(new URL("http://sample.com"))) {
-      mp.archiveUrl
-    }
-    expect(Some("message")) {
-      mp.comment
-    }
-    expect("2012-10-10T10:10:11") {
-      DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.createdAt)
-    }
-    expect("2012-10-11T10:10:11") {
-      DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.updatedAt)
-    }    
   }
 
-  test("findAll filter range sort") {
-    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
-        List(1, "name1", "sample@sample.com", "title", 
-          1, 1, "http://sample.com", "message",
-          "2012-10-10 15:10:11", "2012-10-11 10:10:11"
-        )
-    )
-    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
-        List(2, "name2", "sample2@sample.com", "title2", 
-          2, 1, "http://sample.com2", "message2",
-          "2012-10-10 11:10:11", "2012-10-11 10:10:11"
-        )
-    )
-    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
-        List(3, "name3", "sample3@sample.com", "title3", 
-          2, 1, "http://sample.com3", "message3",
-          "2012-10-10 12:10:11", "2012-10-11 10:10:11"
-        )
-    )
-    val mps = new MlProposalDaoImpl().findAll(
-        Filter(MLPFilterBy.Status, MlProposalStatus.Rejected), 
-        Range(0, 10),
-        Sort(MLPSortBy.CreatedAt, SortOrder.Descending))
-    // id でいうと 3, 2 の 2 件の結果になる
-    expect(2) {
-      mps.length
-    }
-    expect(3) {
-      mps.head.id
-    }
-    expect(2) {
-      mps.tail.head.id
+  test("toOrderBy 作成日時の昇順を変換") {
+    expect(OrderBy(MLPMMapper.createdAt, Ascending)) {
+      new MlProposalDaoImpl().toOrderBy(
+        Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
     }
   }
-  
-  test("findAll range") {
-    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
-        List(1, "name1", "sample@sample.com", "title", 
-          1, 1, "http://sample.com", "message",
-          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
-        )
-    )
-    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
-        List(2, "name2", "sample2@sample.com", "title2", 
-          2, 1, "http://sample.com2", "message2",
-          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
-        )
-    )
-    DB.runUpdate("INSERT INTO ML_PROPOSAL VALUES(?,?,?,?,?,?,?,?,?,?)", 
-        List(3, "name3", "sample3@sample.com", "title3", 
-          2, 1, "http://sample.com3", "message3",
-          "2012-10-10 10:10:11", "2012-10-11 10:10:11"
-        )
-    )
+
+  test("findAll 1件DBに入っていて、その1件が取得できるか") {
+
+    DB.runUpdate("""
+      | INSERT INTO ML_PROPOSAL (
+        | id,
+        | proposer_name,
+        | proposer_email,
+        | ml_title,
+        | status,
+        | archive_type,
+        | archive_url,
+        | message,
+        | created_at,
+        | updated_at
+      | ) VALUES (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+      List(1, "name1", "sample@sample.com", "title",
+        1, 1, "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
+
+    val mp = new MlProposalDaoImpl().findAll(
+      None, Range(0, 10), None).head
+
+    expect(1)(mp.id)
+    expect("name1")(mp.proposerName)
+    expect("sample@sample.com")(mp.proposerEmail)
+    expect("title")(mp.mlTitle)
+    expect(MLPStatus.Accepted)(mp.status)
+    expect(Some(MlArchiveType.Other))(mp.archiveType)
+    expect(Some(new URL("http://sample.com")))(mp.archiveUrl)
+    expect(Some("message"))(mp.comment)
+    expect("2012-10-10T10:10:11")(
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.createdAt))
+    expect("2012-10-11T10:10:11")(
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.updatedAt))
+  }
+
+  test("findAll 検索条件にあうものが取得できるか") {
+    DB.runUpdate("""
+      | INSERT INTO ML_PROPOSAL (
+        | id,
+        | proposer_name,
+        | proposer_email,
+        | ml_title,
+        | status,
+        | archive_type,
+        | archive_url,
+        | message,
+        | created_at,
+        | updated_at
+      | ) VALUES (?,?,?,?,?,?,?,?,?,?),
+      | (?,?,?,?,?,?,?,?,?,?),
+      | (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+      List(
+        // 1 件目
+        1, "name1", "sample@sample.com", "title",
+        0, 1, "http://sample.com", "message",
+        "2012-10-10 15:10:11", "2012-10-11 10:10:11",
+        // 2 件目
+        2, "name2", "sample2@sample.com", "title2",
+        1, 1, "http://sample.com2", "message2",
+        "2012-10-10 11:10:11", "2012-10-11 10:10:11",
+        // 3 件目 検索対象・ステータスが Rejected(2)
+        3, "name3", "sample3@sample.com", "title3",
+        2, 1, "http://sample.com3", "message3",
+        "2012-10-10 12:10:11", "2012-10-11 10:10:11"))
+
     val mps = new MlProposalDaoImpl().findAll(
-        Range(1, 1),
-        Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
-    expect(1) {
-      mps.length
-    }
-    expect(2) {
-      mps.head.id
-    }
-  }  
+      Some(Filter(MLPFilterBy.Status, MLPStatus.Rejected)),
+      Range(0, 10), None)
+
+    expect(1)(mps.length)
+    expect(3)(mps.head.id)
+  }
+
+  test("findAll 並び順が指定した通りになるか") {
+    DB.runUpdate("""
+      | INSERT INTO ML_PROPOSAL (
+        | id,
+        | proposer_name,
+        | proposer_email,
+        | ml_title,
+        | status,
+        | archive_type,
+        | archive_url,
+        | message,
+        | created_at,
+        | updated_at
+      | ) VALUES (?,?,?,?,?,?,?,?,?,?),
+      | (?,?,?,?,?,?,?,?,?,?),
+      | (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+      List(
+        // 1 件目
+        1, "name1", "sample@sample.com", "title",
+        1, 1, "http://sample.com", "message",
+        "2012-10-10 15:10:11", "2012-10-11 10:10:11",
+        // 2 件目
+        2, "name2", "sample2@sample.com", "title2",
+        2, 1, "http://sample.com2", "message2",
+        "2012-10-10 11:10:11", "2012-10-11 10:10:11",
+        // 3 件目
+        3, "name3", "sample3@sample.com", "title3",
+        2, 1, "http://sample.com3", "message3",
+        "2012-10-10 12:10:11", "2012-10-11 10:10:11"))
+
+    val mps = new MlProposalDaoImpl().findAll(
+      None, Range(0, 10),
+      Some(Sort(MLPSortBy.CreatedAt, SortOrder.Descending)))
+
+    // id でいうと 1, 3, 2 の 順番になる
+    expect(3)(mps.length)
+    expect(1)(mps.head.id)       // 1番目
+    expect(3)(mps.tail.head.id)  // 2番目
+  }
+
+  test("findAll 取得範囲が指定した通りになるか") {
+    DB.runUpdate("""
+      | INSERT INTO ML_PROPOSAL (
+        | id,
+        | proposer_name,
+        | proposer_email,
+        | ml_title,
+        | status,
+        | archive_type,
+        | archive_url,
+        | message,
+        | created_at,
+        | updated_at
+      | ) VALUES (?,?,?,?,?,?,?,?,?,?),
+      | (?,?,?,?,?,?,?,?,?,?),
+      | (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+      List(
+        // 1 件目
+        1, "name1", "sample@sample.com", "title",
+        1, 1, "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11",
+        // 2 件目
+        2, "name2", "sample2@sample.com", "title2",
+        2, 1, "http://sample.com2", "message2",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11",
+        // 3 件目
+        3, "name3", "sample3@sample.com", "title3",
+        2, 1, "http://sample.com3", "message3",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
+
+    val mps = new MlProposalDaoImpl().findAll(
+      None, Range(1, 1), None)
+
+    expect(1)(mps.length)
+  }
 }
