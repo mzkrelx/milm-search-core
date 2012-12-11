@@ -30,9 +30,6 @@ import mapper.MlProposalMetaMapper
 
 class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     with BeforeAndAfter {
-  // TODO
-
-  test("insert full") { pending }
 
   /**
    * 全てのテストの前処理
