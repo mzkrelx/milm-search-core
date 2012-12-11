@@ -1,14 +1,17 @@
 package org.milmsearch.core.dao
+
 import java.net.URL
+import org.milmsearch.core.ComponentRegistry.{dateTimeService => Time}
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.{ MlProposalSortBy => MLPSortBy }
-import org.milmsearch.core.domain.{ MlProposalFilterBy => MLPFilterBy }
-import org.milmsearch.core.domain.{ MlProposalStatus => MLPStatus }
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import net.liftweb.mapper.MappedDateTime
 import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
@@ -21,8 +24,8 @@ import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.By
 import net.liftweb.mapper.StartAt
 import net.liftweb.mapper.MaxRows
-import mapper.{ MlProposalMetaMapper => MLPMMapper }
-import mapper.{ MlProposalMapper => MLPMapper }
+import mapper.{MlProposalMetaMapper => MLPMMapper}
+import mapper.{MlProposalMapper => MLPMapper}
 import scala.collection.mutable.ListBuffer
 import net.liftweb.mapper.QueryParam
 import org.milmsearch.core.domain.MlArchiveType
@@ -82,6 +85,7 @@ class MlProposalDaoImpl extends MlProposalDao {
    * ML登録申請情報ドメインを Mapper オブジェクトに変換する
    */
   private def toMapper(request: CreateMlProposalRequest): MLPMapper = {
+    val now = Time().now().toDate
     MLPMMapper.create
       .proposerName(request.proposerName)
       .proposerEmail(request.proposerEmail)
@@ -90,6 +94,8 @@ class MlProposalDaoImpl extends MlProposalDao {
       .archiveType(request.archiveType map { _.toString } getOrElse null)
       .archiveUrl(request.archiveUrl map { _.toString } getOrElse null)
       .message(request.comment getOrElse null)
+      .createdAt(now)
+      .updatedAt(now)
   }
 
   def findAll(range: Range,
@@ -198,10 +204,8 @@ package mapper {
   /**
    * ML登録申請情報のモデルクラス
    */
-  private[dao] class MlProposalMapper
-    extends LongKeyedMapper[MlProposalMapper]
-    with IdPK with CreatedUpdated {
-
+  private[dao] class MlProposalMapper extends
+      LongKeyedMapper[MlProposalMapper] with IdPK {
     def getSingleton = MlProposalMetaMapper
 
     object proposerName extends MappedString(this, 200)
@@ -211,6 +215,7 @@ package mapper {
     object archiveType extends MappedString(this, 200)
     object archiveUrl extends MappedText(this)
     object message extends MappedText(this)
+    object createdAt extends MappedDateTime(this)
+    object updatedAt extends MappedDateTime(this)
   }
-
 }
