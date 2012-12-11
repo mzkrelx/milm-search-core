@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   "dom4j" % "dom4j" % "1.6.1",
   "commons-logging" % "commons-logging" % "1.1.1",
   "org.slf4j" % "slf4j-api" %  "1.6.6",
-  "org.slf4j" % "slf4j-jcl" %  "1.6.6",
+  "org.slf4j" % "slf4j-log4j12" %  "1.6.6",
   "org.apache.lucene" % "lucene-analyzers" % "2.9.4",
   "org.apache.lucene" % "lucene-highlighter" % "2.9.4",
   "nekohtml" % "nekohtml" % "1.9.6.2",
