@@ -19,6 +19,8 @@ import javax.ws.rs.PathParam
 import net.liftweb.json.parse
 import net.liftweb.json.DefaultFormats
 
+class BadRequestException extends Exception
+
 /**
  * ML登録申請情報のAPIリソース
  */
@@ -74,15 +76,22 @@ class MlProposalResource {
   @PUT
   def update(@PathParam("id") id: String, requestBody: String) : Response = {
     val dto = parse(requestBody).extract[RequestDto]
-    val result = mpService.update(id.toLong, dto.toDomain)
+
+    def stringToLong(str: String) =
+	    try {
+	      str.toLong
+	    } catch {
+	      case e:NumberFormatException => throw new BadRequestException
+	    }
 
     try {
-	    if(result){
+	    if(mpService.update(stringToLong(id), dto.toDomain)){
 	    	Response.noContent().build()
 	    } else {
 	    	Response.status(Status.NOT_FOUND).build()
 	    }
     } catch {
+      case e : BadRequestException => Response.status(Status.BAD_REQUEST).build() // 400
       case e => Response.serverError().build()
     }
   }
