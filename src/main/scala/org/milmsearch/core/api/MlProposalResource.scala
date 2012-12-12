@@ -208,7 +208,7 @@ class MlProposalResource extends Loggable with PageableResource {
    */
   @Path("{id}")
   @DELETE
-  def delete(@PathParam("id") id: String): Response = { 
+  def delete(@PathParam("id") id: String): Response = {
     try {
       val idOption = ResourceHelper.getLongParam(id, "id")
       if (!idOption.isDefined) {
@@ -227,7 +227,7 @@ class MlProposalResource extends Loggable with PageableResource {
         Response.status(Status.BAD_REQUEST).build()
       }
     }
-    
+
   }
 
   /**
