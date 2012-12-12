@@ -1,7 +1,6 @@
 package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
-//<<<<<<< HEAD
 import java.util.NoSuchElementException
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.milmsearch.core.domain.MlArchiveType
@@ -24,14 +23,11 @@ import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.PUT
 import javax.ws.rs.Path
-//<<<<<<< HEAD
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import net.liftweb.common.Loggable
-//=======
 import javax.ws.rs.PathParam
 //import net.liftweb.json.parse
-//>>>>>>> 実装箇所のコミット
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
 import net.liftweb.json.parse
@@ -184,15 +180,22 @@ class MlProposalResource extends Loggable with PageableResource {
   @PUT
   def update(@PathParam("id") id: String, requestBody: String) : Response = {
     val dto = parse(requestBody).extract[RequestDto]
-    val result = mpService.update(id.toLong, dto.toDomain)
+
+    def stringToLong(str: String) =
+	    try {
+	      str.toLong
+	    } catch {
+	      case e:NumberFormatException => throw new BadQueryParameterException("illegal format")
+	    }
 
     try {
-	    if(result){
+	    if(mpService.update(stringToLong(id), dto.toDomain)){
 	    	Response.noContent().build()
 	    } else {
 	    	Response.status(Status.NOT_FOUND).build()
 	    }
     } catch {
+      case e : BadQueryParameterException => Response.status(Status.BAD_REQUEST).build() // 400
       case e => Response.serverError().build()
     }
   }
