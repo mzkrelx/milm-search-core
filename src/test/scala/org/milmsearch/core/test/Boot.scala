@@ -1,12 +1,13 @@
 package org.milmsearch.core.test
 
 import scala.collection.mutable.ListBuffer
-
 import net.liftweb.common.Logger
 import net.liftweb.db.DefaultConnectionIdentifier
 import net.liftweb.db.StandardDBVendor
 import net.liftweb.mapper.DB
 import net.liftweb.util.Props
+import net.liftweb.mapper.MapperRules
+import net.liftweb.util.StringHelpers
 
 /**
  * テスト開始前(終了後)に実行する処理を書く
@@ -42,6 +43,10 @@ object Boot extends Logger {
     DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
     
     cleanupHooks += vendor.closeAllConnections_!
+
+    // テーブル名・カラム名には snake_case を用いる
+    MapperRules.tableName  = (_, name) => StringHelpers.snakify(name)
+    MapperRules.columnName = (_, name) => StringHelpers.snakify(name)
   }
   
   /**
