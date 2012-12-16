@@ -25,9 +25,11 @@ import org.milmsearch.core.test.util.DateUtil
 import org.scalamock.Mock
 import org.milmsearch.core.test.util.MockCreatable
 import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.scalatest.PrivateMethodTester
 
 class MlProposalResourceSuite extends FunSuite
-    with MockFactory with ProxyMockFactory with MockCreatable {
+    with MockFactory with ProxyMockFactory with MockCreatable
+    with PrivateMethodTester {
 
   test("create full") {
     val json = """
@@ -64,13 +66,157 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
 
+  test("createFilter 絞り込み項目と値を指定した場合") {
+    val filter = new MlProposalResource invokePrivate
+      PrivateMethod[Option[Filter[MLPFilterBy.type]]](
+        'createFilter)(Some("status"), Some("new"))
+
+    expect(true)(filter isDefined)
+    expect(MLPFilterBy.Status)(filter.get.column)
+    expect("new")(filter.get.value)
+  }
+
+  test("createFilter 絞り込み項目を指定して、絞り込み値を指定しなかった場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Option[Filter[MLPFilterBy.type]]](
+          'createFilter)(Some("status"), None)
+    }
+
+    expect(true)(e.getMessage().startsWith("Invalid filter."))
+  }
+
+  test("createFilter 絞り込み項目を指定しないで、絞り込み値を指定した場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Option[Filter[MLPFilterBy.type]]](
+          'createFilter)(None, Some("new"))
+    }
+
+    expect(true)(e.getMessage().startsWith("Invalid filter."))
+  }
+
+  test("createFilter 絞り込み項目が規定外の場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Option[Filter[MLPFilterBy.type]]](
+          'createFilter)(Some("hello"), Some("new"))
+    }
+
+    expect("Can't create filter. by[hello], value[new]")(
+      e.getMessage())
+  }
+
+  test("createFilter 絞り込み項目と絞り込み値を指定しなかった場合") {
+    val filter = new MlProposalResource invokePrivate
+      PrivateMethod[Option[Filter[MLPFilterBy.type]]](
+        'createFilter)(None, None)
+
+    expect(None)(filter)
+  }
+
+  test("createPage ページに 1、カウントに 1 を指定した場合") {
+    val page = new MlProposalResource invokePrivate
+      PrivateMethod[Page]('createPage)(1L, 1L)
+
+    expect(1L)(page.page)
+    expect(1L)(page.count)
+  }
+
+  test("createPage ページに 0 を指定した場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Page]('createPage)(0L, 1L)
+    }
+
+    expect("Invalid startPage value. [0]")(
+      e.getMessage())
+  }
+
+  test("createPage カウントに 0 を指定した場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Page]('createPage)(1L, 0L)
+    }
+
+    expect("Invalid count value. [0]")(
+      e.getMessage())
+  }
+
+  test("createPage カウントに 100 を指定した場合") {
+    val page = new MlProposalResource invokePrivate
+        PrivateMethod[Page]('createPage)(1L, 100L)
+
+    expect(1L)(page.page)
+    expect(100L)(page.count)
+  }
+
+  test("createPage カウントに 101 を指定した場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Page]('createPage)(1L, 101L)
+    }
+
+    expect("Invalid count value. [101]")(
+      e.getMessage())
+  }
+
+  test("createSort ソート列名と値を指定した場合") {
+    val sort = new MlProposalResource invokePrivate
+      PrivateMethod[Option[Sort[MLPSortBy.type]]](
+        'createSort)(Some("createdAt"), Some("ascending"))
+
+    expect(true)(sort isDefined)
+    expect(MLPSortBy.CreatedAt)(sort.get.column)
+    expect(SortOrder.Ascending)(sort.get.sortOrder)
+  }
+
+  test("createSort ソート列名を指定して、ソート順序を指定しなかった場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Option[Sort[MLPSortBy.type]]](
+          'createSort)(Some("createdAt"), None)
+    }
+
+    expect(true)(e.getMessage().startsWith("Invalid sort."))
+  }
+
+  test("createSort ソート列名を指定しないで、ソート順序を指定した場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Option[Sort[MLPSortBy.type]]](
+          'createSort)(None, Some("ascending"))
+    }
+
+    expect(true)(e.getMessage().startsWith("Invalid sort."))
+  }
+
+  test("createSort ソート列名が規定外の場合") {
+    val e = intercept[BadQueryParameterException] {
+      new MlProposalResource invokePrivate
+        PrivateMethod[Option[Sort[MLPSortBy.type]]](
+          'createSort)(Some("hello"), Some("ascending"))
+    }
+
+    expect("Can't create sort. by[hello], order[ascending]")(
+      e.getMessage())
+  }
+
+  test("createSort ソート列名とソート順序を指定しなかった場合") {
+    val sort = new MlProposalResource invokePrivate
+      PrivateMethod[Option[Sort[MLPSortBy.type]]](
+        'createSort)(None, None)
+
+    expect(None)(sort)
+  }
+
   test("list パラメータがすべて正常値の場合") {
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            Some(Filter(MLPFilterBy.Status, "new")),
             Page(2, 20),
-            Some(Sort(MLPSortBy.ArchiveType, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.ArchiveType, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning MlProposalSearchResult(100, 21, 20,
               21 to 40 map { i => MlProposal(
                 i,
@@ -122,7 +268,7 @@ class MlProposalResourceSuite extends FunSuite
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            None, Page(1, 10), None
+            Page(1, 10), None, None
           ) returning MlProposalSearchResult(100, 1, 10,
               1 to 10 map { i => MlProposal(
                 i,
@@ -342,8 +488,9 @@ class MlProposalResourceSuite extends FunSuite
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            None, Page(1, 10),
-            Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending))
+            Page(1, 10),
+            Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending)),
+            None
           ) returning MlProposalSearchResult(0, 1, 10, Nil)
       }) {
         new MlProposalResource().list(
@@ -370,10 +517,10 @@ class MlProposalResourceSuite extends FunSuite
     val response = ComponentRegistry.mlProposalService.doWith(
       createMock[MlProposalService] {
         _ expects 'search withArgs (
-            Some(Filter(MLPFilterBy.Status, "new")),
-            Page(1, 10),
-            Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending))
-          ) returning MlProposalSearchResult(0, 1, 10, Nil)
+          Page(1, 10),
+          Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending)),
+          Some(Filter(MLPFilterBy.Status, "new"))
+        ) returning MlProposalSearchResult(0, 1, 10, Nil)
       }) {
         new MlProposalResource().list(
           filterBy    = "status",

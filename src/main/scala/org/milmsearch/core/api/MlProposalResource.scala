@@ -44,7 +44,8 @@ class MlProposalResource extends Loggable with PageableResource {
 
   protected val defaultSortBy = MlProposalSortBy.MlTitle
 
-  private val dateFormat = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
+  private val dateFormat =
+    DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
 
   /**
    * ML登録申請情報を作成する<br/>
@@ -95,47 +96,15 @@ class MlProposalResource extends Loggable with PageableResource {
            @QueryParam("sortBy")      sortBy:      String,
            @QueryParam("sortOrder")   sortOrder:   String) = {
     try {
-      def createFilter: Option[Filter[MlProposalFilterBy.type]] = {
-        (filterBy, filterValue) match {
-          case (null, null) => None
-          case (by: String, value: String) =>
-            try {
-              Some(Filter(MlProposalFilterBy.withName(by), value))
-            } catch {
-              case e: NoSuchElementException => throw new BadQueryParameterException(e.getMessage())
-            }
-          case _ => throw new BadQueryParameterException(
-              "Invalid filter. Please query filterBy and filterValue at the same time.")
-        }
-      }
-
-      def createPage = {
-        val sp = ResourceHelper.getLongParam(startPage, "startPage") getOrElse defaultStartPage
-        val co = ResourceHelper.getLongParam(count, "count") getOrElse defaultCount
-        if (sp <= 0) throw new BadQueryParameterException(
-            "Invalid startPage value. [%d]" format sp)
-        if (co <= 0 | co > maxCount) throw new BadQueryParameterException(
-            "Invalid count value. [%d]" format co)
-        Page(sp, co)
-      }
-
-      def createSort: Option[Sort[MlProposalSortBy.type]] = {
-        (sortBy, sortOrder) match {
-          case (null, null) => None
-          case (by: String, order: String) =>
-            try {
-              Some(Sort(MlProposalSortBy.withName(by), SortOrder.withName(order)))
-            } catch {
-              case e: NoSuchElementException => throw new BadQueryParameterException(e.getMessage())
-            }
-          case _ => throw new BadQueryParameterException(
-              "Invalid sort. Please query sortBy and sortOrder at the same time.")
-        }
-      }
-
       Response.ok(toDto(mpService.search(
-        createFilter, createPage, createSort)).toJson).build()
-
+        createPage(
+          ResourceHelper.getLongParam(startPage, "startPage")
+            getOrElse defaultStartPage,
+          ResourceHelper.getLongParam(count, "count")
+            getOrElse defaultCount),
+        createSort(Option(sortBy), Option(sortOrder)),
+        createFilter(Option(filterBy), Option(filterValue))
+      )).toJson).build()
     } catch {
       case e: BadQueryParameterException => {
         logger.error(e)
@@ -143,6 +112,55 @@ class MlProposalResource extends Loggable with PageableResource {
       }
     }
   }
+
+  private def createFilter(filterBy: Option[String],
+      filterValue: Option[String]):
+      Option[Filter[MlProposalFilterBy.type]] =
+    (filterBy, filterValue) match {
+      case (None, None) => None
+      case (Some(by), Some(value)) =>
+        try {
+          Some(Filter(MlProposalFilterBy.withName(by), value))
+        } catch {
+          case e: NoSuchElementException =>
+            throw new BadQueryParameterException(
+              "Can't create filter. by[%s], value[%s]"
+                format (by, value))
+        }
+      case _ => throw new BadQueryParameterException(
+        "Invalid filter. Please query filterBy and " +
+        "filterValue at the same time.")
+    }
+
+  private def createPage(startPage: Long, count: Long) = {
+    if (startPage <= 0)
+      throw new BadQueryParameterException(
+        "Invalid startPage value. [%d]" format startPage)
+    if (count <= 0 | count > maxCount)
+      throw new BadQueryParameterException(
+        "Invalid count value. [%d]" format count)
+    Page(startPage, count)
+  }
+
+  private def createSort(sortBy: Option[String],
+      sortOrder: Option[String]):
+      Option[Sort[MlProposalSortBy.type]] =
+    (sortBy, sortOrder) match {
+      case (None, None) => None
+      case (Some(by), Some(order)) =>
+        try {
+          Some(Sort(MlProposalSortBy.withName(by),
+            SortOrder.withName(order)))
+        } catch {
+          case e: NoSuchElementException =>
+            throw new BadQueryParameterException(
+              "Can't create sort. by[%s], order[%s]"
+                format (by, order))
+        }
+      case _ => throw new BadQueryParameterException(
+          "Invalid sort. Please query sortBy and sortOrder " +
+          "at the same time.")
+    }
 
   @Path("{id}")
   @GET
@@ -188,14 +206,16 @@ class MlProposalResource extends Loggable with PageableResource {
         Some(comment))
   }
 
-  private def toDto(result: MlProposalSearchResult): SearchResultDto =
+  private def toDto(result: MlProposalSearchResult):
+      SearchResultDto =
     SearchResultDto(
-      result.totalResults, result.startIndex, result.itemsPerPage,
-      result.mlProposals map toDto)
+      result.totalResults, result.startIndex,
+      result.itemsPerPage, result.mlProposals map toDto)
 
-  private def toDto(mlp: MlProposal): MlProposalDto =
+  private def toDto(mlp: MlProposal) =
     MlProposalDto(
-      mlp.id, mlp.proposerName, mlp.proposerEmail, mlp.mlTitle, mlp.status.toString,
+      mlp.id, mlp.proposerName, mlp.proposerEmail,
+      mlp.mlTitle, mlp.status.toString,
       mlp.archiveType map { _.toString } getOrElse "",
       mlp.archiveUrl map { _.toString } getOrElse "",
       mlp.comment getOrElse "",

@@ -31,9 +31,10 @@ trait MlProposalService {
    * @param sort   ソート方法
    * @return 検索結果情報
    */
-  def search(filter: Option[Filter[MLPFilterBy.type]],
-      page: Page,
-      sort: Option[Sort[MLPSortBy.type]]): MLPSearchResult
+  def search(page: Page,
+      sort: Option[Sort[MLPSortBy.type]] = None,
+      filter: Option[Filter[MLPFilterBy.type]] = None):
+      MLPSearchResult
 
   /**
    * ML登録申請情報を取得する
@@ -77,15 +78,16 @@ class MlProposalServiceImpl extends MlProposalService {
    */
   private def mpDao = ComponentRegistry.mlProposalDao()
 
-  def create(request: CreateMlProposalRequest) = mpDao.create(request)
+  def create(request: CreateMlProposalRequest) =
+    mpDao.create(request)
 
-  def search(filter: Option[Filter[MLPFilterBy.type]],
-      page: Page,
-      sort: Option[Sort[MLPSortBy.type]]): MLPSearchResult = {
-    val mlProposals = mpDao.findAll(filter, page.toRange, sort)
+  def search(page: Page,
+      sort: Option[Sort[MLPSortBy.type]] = None,
+      filter: Option[Filter[MLPFilterBy.type]] = None) = {
+    val mlProposals = mpDao.findAll(page.toRange, sort, filter)
     MLPSearchResult(
       mpDao.count(filter),
-      page.toRange.offset + 1,
+      page.getStartIndex,
       mlProposals.length.toLong min page.count, mlProposals)
   }
 

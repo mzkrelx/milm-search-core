@@ -20,7 +20,8 @@ import java.net.URL
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.scalatest.BeforeAndAfter
 
-class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndAfter {
+class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
+    with BeforeAndAfter {
   // TODO
   test("insert full") { pending }
 
@@ -68,8 +69,11 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
         1, 1, "http://sample.com", "message",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
 
-    val mp = new MlProposalDaoImpl().findAll(
-      None, Range(0, 10), None).head
+    val mps = new MlProposalDaoImpl().findAll(Range(0, 10))
+
+    expect(1)(mps.length)
+
+    val mp = mps.head
 
     expect(1)(mp.id)
     expect("name1")(mp.proposerName)
@@ -116,8 +120,8 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
         "2012-10-10 12:10:11", "2012-10-11 10:10:11"))
 
     val mps = new MlProposalDaoImpl().findAll(
-      Some(Filter(MLPFilterBy.Status, MLPStatus.Rejected)),
-      Range(0, 10), None)
+      Range(0, 10), None,
+      Some(Filter(MLPFilterBy.Status, MLPStatus.Rejected)))
 
     expect(1)(mps.length)
     expect(3)(mps.head.id)
@@ -154,8 +158,9 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
         "2012-10-10 12:10:11", "2012-10-11 10:10:11"))
 
     val mps = new MlProposalDaoImpl().findAll(
-      None, Range(0, 10),
-      Some(Sort(MLPSortBy.CreatedAt, SortOrder.Descending)))
+      Range(0, 10),
+      Some(Sort(MLPSortBy.CreatedAt, SortOrder.Descending)),
+      None)
 
     // id でいうと 1, 3, 2 の 順番になる
     expect(3)(mps.length)
@@ -193,8 +198,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll with BeforeAndA
         2, 1, "http://sample.com3", "message3",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
 
-    val mps = new MlProposalDaoImpl().findAll(
-      None, Range(1, 1), None)
+    val mps = new MlProposalDaoImpl().findAll(Range(1, 1))
 
     expect(1)(mps.length)
   }

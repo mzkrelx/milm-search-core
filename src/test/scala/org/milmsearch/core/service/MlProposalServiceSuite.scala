@@ -49,8 +49,9 @@ class MlProposalServiceSuite extends FunSuite
   test("search 検索条件なしで20件ずつの2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
-        m expects 'findAll withArgs(None, Range(20, 20),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+        m expects 'findAll withArgs(Range(20, 20),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            None
           ) returning (21 to 40 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -68,7 +69,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = None,
           page   = Page(2, 20),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(100)(searchResult.totalResults)
@@ -80,15 +82,17 @@ class MlProposalServiceSuite extends FunSuite
   test("search 検索結果がないとき") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
-        m expects 'findAll withArgs(None, Range(0, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+        m expects 'findAll withArgs(Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            None
           ) returning Nil
         m expects 'count returning 0L
       }) {
         new MlProposalServiceImpl().search(
           filter = None,
           page   = Page(1, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(0)(searchResult.totalResults)
@@ -97,11 +101,12 @@ class MlProposalServiceSuite extends FunSuite
     expect(Nil)(searchResult.mlProposals)
   }
 
-  test("search 検索結果が10件で、10件ずつ1ページ目のデータを検索") {
+  test("search 検索結果が10件、10件ずつ1ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
-        m expects 'findAll withArgs(None, Range(0, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+        m expects 'findAll withArgs(Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            None
           ) returning (1 to 10 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -119,7 +124,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = None,
           page   = Page(1, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(10)(searchResult.totalResults)
@@ -128,18 +134,20 @@ class MlProposalServiceSuite extends FunSuite
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search 検索結果が10件で、10件ずつ2ページ目のデータを検索") {
+  test("search 検索結果が10件、10件ずつ2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
-        m expects 'findAll withArgs(None, Range(10, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+        m expects 'findAll withArgs(Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            None
           ) returning Nil
         m expects 'count returning 10L
       }) {
         new MlProposalServiceImpl().search(
           filter = None,
           page   = Page(2, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(10)(searchResult.totalResults)
@@ -148,11 +156,12 @@ class MlProposalServiceSuite extends FunSuite
     expect(Nil)(searchResult.mlProposals)
   }
 
-  test("search 検索結果が11件で、10件ずつ1ページ目のデータを検索") {
+  test("search 検索結果が11件、10件ずつ1ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
-        m expects 'findAll withArgs(None, Range(0, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+        m expects 'findAll withArgs(Range(0, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            None
           ) returning (1 to 10 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -170,7 +179,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = None,
           page   = Page(1, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(11)(searchResult.totalResults)
@@ -179,11 +189,12 @@ class MlProposalServiceSuite extends FunSuite
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search 検索結果が11件で、10件ずつ2ページ目のデータを検索") {
+  test("search 検索結果が11件、10件ずつ2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
-        m expects 'findAll withArgs(None, Range(10, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+        m expects 'findAll withArgs(Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            None
           ) returning (11 to 11 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -201,7 +212,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = None,
           page   = Page(2, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(11)(searchResult.totalResults)
@@ -210,11 +222,12 @@ class MlProposalServiceSuite extends FunSuite
     expect(11)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search 検索結果が21件で、10件ずつ2ページ目のデータを検索") {
+  test("search 検索結果が21件、10件ずつ2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
-        m expects 'findAll withArgs(None, Range(10, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+        m expects 'findAll withArgs(Range(10, 10),
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            None
           ) returning (11 to 20 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -232,7 +245,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = None,
           page   = Page(2, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(21)(searchResult.totalResults)
@@ -245,9 +259,9 @@ class MlProposalServiceSuite extends FunSuite
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
-            Some(Filter(MLPFilterBy.Status, MLPStatus.New)),
             Range(20, 20),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning (21 to 40 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -260,13 +274,16 @@ class MlProposalServiceSuite extends FunSuite
             DateUtil.createDate("2012/10/28 10:20:30"),
             DateUtil.createDate("2012/10/28 10:20:30"))
           } toList)
-        m expects 'count returning 100L
+
+        m expects 'count withArgs(
+            Some(Filter(MLPFilterBy.Status, "new"))
+          ) returning 100L
       }) {
         new MlProposalServiceImpl().search(
-          filter = Some(Filter(MLPFilterBy.withName("status"),
-            MLPStatus.withName("new"))),
+          filter = Some(Filter(MLPFilterBy.Status, "new")),
           page   = Page(2, 20),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(100)(searchResult.totalResults)
@@ -278,35 +295,38 @@ class MlProposalServiceSuite extends FunSuite
   test("search ステータスの検索値が存在しない値の場合") {
     intercept[NoSuchFieldException] {
       new MlProposalServiceImpl().search(
-        Some(Filter(MLPFilterBy.Status, "hello")),
-        Page(1, 10),
-        Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+        filter = Some(Filter(MLPFilterBy.Status, "hello")),
+        page   = Page(1, 10),
+        sort   = Some(Sort(MLPSortBy.CreatedAt,
+          SortOrder.Ascending)))
     }
   }
 
   test("search ステータスの検索値が空文字の場合") {
     intercept[NoSuchFieldException] {
       new MlProposalServiceImpl().search(
-        Some(Filter(MLPFilterBy.Status, "")),
-        Page(1, 10),
-        Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+        filter = Some(Filter(MLPFilterBy.Status, "")),
+        page   = Page(1, 10),
+        sort   = Some(Sort(MLPSortBy.CreatedAt,
+          SortOrder.Ascending)))
     }
   }
 
-  test("search 検索条件を指定して、結果が0件の場合") {
+  test("search 検索条件を指定、結果が0件の場合") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
-            Some(Filter(MLPFilterBy.Status, MLPStatus.New)),
             Range(0, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning Nil
         m expects 'count returning 0L
       }) {
         new MlProposalServiceImpl().search(
-          filter = Some(Filter(MLPFilterBy.Status, MLPStatus.New)),
+          filter = Some(Filter(MLPFilterBy.Status, "new")),
           page   = Page(1, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(0)(searchResult.totalResults)
@@ -315,13 +335,13 @@ class MlProposalServiceSuite extends FunSuite
     expect(Nil)(searchResult.mlProposals)
   }
 
-  test("search 検索条件を指定して、検索結果が10件で、10件ずつ1ページ目のデータを検索") {
+  test("search 検索条件を指定、検索結果が10件、10件ずつ1ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
-            Some(Filter(MLPFilterBy.Status, "new")),
             Range(0, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning (1 to 10 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -341,7 +361,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = Some(Filter(MLPFilterBy.Status, "new")),
           page   = Page(1, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(10)(searchResult.totalResults)
@@ -350,13 +371,13 @@ class MlProposalServiceSuite extends FunSuite
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search 検索条件を指定して、検索結果が10件で、10件ずつ2ページ目のデータを検索") {
+  test("search 検索条件を指定、検索結果が10件、10件ずつ2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
-            Some(Filter(MLPFilterBy.Status, "new")),
             Range(10, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning Nil
         m expects 'count withArgs(
             Some(Filter(MLPFilterBy.Status, "new"))
@@ -365,7 +386,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = Some(Filter(MLPFilterBy.Status, "new")),
           page   = Page(2, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(10)(searchResult.totalResults)
@@ -374,13 +396,13 @@ class MlProposalServiceSuite extends FunSuite
     expect(Nil)(searchResult.mlProposals)
   }
 
-  test("search 検索条件を指定して、検索結果が11件で、10件ずつ1ページ目のデータを検索") {
+  test("search 検索条件を指定、検索結果が11件、10件ずつ1ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
-            Some(Filter(MLPFilterBy.Status, "new")),
             Range(0, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning (1 to 10 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -400,7 +422,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = Some(Filter(MLPFilterBy.Status, "new")),
           page   = Page(1, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(11)(searchResult.totalResults)
@@ -409,13 +432,13 @@ class MlProposalServiceSuite extends FunSuite
     expect(1)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search 検索条件を指定して、検索結果が11件で、10件ずつ2ページ目のデータを検索") {
+  test("search 検索条件を指定、検索結果が11件、10件ずつ2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
-            Some(Filter(MLPFilterBy.Status, "new")),
             Range(10, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning (11 to 11 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -435,7 +458,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = Some(Filter(MLPFilterBy.Status, "new")),
           page   = Page(2, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(11)(searchResult.totalResults)
@@ -444,13 +468,14 @@ class MlProposalServiceSuite extends FunSuite
     expect(11)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search 検索条件を指定して、検索結果が21件で、10件ずつ2ページ目のデータを検索") {
+  test("search 検索条件を指定、検索結果が21" +
+  		"10件ずつ2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
-            Some(Filter(MLPFilterBy.Status, "new")),
             Range(10, 10),
-            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
+            Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)),
+            Some(Filter(MLPFilterBy.Status, "new"))
           ) returning (11 to 20 map { i => MlProposal(
             i,
             "申請者の名前",
@@ -470,7 +495,8 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().search(
           filter = Some(Filter(MLPFilterBy.Status, "new")),
           page   = Page(2, 10),
-          sort   = Some(Sort(MLPSortBy.CreatedAt, SortOrder.Ascending)))
+          sort   = Some(Sort(MLPSortBy.CreatedAt,
+            SortOrder.Ascending)))
       }
 
     expect(21)(searchResult.totalResults)

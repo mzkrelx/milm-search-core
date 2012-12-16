@@ -38,9 +38,10 @@ trait MlProposalDao {
    * @param sort   並び順
    * @return List[MlProposal] ML登録申請情報のリスト
    */
-  def findAll(filter: Option[Filter[MLPFilterBy.type]],
-      range: Range,
-      sort:   Option[Sort[MLPSortBy.type]]): List[MlProposal]
+  def findAll(range: Range,
+      sort: Option[Sort[MLPSortBy.type]] = None,
+      filter: Option[Filter[MLPFilterBy.type]] = None):
+      List[MlProposal]
 
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
@@ -50,7 +51,8 @@ trait MlProposalDao {
    * @param filter 検索条件
    * @return Long 件数
    */
-  def count(filter: Option[Filter[MLPFilterBy.type]]): Long
+  def count(filter: Option[Filter[MLPFilterBy.type]] = None):
+      Long
 }
 
 /**
@@ -60,21 +62,27 @@ class MlProposalDaoImpl extends MlProposalDao {
   def find(id: Long) = None
   def create(request: CreateMlProposalRequest) = 0L
 
-  def findAll(filter: Option[Filter[MLPFilterBy.type]],
-      range: Range,
-      sort:  Option[Sort[MLPSortBy.type]]): List[MlProposal] = {
+  def findAll(range: Range,
+      sort: Option[Sort[MLPSortBy.type]] = None,
+      filter: Option[Filter[MLPFilterBy.type]] = None) = {
     val queryParams = ListBuffer[QueryParam[MLPMapper]](
       StartAt(range.offset),
       MaxRows(range.limit))
-    if (sort.isDefined)   queryParams += toOrderBy(sort.get)
-    if (filter.isDefined) queryParams += toBy(filter.get)
+    if (sort.isDefined) {
+      queryParams += toOrderBy(sort.get)
+    }
+    if (filter.isDefined) {
+      queryParams += toBy(filter.get)
+    }
 
     MLPMMapper.findAll(queryParams: _*) map toDomain
   }
 
-  def count(filter: Option[Filter[MLPFilterBy.type]]): Long =
-    if (filter.isDefined) MLPMMapper.count(toBy(filter.get))
-    else MLPMMapper.count()
+  def count(filter: Option[Filter[MLPFilterBy.type]] = None) =
+    if (filter.isDefined)
+      MLPMMapper.count(toBy(filter.get))
+    else
+      MLPMMapper.count()
 
   private def toDomain(mapper: MLPMapper) =
     MlProposal(
@@ -120,7 +128,8 @@ package mapper {
   /**
    * ML登録申請情報テーブルの操作を行う
    */
-  private[dao] object MlProposalMetaMapper extends MlProposalMapper
+  private[dao] object MlProposalMetaMapper
+      extends MlProposalMapper
       with LongKeyedMetaMapper[MlProposalMapper] {
     override def dbTableName = "ml_proposal"
     override def fieldOrder = List(
@@ -131,7 +140,8 @@ package mapper {
   /**
    * ML登録申請情報のモデルクラス
    */
-  private[dao] class MlProposalMapper extends LongKeyedMapper[MlProposalMapper]
+  private[dao] class MlProposalMapper
+      extends LongKeyedMapper[MlProposalMapper]
       with IdPK with CreatedUpdated {
     def getSingleton = MlProposalMetaMapper
 
