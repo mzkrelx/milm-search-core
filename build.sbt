@@ -35,6 +35,8 @@ libraryDependencies ++= Seq(
   "org.scalamock" %% "scalamock-scalatest-support" % "2.4"
 )
 
+parallelExecution in Test := false
+
 testOptions in Test += Tests.Setup { loader =>
   loader.loadClass("org.milmsearch.core.test.Boot").getMethod("setup").invoke(null)
 }
