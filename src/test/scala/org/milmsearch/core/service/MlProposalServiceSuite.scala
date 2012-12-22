@@ -468,8 +468,7 @@ class MlProposalServiceSuite extends FunSuite
     expect(11)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("search 検索条件を指定、検索結果が21" +
-  		"10件ずつ2ページ目のデータを検索") {
+  test("search 検索条件を指定、検索結果が21件、10件ずつ2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
       createMock[MlProposalDao] { m =>
         m expects 'findAll withArgs(
