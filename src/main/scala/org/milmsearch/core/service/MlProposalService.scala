@@ -9,6 +9,9 @@ import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.ComponentRegistry
+import org.milmsearch.core.exception.ResourceNotFoundException
+import org.milmsearch.core.exception.DeleteFailedException
+import net.liftweb.common.Loggable
 
 /**
  * ML登録申請情報を管理するサービス
@@ -57,9 +60,8 @@ trait MlProposalService {
    * ML登録申請情報を削除する
    *
    * @param id ID
-   * @return 削除対象が存在したかどうか
    */
-  def delete(id: Long): Boolean
+  def delete(id: Long)
 }
 
 /**
@@ -70,7 +72,7 @@ class SearchFailedException(msg: String) extends Exception(msg)
 /**
  * MlProposalService の実装クラス
  */
-class MlProposalServiceImpl extends MlProposalService {
+class MlProposalServiceImpl extends MlProposalService with Loggable {
 
   /**
    * ML登録申請情報 DAO
@@ -94,8 +96,20 @@ class MlProposalServiceImpl extends MlProposalService {
 
   def update(id: Long, proposal: MlProposal) = false // TODO
 
-  def delete(id: Long): Boolean = mpDao.delete(id) 
-
+  def delete(id: Long) = {
+    try {
+      val isDeleted = mpDao.delete(id)
+      if (! isDeleted) {
+        throw new ResourceNotFoundException("Not found.")
+      }
+    } catch {
+      case e => {
+        logger.error(e)
+        throw new DeleteFailedException(
+          "Delete failed.")
+      }
+    }
+  }
 }
 
 

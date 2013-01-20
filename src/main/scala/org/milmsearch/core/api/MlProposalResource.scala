@@ -31,10 +31,11 @@ import net.liftweb.json.parse
 import org.milmsearch.core.domain.Sort
 import javax.ws.rs.PathParam
 import javax.ws.rs.core.Response.Status
+import org.milmsearch.core.exception.ResourceNotFoundException
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
 
-class BadRequestException extends Exception
+class BadRequestException(msg: String) extends Exception(msg)
 
 /**
  * ML登録申請情報のAPIリソース
@@ -178,26 +179,34 @@ class MlProposalResource extends Loggable with PageableResource {
     Response.serverError().build()
   }
 
+   /**
+   * ML登録申請情報を削除します。
+   *
+   * @param id ID
+   * @return 200(OK) or 400(Bad Request)
+   */
   @Path("{id}")
   @DELETE
-  def delete(@PathParam("id") id: String): Response = { // 引数の指定が必要　SampleListResource.scalaを後で参照（cherry-pick後）
-
-    def stringToLong(str: String) =
-      try {
-        str.toLong
-      } catch {
-        case e: NumberFormatException => throw new BadRequestException
-      }
-
+  def delete(@PathParam("id") id: String): Response = { 
     try {
-      if (mpService.delete(stringToLong(id)))
-        Response.noContent().build()
-      else
-        Response.status(Status.NOT_FOUND).build()
+      val idOption = ResourceHelper.getLongParam(id, "id")
+      if (!idOption.isDefined) {
+        throw new BadQueryParameterException(
+            "Id is null")
+      }
+      mpService.delete(idOption.get)
+      Response.noContent().build()
     } catch {
-      case e: BadRequestException => Response.status(Status.BAD_REQUEST).build() // 400
-      case e => Response.serverError().build()
+      case e: ResourceNotFoundException => {
+        logger.error(e)
+        Response.status(Status.NOT_FOUND).build()
+      }
+      case e: BadQueryParameterException => {
+        logger.error(e)
+        Response.status(Status.BAD_REQUEST).build()
+      }
     }
+    
   }
 
   /**

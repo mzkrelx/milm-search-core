@@ -26,6 +26,7 @@ import org.scalamock.Mock
 import org.milmsearch.core.test.util.MockCreatable
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.scalatest.PrivateMethodTester
+import org.milmsearch.core.exception.ResourceNotFoundException
 
 class MlProposalResourceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable
@@ -540,6 +541,7 @@ class MlProposalResourceSuite extends FunSuite
       |}""".stripMargin replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
+  
   test("delete_正常") {
     // mockは戻り値なしで良い。
     val id = "1"
@@ -557,11 +559,12 @@ class MlProposalResourceSuite extends FunSuite
   }
 
   test("delete_id該当なし") {
-    // mockは戻り値なしで良い。
     val id = "1"
 
     val m = mock[MlProposalService]
-    m expects 'delete withArgs (1L) returning false
+    //m expects 'delete withArgs (1L) returning false
+    
+    m expects 'delete withArgs (1L) throws new ResourceNotFoundException("Not found.")
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
       new MlProposalResource().delete(id)
@@ -573,22 +576,38 @@ class MlProposalResourceSuite extends FunSuite
   }
 
   test("delete_id数値エラー") {
-    // mockは戻り値なしで良い。
     val id = "a"
 
-    val m = mock[MlProposalService]
+    //val m = mock[MlProposalService]
     //m expects 'delete withArgs (1L) returning true
 
-    val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().delete(id)
-    }
+    //val response = ComponentRegistry.mlProposalService.doWith(m) {
+    val response = new MlProposalResource().delete(id)
+    //}
 
     expect(400) {
       response.getStatus
     }
   }
   
-    test("delete_サーバエラー") {
+  test("delete_id Nullエラー") {
+    // mockは戻り値なしで良い。
+    val id = null
+
+    //val m = mock[MlProposalService]
+    //m expects 'delete withArgs (1L) returning true
+
+    //val response = ComponentRegistry.mlProposalService.doWith(m) {
+    val response =  new MlProposalResource().delete(id)
+    //}
+
+    expect(400) {
+      response.getStatus
+    }
+  }
+  
+  /*
+  test("delete_サーバエラー") {
     // mockが例外を発生させる
     val id = "1"
 
@@ -603,5 +622,5 @@ class MlProposalResourceSuite extends FunSuite
       response.getStatus
     }
   }
-
+  */
 }
