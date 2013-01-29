@@ -268,4 +268,38 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
   test("update empty") { pending }
 
   test("update failure") { pending }
+
+  test("find 1件DBに入っていて、その1件が取得できるか") {
+    DB.runUpdate("""
+      | INSERT INTO ml_proposal (
+        | id,
+        | proposer_name,
+        | proposer_email,
+        | ml_title,
+        | status,
+        | archive_type,
+        | archive_url,
+        | message,
+        | created_at,
+        | updated_at
+      | ) VALUES (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
+
+    val mlp = new MlProposalDaoImpl().find(1)
+
+    expect(1)(mlp.get.id)
+    expect("name1")(mlp.get.proposerName)
+    expect("sample@sample.com")(mlp.get.proposerEmail)
+    expect("title")(mlp.get.mlTitle)
+    expect(MLPStatus.Accepted)(mlp.get.status)
+    expect(Some(MlArchiveType.Other))(mlp.get.archiveType)
+    expect(Some(new URL("http://sample.com")))(mlp.get.archiveUrl)
+    expect(Some("message"))(mlp.get.comment)
+    expect("2012-10-10T10:10:11")(
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.get.createdAt))
+    expect("2012-10-11T10:10:11")(
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.get.updatedAt))
+  }
 }

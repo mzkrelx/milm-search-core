@@ -34,6 +34,7 @@ import net.liftweb.common.Box
 import net.liftweb.common.Full
 import net.liftweb.common.Empty
 import net.liftweb.common.Failure
+import net.liftweb.common.Loggable
 
 /**
  * ML登録申請情報 の DAO
@@ -77,8 +78,19 @@ trait MlProposalDao {
 /**
  * MlProposalDao の実装クラス
  */
-class MlProposalDaoImpl extends MlProposalDao {
-  def find(id: Long) = None
+class MlProposalDaoImpl extends MlProposalDao with Loggable {
+
+  def find(id: Long) = {
+    MLPMMapper.find(id) match {
+      case Full(mapper) => Some(toDomain(mapper))
+      case Empty => None
+      case Failure(message, e, _) => {
+        logger.error(message, e)
+        throw new DataAccessException("データ取得に失敗しました。")
+      }
+    }
+  }
+
   def create(request: CreateMlProposalRequest) = toMapper(request).saveMe().id
 
   /**
@@ -182,6 +194,7 @@ class MlProposalDaoImpl extends MlProposalDao {
       case Failure(message, e, _) => throw e openOr new RuntimeException(message)
     }
   }
+
 }
 
 /**

@@ -27,7 +27,6 @@ import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import net.liftweb.common.Loggable
 import javax.ws.rs.PathParam
-//import net.liftweb.json.parse
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
 import net.liftweb.json.parse
@@ -183,8 +182,30 @@ class MlProposalResource extends Loggable with PageableResource {
 
   @Path("{id}")
   @GET
-  def show() = {
-    Response.serverError().build()
+  def show(@PathParam("id")id: String) = {
+    try {
+      val idOption = ResourceHelper.getLongParam(id, "id")
+      if (! idOption.isDefined) {
+        throw new BadQueryParameterException(
+          "Param 'id' is not passed.")
+      }
+
+      val mlpOption = mpService.find(idOption.get)
+      if (! mlpOption.isDefined) {
+        throw new ResourceNotFoundException("Not Found.")
+      }
+
+      Response.ok(toDto(mlpOption.get).toJson).build()
+    } catch {
+      case e: BadQueryParameterException => {
+        logger.error(e)
+        Response.status(Response.Status.BAD_REQUEST).build()
+      }
+      case e: ResourceNotFoundException => {
+        logger.error(e)
+        Response.status(Response.Status.NOT_FOUND).build()
+      }
+    }
   }
 
   @Path("{id}")
@@ -298,7 +319,12 @@ case class MlProposalDto(
   archiveUrl: String,
   comment: String,
   createdAt: String,
-  updatedAt: String)
+  updatedAt: String) {
+  // for lift-json
+  implicit val formats = DefaultFormats
+
+  def toJson(): String = Serialization.write(this)
+}
 
 /**
  * ML登録申請検索結果の変換用オブジェクト
