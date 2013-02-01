@@ -48,33 +48,7 @@ class MlProposalServiceSuite extends FunSuite
     }
   }
 
-  test("delete_正常") { ////
-    // mockは戻り値なしで良い。戻り値がない場合のexpectの書き方は後ほど
-    val id = 1L
 
-    val m = mock[MlProposalDao]
-    m expects 'delete withArgs (1L) returning true
-
-    expect(true) {
-      ComponentRegistry.mlProposalDao.doWith(m) {
-        new MlProposalServiceImpl().delete(id)
-      }
-    }
-  }
-
-  test("delete_id該当なし") { ////
-    // mockは戻り値なしで良い。
-    val id = 1L
-
-    val m = mock[MlProposalDao]
-    m expects 'delete withArgs (1L) returning false
-
-    expect(false) {
-      ComponentRegistry.mlProposalDao.doWith(m) {
-        new MlProposalServiceImpl().delete(id)
-      }
-    }
-  }
 
   test("search 検索条件なしで20件ずつの2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
@@ -532,6 +506,18 @@ class MlProposalServiceSuite extends FunSuite
     expect(11)(searchResult.startIndex)
     expect(10)(searchResult.itemsPerPage)
     expect(11)(searchResult.mlProposals.apply(0).id)
+  }
+  
+    test("delete_正常") { ////
+    // mockは戻り値なしで良い。
+    val id = 1L
+
+    val m = mock[MlProposalDao]
+    m expects 'delete withArgs (1L) returning true
+
+    ComponentRegistry.mlProposalDao.doWith(m) {
+    	new MlProposalServiceImpl().delete(id)
+    }
   }
   
   test("delete_ID該当なし") { ////

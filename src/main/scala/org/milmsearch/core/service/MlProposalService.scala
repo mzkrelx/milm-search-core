@@ -61,6 +61,8 @@ trait MlProposalService {
    *
    * @param id ID
    */
+  @throws(classOf[ResourceNotFoundException])
+  @throws(classOf[DeleteFailedException])
   def delete(id: Long)
 }
 
@@ -103,6 +105,11 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
         throw new ResourceNotFoundException("Not found.")
       }
     } catch {
+      case e: ResourceNotFoundException => {
+    	logger.error(e) 
+    	throw new ResourceNotFoundException(
+    	  "Not found.")
+      }
       case e => {
         logger.error(e)
         throw new DeleteFailedException(
