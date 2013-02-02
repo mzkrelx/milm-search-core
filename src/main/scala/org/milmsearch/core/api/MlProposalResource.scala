@@ -87,7 +87,7 @@ class MlProposalResource extends Loggable with PageableResource {
     }
 
     if (dto.status != "new") {
-      throw new BadRequestException("status is only allow 'new'")
+      throw new BadRequestException("status is allowed only 'new'")
     }
 
     val id = mpService.create(dto.toDomain)
