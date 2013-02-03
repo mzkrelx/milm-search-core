@@ -15,6 +15,7 @@ import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.ComponentRegistry
+import javax.ws.rs.core.Response.Status
 import javax.ws.rs.core.Response
 import javax.ws.rs.Consumes
 import javax.ws.rs.DELETE
@@ -25,6 +26,8 @@ import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import net.liftweb.common.Loggable
+import javax.ws.rs.PathParam
+//import net.liftweb.json.parse
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
 import net.liftweb.json.parse
@@ -175,8 +178,26 @@ class MlProposalResource extends Loggable with PageableResource {
 
   @Path("{id}")
   @PUT
-  def update() = {
-    Response.serverError().build()
+  def update(@PathParam("id") id: String, requestBody: String) : Response = {
+    val dto = parse(requestBody).extract[RequestDto]
+
+    def stringToLong(str: String) =
+	    try {
+	      str.toLong
+	    } catch {
+	      case e:NumberFormatException => throw new BadQueryParameterException("illegal format")
+	    }
+
+    try {
+	    if(mpService.update(stringToLong(id), dto.toDomain)){
+	    	Response.noContent().build()
+	    } else {
+	    	Response.status(Status.NOT_FOUND).build()
+	    }
+    } catch {
+      case e : BadQueryParameterException => Response.status(Status.BAD_REQUEST).build() // 400
+      case e => Response.serverError().build()
+    }
   }
 
    /**
@@ -187,7 +208,7 @@ class MlProposalResource extends Loggable with PageableResource {
    */
   @Path("{id}")
   @DELETE
-  def delete(@PathParam("id") id: String): Response = { 
+  def delete(@PathParam("id") id: String): Response = {
     try {
       val idOption = ResourceHelper.getLongParam(id, "id")
       if (!idOption.isDefined) {
@@ -206,7 +227,7 @@ class MlProposalResource extends Loggable with PageableResource {
         Response.status(Status.BAD_REQUEST).build()
       }
     }
-    
+
   }
 
   /**
