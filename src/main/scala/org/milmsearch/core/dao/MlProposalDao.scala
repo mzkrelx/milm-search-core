@@ -6,9 +6,9 @@ import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import org.milmsearch.core.domain.{ MlProposalSortBy => MLPSortBy }
+import org.milmsearch.core.domain.{ MlProposalFilterBy => MLPFilterBy }
+import org.milmsearch.core.domain.{ MlProposalStatus => MLPStatus }
 import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
@@ -21,17 +21,25 @@ import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.By
 import net.liftweb.mapper.StartAt
 import net.liftweb.mapper.MaxRows
-import mapper.{MlProposalMetaMapper => MLPMMapper}
-import mapper.{MlProposalMapper => MLPMapper}
+import mapper.{ MlProposalMetaMapper => MLPMMapper }
+import mapper.{ MlProposalMapper => MLPMapper }
 import scala.collection.mutable.ListBuffer
 import net.liftweb.mapper.QueryParam
+import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposal
+import net.liftweb.common.Box
+import net.liftweb.common.Full
+import net.liftweb.common.Empty
+import net.liftweb.common.Failure
 
 /**
  * ML登録申請情報 の DAO
  */
 trait MlProposalDao {
 
-  /** 検索条件と取得範囲と並び順を指定して、ML登録申請情報を検索します。
+  /**
+   * 検索条件と取得範囲と並び順を指定して、ML登録申請情報を検索します。
    *
    * @param filter 検索条件
    * @param range  取得範囲
@@ -39,20 +47,27 @@ trait MlProposalDao {
    * @return List[MlProposal] ML登録申請情報のリスト
    */
   def findAll(range: Range,
-      sort: Option[Sort[MLPSortBy.type]] = None,
-      filter: Option[Filter[MLPFilterBy.type]] = None):
-      List[MlProposal]
+    sort: Option[Sort[MLPSortBy.type]] = None,
+    filter: Option[Filter[MLPFilterBy.type]] = None): List[MlProposal]
 
   def find(id: Long): Option[MlProposal]
   def create(request: CreateMlProposalRequest): Long
 
-  /** 検索条件を指定して、件数を数えます。
+  /**
+   * IDを指定して、ML登録申請情報を削除します。
+   *
+   * @param id: ID
+   * @return Boolean  ??
+   */
+  def delete(id: Long): Boolean
+
+  /**
+   * 検索条件を指定して、件数を数えます。
    *
    * @param filter 検索条件
    * @return Long 件数
    */
-  def count(filter: Option[Filter[MLPFilterBy.type]] = None):
-      Long
+  def count(filter: Option[Filter[MLPFilterBy.type]] = None): Long
 }
 
 /**
@@ -63,8 +78,8 @@ class MlProposalDaoImpl extends MlProposalDao {
   def create(request: CreateMlProposalRequest) = 0L
 
   def findAll(range: Range,
-      sort: Option[Sort[MLPSortBy.type]] = None,
-      filter: Option[Filter[MLPFilterBy.type]] = None) = {
+    sort: Option[Sort[MLPSortBy.type]] = None,
+    filter: Option[Filter[MLPFilterBy.type]] = None) = {
     val queryParams = ListBuffer[QueryParam[MLPMapper]](
       StartAt(range.offset),
       MaxRows(range.limit))
@@ -97,6 +112,18 @@ class MlProposalDaoImpl extends MlProposalDao {
       mapper.createdAt.get,
       mapper.updatedAt.get)
 
+  /**
+   * 指定された情報のmapperを返す
+   * @param id cccID
+   * return Option[MLPMapper] or None or Exception
+   */
+  private def findMapper(id: Long):Option[MLPMapper] =
+    MLPMMapper.find(id) match {
+      case Full(mapper) => Some(mapper)
+      case Empty => None
+      case Failure(message, e, _) => throw new FindException(message)
+    }
+
   def toBy(filter: Filter[MLPFilterBy.type]) = filter match {
     case Filter(MLPFilterBy.Status, v: MLPStatus.Value) =>
       By(MLPMMapper.status, v)
@@ -108,16 +135,23 @@ class MlProposalDaoImpl extends MlProposalDao {
     import MLPSortBy._
     import MLPMMapper._
     OrderBy(sort.column match {
-      case MlTitle       => mlTitle
-      case Status        => status
-      case ArchiveType   => archiveType
-      case CreatedAt     => createdAt
-      case UpdatedAt     => updatedAt
+      case MlTitle => mlTitle
+      case Status => status
+      case ArchiveType => archiveType
+      case CreatedAt => createdAt
+      case UpdatedAt => updatedAt
       case _ => throw new NoSuchFieldException(
         "Can't convert Filter to By")
     }, DaoHelper.toAscOrDesc(sort.sortOrder))
   }
 
+  def delete(id: Long): Boolean = {
+    val mapper = findMapper(id)
+    mapper match {
+      case Some(m) => MLPMMapper.delete_!(m)
+      case None => false
+    }
+  }
 }
 
 /**
@@ -129,8 +163,8 @@ package mapper {
    * ML登録申請情報テーブルの操作を行う
    */
   private[dao] object MlProposalMetaMapper
-      extends MlProposalMapper
-      with LongKeyedMetaMapper[MlProposalMapper] {
+    extends MlProposalMapper
+    with LongKeyedMetaMapper[MlProposalMapper] {
     override def dbTableName = "ml_proposal"
     override def fieldOrder = List(
       id, proposerName, proposerEmail, mlTitle, status,
@@ -141,8 +175,9 @@ package mapper {
    * ML登録申請情報のモデルクラス
    */
   private[dao] class MlProposalMapper
-      extends LongKeyedMapper[MlProposalMapper]
-      with IdPK with CreatedUpdated {
+    extends LongKeyedMapper[MlProposalMapper]
+    with IdPK with CreatedUpdated {
+    
     def getSingleton = MlProposalMetaMapper
 
     object proposerName extends MappedString(this, 200)

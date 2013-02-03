@@ -21,6 +21,8 @@ import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
 import org.milmsearch.core.test.util.MockCreatable
 import org.milmsearch.core.test.util.DateUtil
+import org.milmsearch.core.exception.ResourceNotFoundException
+import org.milmsearch.core.exception.DeleteFailedException
 
 class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable {
@@ -45,6 +47,8 @@ class MlProposalServiceSuite extends FunSuite
       }
     }
   }
+
+
 
   test("search 検索条件なしで20件ずつの2ページ目のデータを検索") {
     val searchResult = ComponentRegistry.mlProposalDao.doWith(
@@ -503,4 +507,45 @@ class MlProposalServiceSuite extends FunSuite
     expect(10)(searchResult.itemsPerPage)
     expect(11)(searchResult.mlProposals.apply(0).id)
   }
+  
+    test("delete_正常") { ////
+    // mockは戻り値なしで良い。
+    val id = 1L
+
+    val m = mock[MlProposalDao]
+    m expects 'delete withArgs (1L) returning true
+
+    ComponentRegistry.mlProposalDao.doWith(m) {
+    	new MlProposalServiceImpl().delete(id)
+    }
+  }
+  
+  test("delete_ID該当なし") { ////
+    // mock は false (Not Found) を返す
+    val id = 1L
+
+    val m = mock[MlProposalDao]
+    m expects 'delete withArgs (1L) returning false
+
+    intercept[ResourceNotFoundException] {
+      ComponentRegistry.mlProposalDao.doWith(m) {
+        new MlProposalServiceImpl().delete(id)
+      }
+    }
+  }
+  
+  test("delete_サーバエラー") { ////
+    // mock は例外を発生する
+    val id = 1L
+
+    val m = mock[MlProposalDao]
+    m expects 'delete withArgs (1L) throws new DeleteFailedException("Delete failed.")
+
+    intercept[DeleteFailedException] {
+      ComponentRegistry.mlProposalDao.doWith(m) {
+        new MlProposalServiceImpl().delete(id)
+      }
+    }
+  }
+
 }

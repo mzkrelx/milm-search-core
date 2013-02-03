@@ -3,6 +3,7 @@ import java.net.URI
 import java.net.URL
 import java.util.NoSuchElementException
 import org.apache.commons.lang3.time.DateFormatUtils
+import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
@@ -28,8 +29,13 @@ import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
 import net.liftweb.json.parse
 import org.milmsearch.core.domain.Sort
+import javax.ws.rs.PathParam
+import javax.ws.rs.core.Response.Status
+import org.milmsearch.core.exception.ResourceNotFoundException
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
+
+class BadRequestException(msg: String) extends Exception(msg)
 
 /**
  * ML登録申請情報のAPIリソース
@@ -68,12 +74,11 @@ class MlProposalResource extends Loggable with PageableResource {
   @POST
   @Consumes(Array("application/json"))
   def create(requestBody: String) = {
-    val dto = parse(requestBody).extract[RequestDto]
+    val dto = parse(requestBody).extract[RequestDto] // リクエストbodyのパース、下記RequestDtoを参照
     val id = mpService.create(dto.toDomain)
 
     Response.created(
-      new URI("/ml-proposal/" + id)
-    ).build()
+      new URI("/ml-proposal/" + id)).build()
   }
 
   /**
@@ -174,23 +179,47 @@ class MlProposalResource extends Loggable with PageableResource {
     Response.serverError().build()
   }
 
+   /**
+   * ML登録申請情報を削除します。
+   *
+   * @param id ID
+   * @return 200(OK) or 400(Bad Request)
+   */
   @Path("{id}")
   @DELETE
-  def delete() = {
-    Response.serverError().build()
+  def delete(@PathParam("id") id: String): Response = { 
+    try {
+      val idOption = ResourceHelper.getLongParam(id, "id")
+      if (!idOption.isDefined) {
+        throw new BadQueryParameterException(
+            "Id is null")
+      }
+      mpService.delete(idOption.get)
+      Response.noContent().build()
+    } catch {
+      case e: ResourceNotFoundException => {
+        logger.error(e)
+        Response.status(Status.NOT_FOUND).build()
+      }
+      case e: BadQueryParameterException => {
+        logger.error(e)
+        Response.status(Status.BAD_REQUEST).build()
+      }
+    }
+    
   }
 
   /**
    * リクエストボディの変換用オブジェクト
    */
   case class RequestDto(
-      proposerName: String,
-      proposerEmail: String,
-      mlTitle: String,
-      status: String,
-      archiveType: String,
-      archiveUrl: String,
-      comment: String) {
+    proposerName: String,
+    proposerEmail: String,
+    mlTitle: String,
+    status: String,
+    archiveType: String,
+    archiveUrl: String,
+    comment: String) {
 
     /**
      * ドメインオブジェクトに変換する
