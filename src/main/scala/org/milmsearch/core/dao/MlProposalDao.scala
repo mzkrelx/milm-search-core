@@ -25,7 +25,6 @@ import mapper.{ MlProposalMetaMapper => MLPMMapper }
 import mapper.{ MlProposalMapper => MLPMapper }
 import scala.collection.mutable.ListBuffer
 import net.liftweb.mapper.QueryParam
-import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
 import net.liftweb.common.Box
@@ -68,6 +67,8 @@ trait MlProposalDao {
    * @return Long 件数
    */
   def count(filter: Option[Filter[MLPFilterBy.type]] = None): Long
+
+  def update(id: Long, request: CreateMlProposalRequest): Boolean{}
 }
 
 /**
@@ -152,6 +153,15 @@ class MlProposalDaoImpl extends MlProposalDao {
       case None => false
     }
   }
+
+  def update(id: Long, request: CreateMlProposalRequest) = {
+    val target: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
+    target match {
+      case Full(row) => mapper.MlProposalMetaMapper.save(row)
+      case Empty => false
+      case Failure(message, e, _) => throw e openOr new RuntimeException(message)
+    }
+  }
 }
 
 /**
@@ -177,7 +187,7 @@ package mapper {
   private[dao] class MlProposalMapper
     extends LongKeyedMapper[MlProposalMapper]
     with IdPK with CreatedUpdated {
-    
+
     def getSingleton = MlProposalMetaMapper
 
     object proposerName extends MappedString(this, 200)

@@ -1,11 +1,11 @@
 package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
-import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.service.MlProposalService
-import org.milmsearch.core.ComponentRegistry
 import org.scalamock.scalatest.MockFactory
 import org.scalamock.ProxyMockFactory
 import org.scalatest.FunSuite
@@ -27,6 +27,8 @@ import org.milmsearch.core.test.util.MockCreatable
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.scalatest.PrivateMethodTester
 import org.milmsearch.core.exception.ResourceNotFoundException
+import org.milmsearch.core.ComponentRegistry
+import java.util.Date
 
 class MlProposalResourceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable
@@ -65,7 +67,7 @@ class MlProposalResourceSuite extends FunSuite
       response.getMetadata().getFirst("Location")
     }
   }
-  
+
   test("createFilter 絞り込み項目と値を指定した場合") {
     val filter = new MlProposalResource invokePrivate
       PrivateMethod[Option[Filter[MLPFilterBy.type]]](
@@ -541,7 +543,7 @@ class MlProposalResourceSuite extends FunSuite
       |}""".stripMargin replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
-  
+
   test("delete_正常") {
     // mockは戻り値なしで良い。
     val id = "1"
@@ -563,7 +565,7 @@ class MlProposalResourceSuite extends FunSuite
 
     val m = mock[MlProposalService]
     //m expects 'delete withArgs (1L) returning false
-    
+
     m expects 'delete withArgs (1L) throws new ResourceNotFoundException("Not found.")
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -589,7 +591,7 @@ class MlProposalResourceSuite extends FunSuite
       response.getStatus
     }
   }
-  
+
   test("delete_id Nullエラー") {
     // mockは戻り値なしで良い。
     val id = null
@@ -605,7 +607,7 @@ class MlProposalResourceSuite extends FunSuite
       response.getStatus
     }
   }
-  
+
   /*
   test("delete_サーバエラー") {
     // mockが例外を発生させる
@@ -623,4 +625,97 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
   */
+
+  test("update full") {
+    val json = """
+      |{
+      |  "proposerName": "申請者の名前",
+      |  "proposerEmail": "proposer@example.com",
+      |  "mlTitle": "MLタイトル",
+      |  "status": "new",
+      |  "archiveType": "mailman",
+      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "comment": "コメント(MLの説明など)"
+      |}""".stripMargin
+
+      val request = CreateMlProposalRequest(
+      "申請者の名前",
+      "proposer@example.com",
+      "MLタイトル",
+      MlProposalStatus.New,
+      Some(MlArchiveType.Mailman),
+      Some(new URL("http://localhost/path/to/archive/")),
+      Some("コメント(MLの説明など)")
+    )
+
+    val id = "1": String
+    val m = mock[MlProposalService]
+    m expects 'update withArgs(id.toLong, request) returning true
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().update(id, json)
+    }
+
+    expect(204) { response.getStatus }
+  }
+
+  test("update notfound") {
+    val json = """
+      |{
+      |  "proposerName": "申請者の名前",
+      |  "proposerEmail": "proposer@example.com",
+      |  "mlTitle": "MLタイトル",
+      |  "status": "new",
+      |  "archiveType": "mailman",
+      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "comment": "コメント(MLの説明など)"
+      |}""".stripMargin
+
+      val request = CreateMlProposalRequest(
+      "申請者の名前",
+      "proposer@example.com",
+      "MLタイトル",
+      MlProposalStatus.New,
+      Some(MlArchiveType.Mailman),
+      Some(new URL("http://localhost/path/to/archive/")),
+      Some("コメント(MLの説明など)")
+    )
+
+    val id = "1": String
+    val m = mock[MlProposalService]
+    m expects 'update withArgs(id.toLong, request) returning false
+
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().update(id, json)
+    }
+
+    expect(404) { response.getStatus }
+  }
+
+  test("update id illegal format") {
+    val json = """
+      |{
+      |  "proposerName": "申請者の名前",
+      |  "proposerEmail": "proposer@example.com",
+      |  "mlTitle": "MLタイトル",
+      |  "status": "new",
+      |  "archiveType": "mailman",
+      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "comment": "コメント(MLの説明など)"
+      |}""".stripMargin
+
+      val request = CreateMlProposalRequest(
+      "申請者の名前",
+      "proposer@example.com",
+      "MLタイトル",
+      MlProposalStatus.New,
+      Some(MlArchiveType.Mailman),
+      Some(new URL("http://localhost/path/to/archive/")),
+      Some("コメント(MLの説明など)")
+    )
+
+    val id = "one": String
+    val response = new MlProposalResource().update(id, json)
+    expect(400) { response.getStatus }
+  }
 }
