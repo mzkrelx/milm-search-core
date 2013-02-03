@@ -35,6 +35,7 @@ import javax.ws.rs.PathParam
 import javax.ws.rs.core.Response.Status
 import org.milmsearch.core.exception.ResourceNotFoundException
 import net.liftweb.json.MappingException
+import ResourceHelper._
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
 class BadRequestException(msg: String) extends Exception(msg)
@@ -116,10 +117,8 @@ class MlProposalResource extends Loggable with PageableResource {
     try {
       Response.ok(toDto(mpService.search(
         createPage(
-          ResourceHelper.getLongParam(startPage, "startPage")
-            getOrElse defaultStartPage,
-          ResourceHelper.getLongParam(count, "count")
-            getOrElse defaultCount),
+          getLongParam(startPage) getOrElse defaultStartPage,
+          getLongParam(count) getOrElse defaultCount),
         createSort(Option(sortBy), Option(sortOrder)),
         createFilter(Option(filterBy), Option(filterValue))
       )).toJson).build()
@@ -184,27 +183,15 @@ class MlProposalResource extends Loggable with PageableResource {
   @GET
   def show(@PathParam("id")id: String) = {
     try {
-      val idOption = ResourceHelper.getLongParam(id, "id")
-      if (! idOption.isDefined) {
-        throw new BadQueryParameterException(
-          "Param 'id' is not passed.")
+      getLongParam(id) match {
+        case None => err400("Param 'id' is not passed.")
+        case Some(id) => mpService.find(id) match {
+          case None => err404("Not Found.")
+          case Some(mlp) => ok(toDto(mlp).toJson)
+        }
       }
-
-      val mlpOption = mpService.find(idOption.get)
-      if (! mlpOption.isDefined) {
-        throw new ResourceNotFoundException("Not Found.")
-      }
-
-      Response.ok(toDto(mlpOption.get).toJson).build()
     } catch {
-      case e: BadQueryParameterException => {
-        logger.error(e)
-        Response.status(Response.Status.BAD_REQUEST).build()
-      }
-      case e: ResourceNotFoundException => {
-        logger.error(e)
-        Response.status(Response.Status.NOT_FOUND).build()
-      }
+      case e: BadQueryParameterException => err400(e.getMessage)
     }
   }
 
@@ -242,7 +229,7 @@ class MlProposalResource extends Loggable with PageableResource {
   @DELETE
   def delete(@PathParam("id") id: String): Response = {
     try {
-      val idOption = ResourceHelper.getLongParam(id, "id")
+      val idOption = getLongParam(id)
       if (!idOption.isDefined) {
         throw new BadQueryParameterException(
             "Id is null")

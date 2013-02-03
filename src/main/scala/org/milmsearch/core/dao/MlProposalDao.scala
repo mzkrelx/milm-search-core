@@ -82,11 +82,11 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
 
   def find(id: Long) = {
     MLPMMapper.find(id) match {
-      case Full(mapper) => Some(toDomain(mapper))
       case Empty => None
+      case Full(mapper) => Some(toDomain(mapper))
       case Failure(message, e, _) => {
         logger.error(message, e)
-        throw new DataAccessException("データ取得に失敗しました。")
+        throw new DataAccessException("Failed to retrieve the data.")
       }
     }
   }

@@ -95,7 +95,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
       mlProposals.length.toLong min page.count, mlProposals)
   }
 
-  def find(id: Long) = mpDao.find(id);
+  def find(id: Long) = mpDao.find(id)
 
   def update(id: Long, request: CreateMlProposalRequest) = mpDao.update(id, request)
 
