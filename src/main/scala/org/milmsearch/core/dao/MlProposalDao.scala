@@ -1,14 +1,17 @@
 package org.milmsearch.core.dao
+
 import java.net.URL
+import org.milmsearch.core.ComponentRegistry.{dateTimeService => Time}
 import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.{ MlProposalSortBy => MLPSortBy }
-import org.milmsearch.core.domain.{ MlProposalFilterBy => MLPFilterBy }
-import org.milmsearch.core.domain.{ MlProposalStatus => MLPStatus }
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import net.liftweb.mapper.MappedDateTime
 import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
@@ -21,8 +24,8 @@ import net.liftweb.mapper.CreatedUpdated
 import net.liftweb.mapper.By
 import net.liftweb.mapper.StartAt
 import net.liftweb.mapper.MaxRows
-import mapper.{ MlProposalMetaMapper => MLPMMapper }
-import mapper.{ MlProposalMapper => MLPMapper }
+import mapper.{MlProposalMetaMapper => MLPMMapper}
+import mapper.{MlProposalMapper => MLPMapper}
 import scala.collection.mutable.ListBuffer
 import net.liftweb.mapper.QueryParam
 import org.milmsearch.core.domain.MlArchiveType
@@ -76,7 +79,24 @@ trait MlProposalDao {
  */
 class MlProposalDaoImpl extends MlProposalDao {
   def find(id: Long) = None
-  def create(request: CreateMlProposalRequest) = 0L
+  def create(request: CreateMlProposalRequest) = toMapper(request).saveMe().id
+
+  /**
+   * ML登録申請情報ドメインを Mapper オブジェクトに変換する
+   */
+  private def toMapper(request: CreateMlProposalRequest): MLPMapper = {
+    val now = Time().now().toDate
+    MLPMMapper.create
+      .proposerName(request.proposerName)
+      .proposerEmail(request.proposerEmail)
+      .mlTitle(request.mlTitle)
+      .status(request.status.toString)
+      .archiveType(request.archiveType map { _.toString } getOrElse null)
+      .archiveUrl(request.archiveUrl map { _.toString } getOrElse null)
+      .message(request.comment getOrElse null)
+      .createdAt(now)
+      .updatedAt(now)
+  }
 
   def findAll(range: Range,
     sort: Option[Sort[MLPSortBy.type]] = None,
@@ -106,8 +126,8 @@ class MlProposalDaoImpl extends MlProposalDao {
       mapper.proposerName.get,
       mapper.proposerEmail.get,
       mapper.mlTitle.get,
-      mapper.status.get,
-      Option(mapper.archiveType.get),
+      MLPStatus.withName(mapper.status.get),
+      Option(MlArchiveType.withName(mapper.archiveType.get)),
       Option(new URL(mapper.archiveUrl.get)),
       Option(mapper.message.get),
       mapper.createdAt.get,
@@ -127,7 +147,7 @@ class MlProposalDaoImpl extends MlProposalDao {
 
   def toBy(filter: Filter[MLPFilterBy.type]) = filter match {
     case Filter(MLPFilterBy.Status, v: MLPStatus.Value) =>
-      By(MLPMMapper.status, v)
+      By(MLPMMapper.status, v.toString)
     case _ => throw new NoSuchFieldException(
       "Can't convert Filter to By")
   }
@@ -184,19 +204,18 @@ package mapper {
   /**
    * ML登録申請情報のモデルクラス
    */
-  private[dao] class MlProposalMapper
-    extends LongKeyedMapper[MlProposalMapper]
-    with IdPK with CreatedUpdated {
-
+  private[dao] class MlProposalMapper extends
+      LongKeyedMapper[MlProposalMapper] with IdPK {
     def getSingleton = MlProposalMetaMapper
 
     object proposerName extends MappedString(this, 200)
     object proposerEmail extends MappedEmail(this, 200)
     object mlTitle extends MappedString(this, 200)
-    object status extends MappedEnum(this, MLPStatus)
-    object archiveType extends MappedEnum(this, MlArchiveType)
+    object status extends MappedString(this, 200)
+    object archiveType extends MappedString(this, 200)
     object archiveUrl extends MappedText(this)
     object message extends MappedText(this)
+    object createdAt extends MappedDateTime(this)
+    object updatedAt extends MappedDateTime(this)
   }
-
 }

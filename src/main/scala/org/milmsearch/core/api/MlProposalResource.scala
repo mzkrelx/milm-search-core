@@ -35,9 +35,9 @@ import org.milmsearch.core.domain.Sort
 import javax.ws.rs.PathParam
 import javax.ws.rs.core.Response.Status
 import org.milmsearch.core.exception.ResourceNotFoundException
+import net.liftweb.json.MappingException
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
-
 class BadRequestException(msg: String) extends Exception(msg)
 
 /**
@@ -77,11 +77,22 @@ class MlProposalResource extends Loggable with PageableResource {
   @POST
   @Consumes(Array("application/json"))
   def create(requestBody: String) = {
-    val dto = parse(requestBody).extract[RequestDto] // リクエストbodyのパース、下記RequestDtoを参照
+    val dto = try {
+      parse(requestBody).extract[RequestDto]
+    } catch {
+      case e: MappingException => {
+        logger.warn(e)
+        throw new BadRequestException("invalid json format")
+      }
+    }
+
+    if (dto.status != "new") {
+      throw new BadRequestException("status is allowed only 'new'")
+    }
+
     val id = mpService.create(dto.toDomain)
 
-    Response.created(
-      new URI("/ml-proposal/" + id)).build()
+    Response.created(new URI("/ml-proposal/" + id)).build()
   }
 
   /**
