@@ -507,8 +507,8 @@ class MlProposalServiceSuite extends FunSuite
     expect(10)(searchResult.itemsPerPage)
     expect(11)(searchResult.mlProposals.apply(0).id)
   }
-  
-    test("delete_正常") { ////
+
+  test("delete_正常") { ////
     // mockは戻り値なしで良い。
     val id = 1L
 
@@ -519,7 +519,7 @@ class MlProposalServiceSuite extends FunSuite
     	new MlProposalServiceImpl().delete(id)
     }
   }
-  
+
   test("delete_ID該当なし") { ////
     // mock は false (Not Found) を返す
     val id = 1L
@@ -533,7 +533,7 @@ class MlProposalServiceSuite extends FunSuite
       }
     }
   }
-  
+
   test("delete_サーバエラー") { ////
     // mock は例外を発生する
     val id = 1L
@@ -548,4 +548,25 @@ class MlProposalServiceSuite extends FunSuite
     }
   }
 
+  test("find") {
+    val mlp = ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'find withArgs(1) returning (Option(
+          MlProposal(
+            1,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル",
+            MLPStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30"))))
+      }) {
+        new MlProposalServiceImpl().find(1)
+      }
+
+    expect(1)(mlp.get.id)
+  }
 }

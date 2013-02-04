@@ -1,15 +1,31 @@
 package org.milmsearch.core.api
+import javax.ws.rs.core.Response
+import net.liftweb.common.Loggable
 
-object ResourceHelper {
-  def getLongParam(param: String, paramName: String): Option[Long] =
+
+object ResourceHelper extends Loggable {
+  def getLongParam(param: String): Option[Long] =
     param match {
       case null => None
-      case numeric => 
+      case p =>
         try {
-          Some(numeric.toLong)
+          Some(p.toLong)
         } catch {
             case e: NumberFormatException => throw new BadQueryParameterException(
-              "Invalid [%s] value. [%s]" format (paramName, param))
+              "[%s] is not numeric." format (param))
         }
     }
+
+  def ok(body: String) = Response.ok(body).build()
+
+  def err400(msg: String): Response = {
+    logger.error(msg)
+    Response.status(Response.Status.BAD_REQUEST).build()
+  }
+
+  def err404(msg: String): Response = {
+    logger.error(msg)
+    Response.status(Response.Status.NOT_FOUND).build()
+  }
+
 }
