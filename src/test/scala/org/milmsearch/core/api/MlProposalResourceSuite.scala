@@ -718,4 +718,48 @@ class MlProposalResourceSuite extends FunSuite
     val response = new MlProposalResource().update(id, json)
     expect(400) { response.getStatus }
   }
+
+  test("show パラメータがすべて正常値の場合") {
+    val response = ComponentRegistry.mlProposalService.doWith(
+      createMock[MlProposalService] {
+        _ expects 'find withArgs (1) returning
+          Some(MlProposal(
+            1,
+            "申請者の名前",
+            "proposer@example.com",
+            "MLタイトル",
+            MlProposalStatus.New,
+            Some(MlArchiveType.Mailman),
+            Some(new URL("http://localhost/path/to/archive/")),
+            Some("コメント(MLの説明など)"),
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            DateUtil.createDate("2012/10/28 10:20:30")))
+      })(new MlProposalResource().show("1"))
+
+    expect(200) { response.getStatus() }
+    expect(
+      """{
+        |"id":%s,
+        |"proposerName":"申請者の名前",
+        |"proposerEmail":"proposer@example.com",
+        |"mlTitle":"MLタイトル",
+        |"status":"new",
+        |"archiveType":"mailman",
+        |"archiveUrl":"http://localhost/path/to/archive/",
+        |"comment":"コメント(MLの説明など)",
+        |"createdAt":"2012-10-28T10:20:30+09:00",
+        |"updatedAt":"2012-10-28T10:20:30+09:00"
+        |}""".stripMargin format (1) replaceAll ("\n", "")
+    ) { response.getEntity.toString }
+  }
+
+  test("show パラメータが数値でない場合") {
+    val response = new MlProposalResource().show("a")
+    expect(400) { response.getStatus() }
+  }
+
+  test("show パラメータが null の場合") {
+    val response = new MlProposalResource().show(null)
+    expect(400) { response.getStatus() }
+  }
 }

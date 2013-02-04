@@ -27,7 +27,6 @@ import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import net.liftweb.common.Loggable
 import javax.ws.rs.PathParam
-//import net.liftweb.json.parse
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.Serialization
 import net.liftweb.json.parse
@@ -36,6 +35,7 @@ import javax.ws.rs.PathParam
 import javax.ws.rs.core.Response.Status
 import org.milmsearch.core.exception.ResourceNotFoundException
 import net.liftweb.json.MappingException
+import ResourceHelper._
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
 class BadRequestException(msg: String) extends Exception(msg)
@@ -117,10 +117,8 @@ class MlProposalResource extends Loggable with PageableResource {
     try {
       Response.ok(toDto(mpService.search(
         createPage(
-          ResourceHelper.getLongParam(startPage, "startPage")
-            getOrElse defaultStartPage,
-          ResourceHelper.getLongParam(count, "count")
-            getOrElse defaultCount),
+          getLongParam(startPage) getOrElse defaultStartPage,
+          getLongParam(count) getOrElse defaultCount),
         createSort(Option(sortBy), Option(sortOrder)),
         createFilter(Option(filterBy), Option(filterValue))
       )).toJson).build()
@@ -183,8 +181,18 @@ class MlProposalResource extends Loggable with PageableResource {
 
   @Path("{id}")
   @GET
-  def show() = {
-    Response.serverError().build()
+  def show(@PathParam("id")id: String) = {
+    try {
+      getLongParam(id) match {
+        case None => err400("Param 'id' is not passed.")
+        case Some(id) => mpService.find(id) match {
+          case None => err404("Not Found.")
+          case Some(mlp) => ok(toDto(mlp).toJson)
+        }
+      }
+    } catch {
+      case e: BadQueryParameterException => err400(e.getMessage)
+    }
   }
 
   @Path("{id}")
@@ -221,7 +229,7 @@ class MlProposalResource extends Loggable with PageableResource {
   @DELETE
   def delete(@PathParam("id") id: String): Response = {
     try {
-      val idOption = ResourceHelper.getLongParam(id, "id")
+      val idOption = getLongParam(id)
       if (!idOption.isDefined) {
         throw new BadQueryParameterException(
             "Id is null")
@@ -298,7 +306,12 @@ case class MlProposalDto(
   archiveUrl: String,
   comment: String,
   createdAt: String,
-  updatedAt: String)
+  updatedAt: String) {
+  // for lift-json
+  implicit val formats = DefaultFormats
+
+  def toJson(): String = Serialization.write(this)
+}
 
 /**
  * ML登録申請検索結果の変換用オブジェクト

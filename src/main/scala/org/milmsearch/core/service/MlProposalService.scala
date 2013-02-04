@@ -46,7 +46,7 @@ trait MlProposalService {
    * @param id ID
    * @return ML登録申請情報
    */
-  def findById(id: Long): Option[MlProposal]
+  def find(id: Long): Option[MlProposal]
 
   /**
    * ML登録申請情報を更新する
@@ -95,7 +95,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
       mlProposals.length.toLong min page.count, mlProposals)
   }
 
-  def findById(id: Long) = None // TODO
+  def find(id: Long) = mpDao.find(id)
 
   def update(id: Long, request: CreateMlProposalRequest) = mpDao.update(id, request)
 
