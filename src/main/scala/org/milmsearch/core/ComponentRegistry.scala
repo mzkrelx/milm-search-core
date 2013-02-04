@@ -10,4 +10,5 @@ import net.liftweb.util.SimpleInjector
 object ComponentRegistry extends SimpleInjector {
   val mlProposalDao = new Inject[MlProposalDao](new MlProposalDaoImpl) {}
   val mlProposalService = new Inject[MlProposalService](new MlProposalServiceImpl) {}
+  val dateTimeService = new Inject[DateTimeService](new DateTimeServiceImpl) {}
 }
