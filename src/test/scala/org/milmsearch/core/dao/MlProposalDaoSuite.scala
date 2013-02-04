@@ -1,35 +1,47 @@
 package org.milmsearch.core.dao
+import java.net.URL
+import org.apache.commons.lang3.time.DateFormatUtils
+import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
 import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import org.milmsearch.core.domain.MlProposalColumn
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.Bootstrap
-import org.milmsearch.core.domain.CreateMlProposalRequest
-import org.milmsearch.core.domain.MlProposalStatus
+import org.scalatest.BeforeAndAfter
+import org.scalatest.BeforeAndAfter
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FunSuite
-import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSuite
+import mapper.{MlProposalMetaMapper => MLPMMapper}
+import mapper.MlProposalMetaMapper
+import net.liftweb.db.DB1.db1ToDb
 import net.liftweb.mapper.Ascending
 import net.liftweb.mapper.By
 import net.liftweb.mapper.DB
 import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.Schemifier
-import net.liftweb.db.DB1.db1ToDb
-import java.net.URL
-import mapper.{MlProposalMetaMapper => MLPMMapper}
-import org.apache.commons.lang3.time.DateFormatUtils
-import org.scalatest.BeforeAndAfter
-import net.liftweb.util.Props
-import net.liftweb.mapper.Schemifier
-import mapper.MlProposalMetaMapper
 
 class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     with BeforeAndAfter {
+
+  private val insert1RecordSql = """
+      | INSERT INTO ml_proposal (
+        | id,
+        | proposer_name,
+        | proposer_email,
+        | ml_title,
+        | status,
+        | archive_type,
+        | archive_url,
+        | message,
+        | created_at,
+        | updated_at
+      | ) VALUES (?,?,?,?,?,?,?,?,?,?)""".stripMargin
 
   /**
    * 全てのテストの前処理
@@ -58,19 +70,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
 
   test("findAll 1件DBに入っていて、その1件が取得できるか") {
 
-    DB.runUpdate("""
-      | INSERT INTO ML_PROPOSAL (
-        | id,
-        | proposer_name,
-        | proposer_email,
-        | ml_title,
-        | status,
-        | archive_type,
-        | archive_url,
-        | message,
-        | created_at,
-        | updated_at
-      | ) VALUES (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+    DB.runUpdate(insert1RecordSql,
       List(1, "name1", "sample@sample.com", "title",
         "accepted", "other", "http://sample.com", "message",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
@@ -96,21 +96,9 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
   }
 
   test("findAll 検索条件にあうものが取得できるか") {
-    DB.runUpdate("""
-      | INSERT INTO ML_PROPOSAL (
-        | id,
-        | proposer_name,
-        | proposer_email,
-        | ml_title,
-        | status,
-        | archive_type,
-        | archive_url,
-        | message,
-        | created_at,
-        | updated_at
-      | ) VALUES (?,?,?,?,?,?,?,?,?,?),
-      | (?,?,?,?,?,?,?,?,?,?),
-      | (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+    DB.runUpdate(insert1RecordSql + """
+      | ,(?,?,?,?,?,?,?,?,?,?)
+      | ,(?,?,?,?,?,?,?,?,?,?)""".stripMargin,
       List(
         // 1 件目
         1, "name1", "sample@sample.com", "title",
@@ -134,21 +122,9 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
   }
 
   test("findAll 並び順が指定した通りになるか") {
-    DB.runUpdate("""
-      | INSERT INTO ML_PROPOSAL (
-        | id,
-        | proposer_name,
-        | proposer_email,
-        | ml_title,
-        | status,
-        | archive_type,
-        | archive_url,
-        | message,
-        | created_at,
-        | updated_at
-      | ) VALUES (?,?,?,?,?,?,?,?,?,?),
-      | (?,?,?,?,?,?,?,?,?,?),
-      | (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+    DB.runUpdate(insert1RecordSql + """
+      | ,(?,?,?,?,?,?,?,?,?,?)
+      | ,(?,?,?,?,?,?,?,?,?,?)""".stripMargin,
       List(
         // 1 件目
         1, "name1", "sample@sample.com", "title",
@@ -175,21 +151,9 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
   }
 
   test("findAll 取得範囲が指定した通りになるか") {
-    DB.runUpdate("""
-      | INSERT INTO ML_PROPOSAL (
-        | id,
-        | proposer_name,
-        | proposer_email,
-        | ml_title,
-        | status,
-        | archive_type,
-        | archive_url,
-        | message,
-        | created_at,
-        | updated_at
-      | ) VALUES (?,?,?,?,?,?,?,?,?,?),
-      | (?,?,?,?,?,?,?,?,?,?),
-      | (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+    DB.runUpdate(insert1RecordSql + """
+      | ,(?,?,?,?,?,?,?,?,?,?)
+      | ,(?,?,?,?,?,?,?,?,?,?)""".stripMargin,
       List(
         // 1 件目
         1, "name1", "sample@sample.com", "title",
@@ -211,7 +175,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
 
   test("delete_正常") {
     val id = 1L
-    DB.runUpdate("INSERT INTO ml_proposal VALUES(?,?,?,?,?,?,?,?,?,?)",
+    DB.runUpdate(insert1RecordSql,
         List(1, "name2", "sample2@sample.com", "title2", 2, 1,
             "http://sample.com2", "message2", "2012-10-10 10:10:11", "2012-10-11 10:10:11"
             )) // 一旦挿入して、（prepared statement）
@@ -240,13 +204,13 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
       "changedName",
       "proposer@example.com",
       "MLタイトル",
-      MlProposalStatus.New,
+      MLPStatus.New,
       Some(MlArchiveType.Mailman),
       Some(new URL("http://localhost/path/to/archive/")),
       Some("コメント(MLの説明など)"))
 
     val id = 1L
-    DB.runUpdate("INSERT INTO ml_proposal VALUES(?,?,?,?,?,?,?,?,?,?)",
+    DB.runUpdate(insert1RecordSql,
       List(1, "name1", "sample1@sample.com", "title1", 2, 1,
         "http://sample.com2", "message2", "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
 
@@ -270,19 +234,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
   test("update failure") { pending }
 
   test("find 1件DBに入っていて、その1件が取得できるか") {
-    DB.runUpdate("""
-      | INSERT INTO ml_proposal (
-        | id,
-        | proposer_name,
-        | proposer_email,
-        | ml_title,
-        | status,
-        | archive_type,
-        | archive_url,
-        | message,
-        | created_at,
-        | updated_at
-      | ) VALUES (?,?,?,?,?,?,?,?,?,?)""".stripMargin,
+    DB.runUpdate(insert1RecordSql,
       List(1, "name1", "sample@sample.com", "title",
         "accepted", "other", "http://sample.com", "message",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
@@ -301,5 +253,27 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
       DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.get.createdAt))
     expect("2012-10-11T10:10:11")(
       DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.get.updatedAt))
+  }
+
+  test("update(id, column, value) proposerNameを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11"))
+
+    expect(true) {
+      new MlProposalDaoImpl().update(
+        1, MlProposalColumn.ProposerName, "hideo")
+    }
+
+    val mlp = new MlProposalDaoImpl().find(1)
+    expect("hideo")(mlp.get.proposerName)
+  }
+
+  test("update(id, column, value) 存在しないIDを指定") {
+    expect(false) {
+      new MlProposalDaoImpl().update(
+        1, MlProposalColumn.ProposerName, "hideo")
+    }
   }
 }

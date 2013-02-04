@@ -1,28 +1,28 @@
 package org.milmsearch.core.service
 import java.net.URL
-import java.util.Calendar
-import org.milmsearch.core.dao.NoSuchFieldException
 import org.milmsearch.core.dao.MlProposalDao
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.dao.NoSuchFieldException
 import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
+import org.milmsearch.core.exception.DeleteFailedException
+import org.milmsearch.core.exception.ResourceNotFoundException
+import org.milmsearch.core.test.util.DateUtil
+import org.milmsearch.core.test.util.MockCreatable
 import org.milmsearch.core.ComponentRegistry
 import org.scalamock.scalatest.MockFactory
-import org.scalamock.ProxyMockFactory
 import org.scalamock.Mock
+import org.scalamock.ProxyMockFactory
 import org.scalatest.FunSuite
-import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
-import org.milmsearch.core.test.util.MockCreatable
-import org.milmsearch.core.test.util.DateUtil
-import org.milmsearch.core.exception.ResourceNotFoundException
-import org.milmsearch.core.exception.DeleteFailedException
+import org.milmsearch.core.domain.MlProposalColumn
 
 class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable {
@@ -565,5 +565,16 @@ class MlProposalServiceSuite extends FunSuite
       }
 
     expect(1)(mlp.get.id)
+  }
+
+  test("accept") {
+    ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'update withArgs(
+          1, MlProposalColumn.Status, MLPStatus.Accepted.toString
+        ) returning (true)
+      }) {
+        new MlProposalServiceImpl().accept(1)
+      }
   }
 }

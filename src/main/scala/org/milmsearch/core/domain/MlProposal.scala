@@ -91,3 +91,18 @@ object MlProposalSortBy extends SortByEnum {
   val CreatedAt     = Value("createdAt")
   val UpdatedAt     = Value("updatedAt")
 }
+
+/**
+ * ML登録申請の項目
+ */
+object MlProposalColumn extends Enumeration {
+  val ProposerName  = Value("proposerName")
+  val ProposerEmail = Value("proposerEmail")
+  val MlTitle       = Value("mlTitle")
+  val Status        = Value("status")
+  val ArchiveType   = Value("archiveType")
+  val ArchiveUrl    = Value("archiveUrl")
+  val Comment       = Value("comment")
+  val CreatedAt     = Value("createdAt")
+  val UpdatedAt     = Value("updatedAt")
+}

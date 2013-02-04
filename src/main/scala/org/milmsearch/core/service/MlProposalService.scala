@@ -8,10 +8,12 @@ import org.milmsearch.core.domain.{MlProposalSearchResult => MLPSearchResult}
 import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Sort
-import org.milmsearch.core.ComponentRegistry
-import org.milmsearch.core.exception.ResourceNotFoundException
 import org.milmsearch.core.exception.DeleteFailedException
+import org.milmsearch.core.exception.ResourceNotFoundException
+import org.milmsearch.core.ComponentRegistry
 import net.liftweb.common.Loggable
+import org.milmsearch.core.domain.MlProposalColumn
+import org.milmsearch.core.domain.MlProposalStatus
 
 /**
  * ML登録申請情報を管理するサービス
@@ -27,7 +29,6 @@ trait MlProposalService {
   def create(request: CreateMlProposalRequest): Long
 
   /**
-<<<<<<< HEAD
    * 検索結果情報を取得する
    *
    * @param filter 検索条件
@@ -65,6 +66,13 @@ trait MlProposalService {
   @throws(classOf[ResourceNotFoundException])
   @throws(classOf[DeleteFailedException])
   def delete(id: Long)
+
+  /**
+   * ML登録申請情報を承認する
+   *
+   * @param id ID
+   */
+  def accept(id: Long)
 }
 
 /**
@@ -107,8 +115,8 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
       }
     } catch {
       case e: ResourceNotFoundException => {
-    	logger.error(e) 
-    	throw e
+      	logger.error(e)
+      	throw e
       }
       case e => {
         logger.error(e)
@@ -117,6 +125,12 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
       }
     }
   }
+
+  def accept(id: Long) {
+    if (!mpDao.update(id, MlProposalColumn.Status,
+        MlProposalStatus.Accepted.toString)) {
+      throw new ResourceNotFoundException(
+        "MlProposal to accept is not found.")
+    }
+  }
 }
-
-
