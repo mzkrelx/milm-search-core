@@ -147,8 +147,9 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
 
   /**
    * 指定された情報のmapperを返す
-   * @param id cccID
-   * return Option[MLPMapper] or None or Exception
+   * @param id ID
+   * @return Option[MLPMapper]
+   * @throws FindException
    */
   private def findMapper(id: Long):Option[MLPMapper] =
     MLPMMapper.find(id) match {

@@ -99,7 +99,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
 
   def update(id: Long, request: CreateMlProposalRequest) = mpDao.update(id, request)
 
-  def delete(id: Long) = {
+  def delete(id: Long) {
     try {
       val isDeleted = mpDao.delete(id)
       if (! isDeleted) {
@@ -108,8 +108,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
     } catch {
       case e: ResourceNotFoundException => {
     	logger.error(e) 
-    	throw new ResourceNotFoundException(
-    	  "Not found.")
+    	throw e
       }
       case e => {
         logger.error(e)
