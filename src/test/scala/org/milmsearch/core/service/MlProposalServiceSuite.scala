@@ -508,8 +508,7 @@ class MlProposalServiceSuite extends FunSuite
     expect(11)(searchResult.mlProposals.apply(0).id)
   }
 
-  test("delete_正常") { ////
-    // mockは戻り値なしで良い。
+  test("delete_正常") {
     val id = 1L
 
     val m = mock[MlProposalDao]
@@ -520,8 +519,7 @@ class MlProposalServiceSuite extends FunSuite
     }
   }
 
-  test("delete_ID該当なし") { ////
-    // mock は false (Not Found) を返す
+  test("delete_ID該当なし") {
     val id = 1L
 
     val m = mock[MlProposalDao]
@@ -534,8 +532,7 @@ class MlProposalServiceSuite extends FunSuite
     }
   }
 
-  test("delete_サーバエラー") { ////
-    // mock は例外を発生する
+  test("delete_サーバエラー") {
     val id = 1L
 
     val m = mock[MlProposalDao]
