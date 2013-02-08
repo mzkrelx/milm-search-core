@@ -316,7 +316,8 @@ class MlProposalResource extends Loggable with PageableResource {
       mlp.archiveUrl map { _.toString } getOrElse "",
       mlp.comment getOrElse "",
       dateFormat.format(mlp.createdAt),
-      dateFormat.format(mlp.updatedAt))
+      dateFormat.format(mlp.updatedAt),
+      mlp.judgedAt map { dateFormat.format(_) } getOrElse "")
 }
 
 
@@ -333,7 +334,8 @@ case class MlProposalDto(
   archiveUrl: String,
   comment: String,
   createdAt: String,
-  updatedAt: String) {
+  updatedAt: String,
+  judgedAt: String) {
   // for lift-json
   implicit val formats = DefaultFormats
 

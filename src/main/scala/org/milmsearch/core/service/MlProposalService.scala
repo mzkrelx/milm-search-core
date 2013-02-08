@@ -95,10 +95,11 @@ class SearchFailedException(msg: String) extends Exception(msg)
  */
 class MlProposalServiceImpl extends MlProposalService with Loggable {
 
-  /**
-   * ML登録申請情報 DAO
-   */
+  /** ML登録申請情報 DAO */
   private def mpDao = ComponentRegistry.mlProposalDao()
+
+  /** 日付サービス */
+  private def dateTimeService = ComponentRegistry.dateTimeService()
 
   def create(request: CreateMlProposalRequest) =
     mpDao.create(request)
@@ -137,16 +138,18 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
   }
 
   def accept(id: Long) {
-    if (!mpDao.update(id, MlProposalColumn.Status,
-        MlProposalStatus.Accepted.toString)) {
+    if (!mpDao.update(id, List(
+        (MlProposalColumn.Status, MlProposalStatus.Accepted.toString),
+        (MlProposalColumn.JudgedAt, dateTimeService.now.toDate)))) {
       throw new ResourceNotFoundException(
         "MlProposal to accept is not found.")
     }
   }
 
   def reject(id: Long) {
-    if (!mpDao.update(id, MlProposalColumn.Status,
-        MlProposalStatus.Rejected.toString)) {
+    if (!mpDao.update(id, List(
+        (MlProposalColumn.Status, MlProposalStatus.Rejected.toString),
+        (MlProposalColumn.JudgedAt, dateTimeService.now.toDate)))) {
       throw new ResourceNotFoundException(
         "MlProposal to reject is not found.")
     }

@@ -26,7 +26,8 @@ case class MlProposal(
   archiveUrl: Option[URL] = None,
   comment: Option[String] = None,
   createdAt: Date,
-  updatedAt: Date
+  updatedAt: Date,
+  judgedAt: Option[Date] = None
 )
 
 /**
@@ -105,4 +106,5 @@ object MlProposalColumn extends Enumeration {
   val Comment       = Value("comment")
   val CreatedAt     = Value("createdAt")
   val UpdatedAt     = Value("updatedAt")
+  val JudgedAt      = Value("judgedAt")
 }

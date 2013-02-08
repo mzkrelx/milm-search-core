@@ -6,6 +6,7 @@ import org.milmsearch.core.domain.CreateMlProposalRequest
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MlProposalColumn
 import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
 import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
@@ -22,7 +23,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalamock.Mock
 import org.scalamock.ProxyMockFactory
 import org.scalatest.FunSuite
-import org.milmsearch.core.domain.MlProposalColumn
+import org.joda.time.DateTime
 
 class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable {
@@ -568,48 +569,90 @@ class MlProposalServiceSuite extends FunSuite
   }
 
   test("accept") {
-    ComponentRegistry.mlProposalDao.doWith(
-      createMock[MlProposalDao] { m =>
-        m expects 'update withArgs(
-          1, MlProposalColumn.Status, MLPStatus.Accepted.toString
-        ) returning (true)
-      }) {
-        new MlProposalServiceImpl().accept(1)
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
+    ComponentRegistry.dateTimeService.doWith {
+      createMock[DateTimeService] {
+        _ expects 'now returning now
       }
+    } {
+      ComponentRegistry.mlProposalDao.doWith {
+        createMock[MlProposalDao] {
+          _ expects 'update withArgs(
+            1, List(
+            (MlProposalColumn.Status, MLPStatus.Accepted.toString),
+            (MlProposalColumn.JudgedAt, now.toDate()))
+          ) returning (true)
+        }
+      } {
+          new MlProposalServiceImpl().accept(1)
+        }
+    }
   }
 
   test("accept 承認する対象が無かった場合") {
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
     intercept[ResourceNotFoundException] {
-      ComponentRegistry.mlProposalDao.doWith {
-        createMock[MlProposalDao] { m =>
-          m expects 'update withArgs(
-            1, MlProposalColumn.Status, MLPStatus.Accepted.toString
-          ) returning (false)
+      ComponentRegistry.dateTimeService.doWith {
+        createMock[DateTimeService] {
+          _ expects 'now returning now
         }
-      } { new MlProposalServiceImpl().accept(1) }
+      } {
+        ComponentRegistry.mlProposalDao.doWith {
+          createMock[MlProposalDao] {
+            _ expects 'update withArgs(
+              1, List(
+              (MlProposalColumn.Status, MLPStatus.Accepted.toString),
+              (MlProposalColumn.JudgedAt, now.toDate()))
+            ) returning (false)
+          }
+        } {
+            new MlProposalServiceImpl().accept(1)
+          }
+      }
     }
   }
 
   test("reject") {
-    ComponentRegistry.mlProposalDao.doWith(
-      createMock[MlProposalDao] { m =>
-        m expects 'update withArgs(
-          1, MlProposalColumn.Status, MLPStatus.Rejected.toString
-        ) returning (true)
-      }) {
-        new MlProposalServiceImpl().reject(1)
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
+    ComponentRegistry.dateTimeService.doWith {
+      createMock[DateTimeService] {
+        _ expects 'now returning now
       }
+    } {
+      ComponentRegistry.mlProposalDao.doWith {
+        createMock[MlProposalDao] {
+          _ expects 'update withArgs(
+            1, List(
+            (MlProposalColumn.Status, MLPStatus.Rejected.toString),
+            (MlProposalColumn.JudgedAt, now.toDate()))
+          ) returning (true)
+        }
+      } {
+          new MlProposalServiceImpl().reject(1)
+        }
+    }
   }
 
   test("reject 却下する対象が無かった場合") {
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
     intercept[ResourceNotFoundException] {
-      ComponentRegistry.mlProposalDao.doWith {
-        createMock[MlProposalDao] { m =>
-          m expects 'update withArgs(
-            1, MlProposalColumn.Status, MLPStatus.Rejected.toString
-          ) returning (false)
+      ComponentRegistry.dateTimeService.doWith {
+        createMock[DateTimeService] {
+          _ expects 'now returning now
         }
-      } { new MlProposalServiceImpl().reject(1) }
+      } {
+        ComponentRegistry.mlProposalDao.doWith {
+          createMock[MlProposalDao] {
+            _ expects 'update withArgs(
+              1, List(
+              (MlProposalColumn.Status, MLPStatus.Rejected.toString),
+              (MlProposalColumn.JudgedAt, now.toDate()))
+            ) returning (false)
+          }
+        } {
+            new MlProposalServiceImpl().reject(1)
+          }
+      }
     }
   }
 }

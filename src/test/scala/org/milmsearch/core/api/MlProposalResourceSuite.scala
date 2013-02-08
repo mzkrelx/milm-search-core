@@ -230,7 +230,8 @@ class MlProposalResourceSuite extends FunSuite
                 Some(new URL("http://localhost/path/to/archive/")),
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
-                DateUtil.createDate("2012/10/28 10:20:30"))
+                DateUtil.createDate("2012/10/28 10:20:30"),
+                None)
               } toList)
       }) {
         new MlProposalResource().list(
@@ -241,7 +242,6 @@ class MlProposalResourceSuite extends FunSuite
           sortBy      = "archiveType",
           sortOrder   = "ascending")
       }
-
     expect(200) { response.getStatus() }
     expect(
       """{
@@ -260,7 +260,8 @@ class MlProposalResourceSuite extends FunSuite
         |"archiveUrl":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
+        |"updatedAt":"2012-10-28T10:20:30+09:00",
+        |"judgedAt":""
         |}""".stripMargin format (i, i)
       } mkString ",") replaceAll ("\n", "")
     ) { response.getEntity.toString }
@@ -282,7 +283,8 @@ class MlProposalResourceSuite extends FunSuite
                 Some(new URL("http://localhost/path/to/archive/")),
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
-                DateUtil.createDate("2012/10/28 10:20:30"))
+                DateUtil.createDate("2012/10/28 10:20:30"),
+                None)
               } toList)
       }) {
         new MlProposalResource().list(
@@ -312,7 +314,8 @@ class MlProposalResourceSuite extends FunSuite
         |"archiveUrl":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
+        |"updatedAt":"2012-10-28T10:20:30+09:00",
+        |"judgedAt":""
         |}""".stripMargin format (i, i)
       } mkString ",") replaceAll ("\n", "")
     ) { response.getEntity.toString }
@@ -699,7 +702,8 @@ class MlProposalResourceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30")))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None))
       })(new MlProposalResource().show("1"))
 
     expect(200) { response.getStatus() }
@@ -714,7 +718,8 @@ class MlProposalResourceSuite extends FunSuite
         |"archiveUrl":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
+        |"updatedAt":"2012-10-28T10:20:30+09:00",
+        |"judgedAt":""
         |}""".stripMargin format (1) replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }

@@ -34,7 +34,7 @@ import net.liftweb.mapper.MaxRows
 import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.QueryParam
 import net.liftweb.mapper.StartAt
-import org.omg.CosNaming.NamingContextPackage.NotFound
+import java.util.Date
 
 /**
  * ML登録申請情報 の DAO
@@ -74,7 +74,10 @@ trait MlProposalDao {
 
   def update(id: Long, request: CreateMlProposalRequest): Boolean{}
 
-  def update(id: Long, column: MlProposalColumn.Value, value: String): Boolean
+  def update(id: Long, colVal: Pair[MlProposalColumn.Value, Object]): Boolean
+
+  def update(id: Long, colValList: List[Pair[MlProposalColumn.Value, Object]]): Boolean
+
 }
 
 /**
@@ -110,6 +113,7 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       .message(request.comment getOrElse null)
       .createdAt(now)
       .updatedAt(now)
+      .judgedAt(null)
   }
 
   def findAll(range: Range,
@@ -145,7 +149,8 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       Option(new URL(mapper.archiveUrl.get)),
       Option(mapper.message.get),
       mapper.createdAt.get,
-      mapper.updatedAt.get)
+      mapper.updatedAt.get,
+      Option(mapper.judgedAt.get))
 
   /**
    * 指定された情報のmapperを返す
@@ -198,26 +203,47 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
     }
   }
 
-  def update(id: Long, column: MlProposalColumn.Value, value: String) = {
+  def update(id: Long, colVal: Pair[MlProposalColumn.Value, Object]) = {
+    findMapper(id) match {
+      case None => false
+      case Some(mlpMapper) => {
+        setMlpMapper(mlpMapper, colVal)
+        mlpMapper.save()
+      }
+    }
+  }
+
+  def update(id: Long, colValList: List[Pair[MlProposalColumn.Value, Object]]) = {
     findMapper(id) match {
       case None => false
       case Some(mlpMapper) => {
         import MlProposalColumn._
-        column match {
-          case ProposerName  => mlpMapper.proposerName.set(value)
-          case ProposerEmail => mlpMapper.proposerEmail.set(value)
-          case MlTitle       => mlpMapper.mlTitle.set(value)
-          case Status        => mlpMapper.status.set(value)
-          case ArchiveType   => mlpMapper.archiveType.set(value)
-          case ArchiveUrl    => mlpMapper.archiveUrl.set(value)
-          case Comment       => mlpMapper.message.set(value)
-          // XXX CreatedAt と UpdateAt は Date型でないと set できなかったので保留
-          case notMlpColumn => throw new NoSuchFieldException(
-           "Can't update [%s]'s column." formatted notMlpColumn.toString)
-        }
+        import mlpMapper._
+        colValList foreach { colVal => setMlpMapper(mlpMapper, colVal) }
         mlpMapper.save()
       }
     }
+  }
+
+  private def setMlpMapper(mlpMapper: MLPMapper, colVal: Pair[MlProposalColumn.Value, Object]) {
+    import MlProposalColumn._
+    import mlpMapper._
+
+    colVal match {
+      case (ProposerName,  value: String) => proposerName.set(value)
+      case (ProposerEmail, value: String) => proposerEmail.set(value)
+      case (MlTitle,       value: String) => mlTitle.set(value)
+      case (Status,        value: String) => status.set(value)
+      case (ArchiveType,   value: String) => archiveType.set(value)
+      case (ArchiveUrl,    value: String) => archiveUrl.set(value)
+      case (Comment,       value: String) => message.set(value)
+      case (CreatedAt,     value: Date)   => createdAt.set(value)
+      case (UpdatedAt,     value: Date)   => updatedAt.set(value)
+      case (JudgedAt,      value: Date)   => judgedAt.set(value)
+      case notMlpColumn => throw new NoSuchFieldException(
+        "Can't update by [%s]." formatted (notMlpColumn.toString))
+    }
+    mlpMapper
   }
 }
 
@@ -254,5 +280,6 @@ package mapper {
     object message extends MappedText(this)
     object createdAt extends MappedDateTime(this)
     object updatedAt extends MappedDateTime(this)
+    object judgedAt extends MappedDateTime(this)
   }
 }
