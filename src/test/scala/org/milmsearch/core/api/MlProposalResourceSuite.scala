@@ -728,4 +728,43 @@ class MlProposalResourceSuite extends FunSuite
     val response = new MlProposalResource().show(null)
     expect(400) { response.getStatus() }
   }
+
+  test("accept 承認する場合") {
+    val response = ComponentRegistry.mlProposalService.doWith{
+      createMock[MlProposalService] {
+        _ expects 'accept withArgs(1)
+      }
+    } { new MlProposalResource().accept("1", "true") }
+    expect(204) { response.getStatus() }  // TODO
+  }
+
+  test("accept 却下する場合") {
+    val response = ComponentRegistry.mlProposalService.doWith{
+      createMock[MlProposalService] {
+        _ expects 'reject withArgs(1)
+      }
+    } { new MlProposalResource().accept("1", "false") }
+    expect(204) { response.getStatus() }  // TODO
+  }
+
+  test("accept ID のパラメータが数値でない場合") {
+    val response = new MlProposalResource().accept("a", "true")
+    expect(400) { response.getStatus() }
+  }
+
+  test("accept ID のパラメータが null の場合") {
+    val response = new MlProposalResource().accept(null, "true")
+    expect(400) { response.getStatus() }
+  }
+
+  test("accept 承認するか(Boolean)のパラメータが Boolean でない場合") {
+    val response = new MlProposalResource().accept("1", "a")
+    expect(400) { response.getStatus() }
+  }
+
+  test("accept 承認するか(Boolean)のパラメータが null の場合") {
+    val response = new MlProposalResource().accept("1", null)
+    expect(400) { response.getStatus() }
+  }
+
 }
