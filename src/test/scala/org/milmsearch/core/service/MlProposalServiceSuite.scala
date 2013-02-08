@@ -577,4 +577,39 @@ class MlProposalServiceSuite extends FunSuite
         new MlProposalServiceImpl().accept(1)
       }
   }
+
+  test("accept 承認する対象が無かった場合") {
+    intercept[ResourceNotFoundException] {
+      ComponentRegistry.mlProposalDao.doWith {
+        createMock[MlProposalDao] { m =>
+          m expects 'update withArgs(
+            1, MlProposalColumn.Status, MLPStatus.Accepted.toString
+          ) returning (false)
+        }
+      } { new MlProposalServiceImpl().accept(1) }
+    }
+  }
+
+  test("reject") {
+    ComponentRegistry.mlProposalDao.doWith(
+      createMock[MlProposalDao] { m =>
+        m expects 'update withArgs(
+          1, MlProposalColumn.Status, MLPStatus.Rejected.toString
+        ) returning (true)
+      }) {
+        new MlProposalServiceImpl().reject(1)
+      }
+  }
+
+  test("reject 却下する対象が無かった場合") {
+    intercept[ResourceNotFoundException] {
+      ComponentRegistry.mlProposalDao.doWith {
+        createMock[MlProposalDao] { m =>
+          m expects 'update withArgs(
+            1, MlProposalColumn.Status, MLPStatus.Rejected.toString
+          ) returning (false)
+        }
+      } { new MlProposalServiceImpl().reject(1) }
+    }
+  }
 }
