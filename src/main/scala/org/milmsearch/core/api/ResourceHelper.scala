@@ -16,6 +16,18 @@ object ResourceHelper extends Loggable {
         }
     }
 
+  def getBooleanParam(param: String): Option[Boolean] =
+    param match {
+      case null => None
+      case p =>
+        try {
+          Some(p.toBoolean)
+        } catch {
+            case e: NumberFormatException => throw new BadQueryParameterException(
+              "[%s] is not boolean." format (param))
+        }
+    }
+
   def ok(body: String) = Response.ok(body).build()
 
   def err400(msg: String): Response = {

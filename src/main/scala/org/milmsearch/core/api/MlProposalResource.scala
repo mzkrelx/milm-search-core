@@ -249,6 +249,33 @@ class MlProposalResource extends Loggable with PageableResource {
 
   }
 
+  @Path("{id}")
+  @POST
+  def accept(@PathParam("id") id: String,
+             @QueryParam("accept")isAccepting: String) = {
+    try {
+      getLongParam(id) match {
+        case None => err400("Param 'id' is not passed.")
+        case Some(i) => {
+          getBooleanParam(isAccepting) match {
+            case None => err400("Param 'accept' is not passed.")
+            case Some(true)  => {
+              mpService.accept(i)
+              Response.noContent().build() // TODO 仕様未定
+            }
+            case Some(false) => {
+              mpService.reject(i)
+              Response.noContent().build() // TODO 仕様未定
+            }
+          }
+        }
+      }
+    } catch {
+      case e: BadQueryParameterException => err400(e.getMessage)
+      case e: ResourceNotFoundException  => err404(e.getMessage)
+    }
+  }
+
   /**
    * リクエストボディの変換用オブジェクト
    */

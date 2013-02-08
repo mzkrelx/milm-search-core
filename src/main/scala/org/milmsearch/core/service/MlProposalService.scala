@@ -71,8 +71,18 @@ trait MlProposalService {
    * ML登録申請情報を承認する
    *
    * @param id ID
+   * @throws ResourceNotFoundException
    */
   def accept(id: Long)
+
+  /**
+   * ML登録申請情報を却下する
+   *
+   * @param id ID
+   * @throws ResourceNotFoundException
+   */
+  def reject(id: Long)
+
 }
 
 /**
@@ -131,6 +141,14 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
         MlProposalStatus.Accepted.toString)) {
       throw new ResourceNotFoundException(
         "MlProposal to accept is not found.")
+    }
+  }
+
+  def reject(id: Long) {
+    if (!mpDao.update(id, MlProposalColumn.Status,
+        MlProposalStatus.Rejected.toString)) {
+      throw new ResourceNotFoundException(
+        "MlProposal to reject is not found.")
     }
   }
 }
