@@ -1,8 +1,10 @@
 package org.milmsearch.core.service
 import java.net.URL
 import org.milmsearch.core.dao.MlProposalDao
+import org.milmsearch.core.dao.MLDao
 import org.milmsearch.core.dao.NoSuchFieldException
 import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.CreateMLRequest
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
@@ -19,6 +21,7 @@ import org.milmsearch.core.exception.ResourceNotFoundException
 import org.milmsearch.core.test.util.DateUtil
 import org.milmsearch.core.test.util.MockCreatable
 import org.milmsearch.core.ComponentRegistry
+import org.milmsearch.core.{ComponentRegistry => CR}
 import org.scalamock.scalatest.MockFactory
 import org.scalamock.Mock
 import org.scalamock.ProxyMockFactory
@@ -576,16 +579,38 @@ class MlProposalServiceSuite extends FunSuite
       }
     } {
       ComponentRegistry.mlProposalDao.doWith {
-        createMock[MlProposalDao] {
-          _ expects 'update withArgs(
+        createMock[MlProposalDao] { m =>
+          m expects 'update withArgs(
             1, List(
             (MlProposalColumn.Status, MLPStatus.Accepted.toString),
             (MlProposalColumn.JudgedAt, now.toDate()))
           ) returning (true)
+          m expects 'find withArgs(1L) returning Some(
+            MlProposal(
+              1,
+              "申請者の名前",
+              "proposer@example.com",
+              "MLタイトル",
+              MLPStatus.Accepted,
+              Some(MlArchiveType.Mailman),
+              Some(new URL("http://localhost/path/to/archive/")),
+              Some("コメント(MLの説明など)"),
+              DateUtil.createDate("2012/10/28 10:20:30"),
+              DateUtil.createDate("2012/10/28 10:20:30"),
+              Some(now.toDate)))
         }
       } {
-          new MlProposalServiceImpl().accept(1)
-        }
+        CR.mlDao.doWith {
+          createMock[MLDao] {
+            _ expects 'create withArgs(
+              CreateMLRequest(
+                "MLタイトル",
+                MlArchiveType.Mailman,
+                new URL("http://localhost/path/to/archive/"),
+                now.toDate)) returning 10L
+          }
+        } { new MlProposalServiceImpl().accept(1) }
+      }
     }
   }
 

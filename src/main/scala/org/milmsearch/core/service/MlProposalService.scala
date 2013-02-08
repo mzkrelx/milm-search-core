@@ -14,6 +14,7 @@ import org.milmsearch.core.ComponentRegistry
 import net.liftweb.common.Loggable
 import org.milmsearch.core.domain.MlProposalColumn
 import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.CreateMLRequest
 
 /**
  * ML登録申請情報を管理するサービス
@@ -98,6 +99,9 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
   /** ML登録申請情報 DAO */
   private def mpDao = ComponentRegistry.mlProposalDao()
 
+  /** ML情報サービス */
+  private def mlService = ComponentRegistry.mlService()
+
   /** 日付サービス */
   private def dateTimeService = ComponentRegistry.dateTimeService()
 
@@ -138,11 +142,21 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
   }
 
   def accept(id: Long) {
+    val now = dateTimeService.now.toDate
     if (!mpDao.update(id, List(
         (MlProposalColumn.Status, MlProposalStatus.Accepted.toString),
-        (MlProposalColumn.JudgedAt, dateTimeService.now.toDate)))) {
+        (MlProposalColumn.JudgedAt, now)))) {
       throw new ResourceNotFoundException(
         "MlProposal to accept is not found.")
+    }
+
+    find(id) match {
+      case None => throw new ResourceNotFoundException(
+        "ML Proposal is not found. [id=%s]" format id)
+      case Some(mlp) =>
+        mlService.create(
+          CreateMLRequest(
+            mlp.mlTitle, mlp.archiveType.get, mlp.archiveUrl.get, now))
     }
   }
 
