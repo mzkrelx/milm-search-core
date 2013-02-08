@@ -261,7 +261,8 @@ package mapper {
     override def dbTableName = "ml_proposal"
     override def fieldOrder = List(
       id, proposerName, proposerEmail, mlTitle, status,
-      archiveType, archiveUrl, message, createdAt, updatedAt)
+      archiveType, archiveUrl, message, createdAt, updatedAt,
+      judgedAt)
   }
 
   /**
