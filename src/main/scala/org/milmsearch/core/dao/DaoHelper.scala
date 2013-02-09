@@ -16,10 +16,11 @@ object DaoHelper {
    */
   def schemify() {
     Schemifier.schemify(true, Schemifier.infoF _,
-      MlProposalMetaMapper
+      MlProposalMetaMapper,
+      MLMetaMapper
     )
   }
-  
+
   /**
    * ドメインのソートをマッパーのソートに変換します。
    */

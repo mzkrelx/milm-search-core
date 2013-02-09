@@ -219,7 +219,7 @@ class MlProposalResource extends Loggable with PageableResource {
     }
   }
 
-   /**
+  /**
    * ML登録申請情報を削除します。
    *
    * @param id ID
@@ -247,6 +247,41 @@ class MlProposalResource extends Loggable with PageableResource {
       }
     }
 
+  }
+
+  /**
+   * ML登録申請情報を削除します。
+   *
+   * @param id ID
+   * @param isAcception true は承認、false は却下
+   * @return 200(OK) or 400(Bad Request) or 404(Not Found)
+   * @TODO トランザクション処理
+   */
+  @Path("{id}")
+  @POST
+  def accept(@PathParam("id") id: String,
+             @QueryParam("accept")isAccepting: String) = {
+    try {
+      getLongParam(id) match {
+        case None => err400("Param 'id' is not passed.")
+        case Some(i) => {
+          getBooleanParam(isAccepting) match {
+            case None => err400("Param 'accept' is not passed.")
+            case Some(true)  => {
+              mpService.accept(i)
+              Response.noContent().build() // TODO 仕様未定
+            }
+            case Some(false) => {
+              mpService.reject(i)
+              Response.noContent().build() // TODO 仕様未定
+            }
+          }
+        }
+      }
+    } catch {
+      case e: BadQueryParameterException => err400(e.getMessage)
+      case e: ResourceNotFoundException  => err404(e.getMessage)
+    }
   }
 
   /**
@@ -289,7 +324,8 @@ class MlProposalResource extends Loggable with PageableResource {
       mlp.archiveUrl map { _.toString } getOrElse "",
       mlp.comment getOrElse "",
       dateFormat.format(mlp.createdAt),
-      dateFormat.format(mlp.updatedAt))
+      dateFormat.format(mlp.updatedAt),
+      mlp.judgedAt map { dateFormat.format(_) } getOrElse "")
 }
 
 
@@ -306,7 +342,8 @@ case class MlProposalDto(
   archiveUrl: String,
   comment: String,
   createdAt: String,
-  updatedAt: String) {
+  updatedAt: String,
+  judgedAt: String) {
   // for lift-json
   implicit val formats = DefaultFormats
 
