@@ -219,7 +219,7 @@ class MlProposalResource extends Loggable with PageableResource {
     }
   }
 
-   /**
+  /**
    * ML登録申請情報を削除します。
    *
    * @param id ID
@@ -249,6 +249,14 @@ class MlProposalResource extends Loggable with PageableResource {
 
   }
 
+  /**
+   * ML登録申請情報を削除します。
+   *
+   * @param id ID
+   * @param isAcception true は承認、false は却下
+   * @return 200(OK) or 400(Bad Request) or 404(Not Found)
+   * @TODO トランザクション処理
+   */
   @Path("{id}")
   @POST
   def accept(@PathParam("id") id: String,
