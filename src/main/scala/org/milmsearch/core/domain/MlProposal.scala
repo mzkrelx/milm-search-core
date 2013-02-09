@@ -28,6 +28,7 @@ case class MlProposal(
   createdAt: Date,
   updatedAt: Date,
   judgedAt: Option[Date] = None
+  // TODO 管理者コメント追加
 )
 
 /**
@@ -51,6 +52,24 @@ case class CreateMlProposalRequest(
   comment: Option[String] = None
 )
 
+
+/**
+ * ML登録申請の更新情報
+ *
+ * @param mlTitle MLのタイトル
+ * @param archiveType MLのアーカイブのタイプ
+ * @param archiveUrl MLのアーカイブページのURL
+ */
+case class UpdateMlProposalRequest(
+  mlTitle: String,
+  archiveType: MlArchiveType.Value,
+  archiveUrl: URL
+  // TODO 管理者コメント追加
+)
+
+/**
+ * ML登録申請情報の検索結果
+ */
 case class MlProposalSearchResult(
   totalResults: Long,
   startIndex: Long,
