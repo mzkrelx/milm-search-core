@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response.Status
 import org.milmsearch.core.exception.ResourceNotFoundException
 import net.liftweb.json.MappingException
 import ResourceHelper._
+import org.milmsearch.core.domain.UpdateMlProposalRequest
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
 class BadRequestException(msg: String) extends Exception(msg)
@@ -78,7 +79,7 @@ class MlProposalResource extends Loggable with PageableResource {
   @Consumes(Array("application/json"))
   def create(requestBody: String) = {
     val dto = try {
-      parse(requestBody).extract[RequestDto]
+      parse(requestBody).extract[CreateRequestDto]
     } catch {
       case e: MappingException => {
         logger.warn(e)
@@ -195,27 +196,37 @@ class MlProposalResource extends Loggable with PageableResource {
     }
   }
 
+  /**
+   * ML登録申請情報を更新します。
+   *
+   * @param id
+   * @param requestBody
+   */
   @Path("{id}")
   @PUT
-  def update(@PathParam("id") id: String, requestBody: String) : Response = {
-    val dto = parse(requestBody).extract[RequestDto]
-
-    def stringToLong(str: String) =
-	    try {
-	      str.toLong
-	    } catch {
-	      case e:NumberFormatException => throw new BadQueryParameterException("illegal format")
-	    }
-
+  def update(@PathParam("id") id: String, requestBody: String) = {
     try {
-	    if(mpService.update(stringToLong(id), dto.toDomain)){
-	    	Response.noContent().build()
-	    } else {
-	    	Response.status(Status.NOT_FOUND).build()
-	    }
+      getLongParam(id) match {
+        case None => err400("Param 'id' is not passed.")
+        case Some(x) => {
+          val dto = try {
+            println(parse(requestBody))
+            println(parse(requestBody).extract[UpdateRequestDto])
+            parse(requestBody).extract[UpdateRequestDto]
+          } catch {
+            case e: MappingException => {
+              logger.warn(e)
+              throw new BadRequestException("invalid json format")
+            }
+          }
+          mpService.update(x, dto.toDomain)
+          noContent
+        }
+      }
     } catch {
-      case e : BadQueryParameterException => Response.status(Status.BAD_REQUEST).build() // 400
-      case e => Response.serverError().build()
+      case e @ (_: BadQueryParameterException |
+                _: BadRequestException) => err400(e.getMessage)
+      case e: ResourceNotFoundException => err404(e.getMessage)
     }
   }
 
@@ -285,9 +296,9 @@ class MlProposalResource extends Loggable with PageableResource {
   }
 
   /**
-   * リクエストボディの変換用オブジェクト
+   * 新規申請時リクエストボディの変換用オブジェクト
    */
-  case class RequestDto(
+  case class CreateRequestDto(
     proposerName: String,
     proposerEmail: String,
     mlTitle: String,
@@ -308,6 +319,21 @@ class MlProposalResource extends Loggable with PageableResource {
         Some(MlArchiveType.withName(archiveType)),
         Some(new URL(archiveUrl)),
         Some(comment))
+  }
+
+  /**
+   * 更新時リクエストボディの変換用オブジェクト
+   */
+  case class UpdateRequestDto(
+    mlTitle: String,
+    archiveType: String,
+    archiveUrl: String) {
+
+    def toDomain =
+      UpdateMlProposalRequest(
+        mlTitle,
+        MlArchiveType.withName(archiveType),
+        new URL(archiveUrl))
   }
 
   private def toDto(result: MlProposalSearchResult):

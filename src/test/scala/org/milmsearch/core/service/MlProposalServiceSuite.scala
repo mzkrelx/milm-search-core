@@ -27,6 +27,7 @@ import org.scalamock.Mock
 import org.scalamock.ProxyMockFactory
 import org.scalatest.FunSuite
 import org.joda.time.DateTime
+import org.milmsearch.core.domain.UpdateMlProposalRequest
 
 class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable {
@@ -569,6 +570,23 @@ class MlProposalServiceSuite extends FunSuite
       }
 
     expect(1)(mlp.get.id)
+  }
+
+  test("update") {
+    import MlProposalColumn._
+    ComponentRegistry.mlProposalDao.doWith {
+      createMock[MlProposalDao] {
+        _ expects 'update withArgs(1, List((MlTitle, "new Title"),
+          (ArchiveType, MlArchiveType.Other),
+          (ArchiveUrl, new URL("http://newurl")))) returning true
+      }
+    } {
+      new MlProposalServiceImpl().update(1,
+        UpdateMlProposalRequest(
+          "new Title",
+          MlArchiveType.Other,
+          new URL("http://newurl")))
+    }
   }
 
   test("accept") {
