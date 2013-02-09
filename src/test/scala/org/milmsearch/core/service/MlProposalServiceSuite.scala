@@ -1,28 +1,32 @@
 package org.milmsearch.core.service
 import java.net.URL
-import java.util.Calendar
-import org.milmsearch.core.dao.NoSuchFieldException
 import org.milmsearch.core.dao.MlProposalDao
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.dao.MLDao
+import org.milmsearch.core.dao.NoSuchFieldException
 import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.CreateMLRequest
+import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MlProposalColumn
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
-import org.milmsearch.core.ComponentRegistry
-import org.scalamock.scalatest.MockFactory
-import org.scalamock.ProxyMockFactory
-import org.scalamock.Mock
-import org.scalatest.FunSuite
-import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
-import org.milmsearch.core.test.util.MockCreatable
-import org.milmsearch.core.test.util.DateUtil
-import org.milmsearch.core.exception.ResourceNotFoundException
 import org.milmsearch.core.exception.DeleteFailedException
+import org.milmsearch.core.exception.ResourceNotFoundException
+import org.milmsearch.core.test.util.DateUtil
+import org.milmsearch.core.test.util.MockCreatable
+import org.milmsearch.core.ComponentRegistry
+import org.milmsearch.core.{ComponentRegistry => CR}
+import org.scalamock.scalatest.MockFactory
+import org.scalamock.Mock
+import org.scalamock.ProxyMockFactory
+import org.scalatest.FunSuite
+import org.joda.time.DateTime
 
 class MlProposalServiceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable {
@@ -565,5 +569,115 @@ class MlProposalServiceSuite extends FunSuite
       }
 
     expect(1)(mlp.get.id)
+  }
+
+  test("accept") {
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
+    ComponentRegistry.dateTimeService.doWith {
+      createMock[DateTimeService] {
+        _ expects 'now returning now
+      }
+    } {
+      ComponentRegistry.mlProposalDao.doWith {
+        createMock[MlProposalDao] { m =>
+          m expects 'update withArgs(
+            1, List(
+            (MlProposalColumn.Status, MLPStatus.Accepted.toString),
+            (MlProposalColumn.JudgedAt, now.toDate()))
+          ) returning (true)
+          m expects 'find withArgs(1L) returning Some(
+            MlProposal(
+              1,
+              "申請者の名前",
+              "proposer@example.com",
+              "MLタイトル",
+              MLPStatus.Accepted,
+              Some(MlArchiveType.Mailman),
+              Some(new URL("http://localhost/path/to/archive/")),
+              Some("コメント(MLの説明など)"),
+              DateUtil.createDate("2012/10/28 10:20:30"),
+              DateUtil.createDate("2012/10/28 10:20:30"),
+              Some(now.toDate)))
+        }
+      } {
+        CR.mlDao.doWith {
+          createMock[MLDao] {
+            _ expects 'create withArgs(
+              CreateMLRequest(
+                "MLタイトル",
+                MlArchiveType.Mailman,
+                new URL("http://localhost/path/to/archive/"),
+                now.toDate)) returning 10L
+          }
+        } { new MlProposalServiceImpl().accept(1) }
+      }
+    }
+  }
+
+  test("accept 承認する対象が無かった場合") {
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
+    intercept[ResourceNotFoundException] {
+      ComponentRegistry.dateTimeService.doWith {
+        createMock[DateTimeService] {
+          _ expects 'now returning now
+        }
+      } {
+        ComponentRegistry.mlProposalDao.doWith {
+          createMock[MlProposalDao] {
+            _ expects 'update withArgs(
+              1, List(
+              (MlProposalColumn.Status, MLPStatus.Accepted.toString),
+              (MlProposalColumn.JudgedAt, now.toDate()))
+            ) returning (false)
+          }
+        } {
+            new MlProposalServiceImpl().accept(1)
+          }
+      }
+    }
+  }
+
+  test("reject") {
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
+    ComponentRegistry.dateTimeService.doWith {
+      createMock[DateTimeService] {
+        _ expects 'now returning now
+      }
+    } {
+      ComponentRegistry.mlProposalDao.doWith {
+        createMock[MlProposalDao] {
+          _ expects 'update withArgs(
+            1, List(
+            (MlProposalColumn.Status, MLPStatus.Rejected.toString),
+            (MlProposalColumn.JudgedAt, now.toDate()))
+          ) returning (true)
+        }
+      } {
+          new MlProposalServiceImpl().reject(1)
+        }
+    }
+  }
+
+  test("reject 却下する対象が無かった場合") {
+    val now = new DateTime(1986, 11, 28, 10, 12, 13, 0)
+    intercept[ResourceNotFoundException] {
+      ComponentRegistry.dateTimeService.doWith {
+        createMock[DateTimeService] {
+          _ expects 'now returning now
+        }
+      } {
+        ComponentRegistry.mlProposalDao.doWith {
+          createMock[MlProposalDao] {
+            _ expects 'update withArgs(
+              1, List(
+              (MlProposalColumn.Status, MLPStatus.Rejected.toString),
+              (MlProposalColumn.JudgedAt, now.toDate()))
+            ) returning (false)
+          }
+        } {
+            new MlProposalServiceImpl().reject(1)
+          }
+      }
+    }
   }
 }

@@ -26,7 +26,8 @@ case class MlProposal(
   archiveUrl: Option[URL] = None,
   comment: Option[String] = None,
   createdAt: Date,
-  updatedAt: Date
+  updatedAt: Date,
+  judgedAt: Option[Date] = None
 )
 
 /**
@@ -90,4 +91,20 @@ object MlProposalSortBy extends SortByEnum {
   val ArchiveType   = Value("archiveType")
   val CreatedAt     = Value("createdAt")
   val UpdatedAt     = Value("updatedAt")
+}
+
+/**
+ * ML登録申請の項目
+ */
+object MlProposalColumn extends Enumeration {
+  val ProposerName  = Value("proposerName")
+  val ProposerEmail = Value("proposerEmail")
+  val MlTitle       = Value("mlTitle")
+  val Status        = Value("status")
+  val ArchiveType   = Value("archiveType")
+  val ArchiveUrl    = Value("archiveUrl")
+  val Comment       = Value("comment")
+  val CreatedAt     = Value("createdAt")
+  val UpdatedAt     = Value("updatedAt")
+  val JudgedAt      = Value("judgedAt")
 }

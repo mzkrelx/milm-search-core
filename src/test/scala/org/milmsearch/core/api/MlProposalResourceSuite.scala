@@ -230,7 +230,8 @@ class MlProposalResourceSuite extends FunSuite
                 Some(new URL("http://localhost/path/to/archive/")),
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
-                DateUtil.createDate("2012/10/28 10:20:30"))
+                DateUtil.createDate("2012/10/28 10:20:30"),
+                None)
               } toList)
       }) {
         new MlProposalResource().list(
@@ -241,7 +242,6 @@ class MlProposalResourceSuite extends FunSuite
           sortBy      = "archiveType",
           sortOrder   = "ascending")
       }
-
     expect(200) { response.getStatus() }
     expect(
       """{
@@ -260,7 +260,8 @@ class MlProposalResourceSuite extends FunSuite
         |"archiveUrl":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
+        |"updatedAt":"2012-10-28T10:20:30+09:00",
+        |"judgedAt":""
         |}""".stripMargin format (i, i)
       } mkString ",") replaceAll ("\n", "")
     ) { response.getEntity.toString }
@@ -282,7 +283,8 @@ class MlProposalResourceSuite extends FunSuite
                 Some(new URL("http://localhost/path/to/archive/")),
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
-                DateUtil.createDate("2012/10/28 10:20:30"))
+                DateUtil.createDate("2012/10/28 10:20:30"),
+                None)
               } toList)
       }) {
         new MlProposalResource().list(
@@ -312,7 +314,8 @@ class MlProposalResourceSuite extends FunSuite
         |"archiveUrl":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
+        |"updatedAt":"2012-10-28T10:20:30+09:00",
+        |"judgedAt":""
         |}""".stripMargin format (i, i)
       } mkString ",") replaceAll ("\n", "")
     ) { response.getEntity.toString }
@@ -699,7 +702,8 @@ class MlProposalResourceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30")))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None))
       })(new MlProposalResource().show("1"))
 
     expect(200) { response.getStatus() }
@@ -714,7 +718,8 @@ class MlProposalResourceSuite extends FunSuite
         |"archiveUrl":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
-        |"updatedAt":"2012-10-28T10:20:30+09:00"
+        |"updatedAt":"2012-10-28T10:20:30+09:00",
+        |"judgedAt":""
         |}""".stripMargin format (1) replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
@@ -728,4 +733,43 @@ class MlProposalResourceSuite extends FunSuite
     val response = new MlProposalResource().show(null)
     expect(400) { response.getStatus() }
   }
+
+  test("accept 承認する場合") {
+    val response = ComponentRegistry.mlProposalService.doWith{
+      createMock[MlProposalService] {
+        _ expects 'accept withArgs(1)
+      }
+    } { new MlProposalResource().accept("1", "true") }
+    expect(204) { response.getStatus() }  // TODO
+  }
+
+  test("accept 却下する場合") {
+    val response = ComponentRegistry.mlProposalService.doWith{
+      createMock[MlProposalService] {
+        _ expects 'reject withArgs(1)
+      }
+    } { new MlProposalResource().accept("1", "false") }
+    expect(204) { response.getStatus() }  // TODO
+  }
+
+  test("accept ID のパラメータが数値でない場合") {
+    val response = new MlProposalResource().accept("a", "true")
+    expect(400) { response.getStatus() }
+  }
+
+  test("accept ID のパラメータが null の場合") {
+    val response = new MlProposalResource().accept(null, "true")
+    expect(400) { response.getStatus() }
+  }
+
+  test("accept 承認するか(Boolean)のパラメータが Boolean でない場合") {
+    val response = new MlProposalResource().accept("1", "a")
+    expect(400) { response.getStatus() }
+  }
+
+  test("accept 承認するか(Boolean)のパラメータが null の場合") {
+    val response = new MlProposalResource().accept("1", null)
+    expect(400) { response.getStatus() }
+  }
+
 }

@@ -53,7 +53,7 @@ class MlProposalDaoSpec extends FunSpec with ShouldMatchers
       id should equal (1)
 
       val (colNames, records) = DB.performQuery("SELECT * FROM ml_proposal")
-      colNames should have length 10
+      colNames should have length 11
       records  should have length 1
 
       val r = recordToMap(colNames, records.head)
@@ -67,6 +67,7 @@ class MlProposalDaoSpec extends FunSpec with ShouldMatchers
       r("message")        should equal ("コメント(MLの説明など)\nほげほげ)")
       r("created_at")     should equal (new Timestamp(now.getMillis))
       r("updated_at")     should equal (new Timestamp(now.getMillis))
+      r("judged_at")      should equal (null)
     }
 
     it("""作成要求に必要最低限の値が存在した場合は、任意項目は null の状態で
@@ -90,7 +91,7 @@ class MlProposalDaoSpec extends FunSpec with ShouldMatchers
       id should equal (1)
 
       val (colNames, records) = DB.performQuery("SELECT * FROM ml_proposal")
-      colNames should have length 10
+      colNames should have length 11
       records  should have length 1
 
       val r = recordToMap(colNames, records.head)
@@ -104,6 +105,7 @@ class MlProposalDaoSpec extends FunSpec with ShouldMatchers
       r("message")        should equal (null)
       r("created_at")     should equal (new Timestamp(now.getMillis))
       r("updated_at")     should equal (new Timestamp(now.getMillis))
+      r("judged_at")      should equal (null)
     }
   }
 

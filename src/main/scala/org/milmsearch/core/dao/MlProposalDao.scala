@@ -1,40 +1,40 @@
 package org.milmsearch.core.dao
 
 import java.net.URL
+import scala.collection.mutable.ListBuffer
 import org.milmsearch.core.ComponentRegistry.{dateTimeService => Time}
 import org.milmsearch.core.domain.CreateMlProposalRequest
-import org.milmsearch.core.domain.MlProposal
 import org.milmsearch.core.domain.Filter
+import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MlProposalColumn
+import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import mapper.{MlProposalMapper => MLPMapper}
+import mapper.{MlProposalMetaMapper => MLPMMapper}
+import net.liftweb.common.Box
+import net.liftweb.common.Empty
+import net.liftweb.common.Failure
+import net.liftweb.common.Full
+import net.liftweb.common.Loggable
+import net.liftweb.mapper.By
+import net.liftweb.mapper.CreatedUpdated
+import net.liftweb.mapper.IdPK
+import net.liftweb.mapper.LongKeyedMapper
+import net.liftweb.mapper.LongKeyedMetaMapper
 import net.liftweb.mapper.MappedDateTime
+import net.liftweb.mapper.MappedEmail
 import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.MappedString
 import net.liftweb.mapper.MappedText
-import net.liftweb.mapper.LongKeyedMapper
-import net.liftweb.mapper.OrderBy
-import net.liftweb.mapper.LongKeyedMetaMapper
-import net.liftweb.mapper.MappedEmail
-import net.liftweb.mapper.IdPK
-import net.liftweb.mapper.CreatedUpdated
-import net.liftweb.mapper.By
-import net.liftweb.mapper.StartAt
 import net.liftweb.mapper.MaxRows
-import mapper.{MlProposalMetaMapper => MLPMMapper}
-import mapper.{MlProposalMapper => MLPMapper}
-import scala.collection.mutable.ListBuffer
+import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.QueryParam
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposal
-import net.liftweb.common.Box
-import net.liftweb.common.Full
-import net.liftweb.common.Empty
-import net.liftweb.common.Failure
-import net.liftweb.common.Loggable
+import net.liftweb.mapper.StartAt
+import java.util.Date
 
 /**
  * ML登録申請情報 の DAO
@@ -73,6 +73,11 @@ trait MlProposalDao {
   def count(filter: Option[Filter[MLPFilterBy.type]] = None): Long
 
   def update(id: Long, request: CreateMlProposalRequest): Boolean{}
+
+  def update(id: Long, colVal: Pair[MlProposalColumn.Value, Object]): Boolean
+
+  def update(id: Long, colValList: List[Pair[MlProposalColumn.Value, Object]]): Boolean
+
 }
 
 /**
@@ -108,6 +113,7 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       .message(request.comment getOrElse null)
       .createdAt(now)
       .updatedAt(now)
+      .judgedAt(null)
   }
 
   def findAll(range: Range,
@@ -143,7 +149,8 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       Option(new URL(mapper.archiveUrl.get)),
       Option(mapper.message.get),
       mapper.createdAt.get,
-      mapper.updatedAt.get)
+      mapper.updatedAt.get,
+      Option(mapper.judgedAt.get))
 
   /**
    * 指定された情報のmapperを返す
@@ -196,6 +203,48 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
     }
   }
 
+  def update(id: Long, colVal: Pair[MlProposalColumn.Value, Object]) = {
+    findMapper(id) match {
+      case None => false
+      case Some(mlpMapper) => {
+        setMlpMapper(mlpMapper, colVal)
+        mlpMapper.save()
+      }
+    }
+  }
+
+  def update(id: Long, colValList: List[Pair[MlProposalColumn.Value, Object]]) = {
+    findMapper(id) match {
+      case None => false
+      case Some(mlpMapper) => {
+        import MlProposalColumn._
+        import mlpMapper._
+        colValList foreach { colVal => setMlpMapper(mlpMapper, colVal) }
+        mlpMapper.save()
+      }
+    }
+  }
+
+  private def setMlpMapper(mlpMapper: MLPMapper, colVal: Pair[MlProposalColumn.Value, Object]) {
+    import MlProposalColumn._
+    import mlpMapper._
+
+    colVal match {
+      case (ProposerName,  value: String) => proposerName.set(value)
+      case (ProposerEmail, value: String) => proposerEmail.set(value)
+      case (MlTitle,       value: String) => mlTitle.set(value)
+      case (Status,        value: String) => status.set(value)
+      case (ArchiveType,   value: String) => archiveType.set(value)
+      case (ArchiveUrl,    value: String) => archiveUrl.set(value)
+      case (Comment,       value: String) => message.set(value)
+      case (CreatedAt,     value: Date)   => createdAt.set(value)
+      case (UpdatedAt,     value: Date)   => updatedAt.set(value)
+      case (JudgedAt,      value: Date)   => judgedAt.set(value)
+      case notMlpColumn => throw new NoSuchFieldException(
+        "Can't update by [%s]." formatted (notMlpColumn.toString))
+    }
+    mlpMapper
+  }
 }
 
 /**
@@ -212,7 +261,8 @@ package mapper {
     override def dbTableName = "ml_proposal"
     override def fieldOrder = List(
       id, proposerName, proposerEmail, mlTitle, status,
-      archiveType, archiveUrl, message, createdAt, updatedAt)
+      archiveType, archiveUrl, message, createdAt, updatedAt,
+      judgedAt)
   }
 
   /**
@@ -231,5 +281,6 @@ package mapper {
     object message extends MappedText(this)
     object createdAt extends MappedDateTime(this)
     object updatedAt extends MappedDateTime(this)
+    object judgedAt extends MappedDateTime(this)
   }
 }
