@@ -30,13 +30,15 @@ object ResourceHelper extends Loggable {
 
   def ok(body: String) = Response.ok(body).build()
 
-  def err400(msg: String): Response = {
-    logger.error(msg)
+  def noContent = Response.noContent.build()
+
+  def err400(logMsg: String): Response = {
+    logger.error(logMsg)
     Response.status(Response.Status.BAD_REQUEST).build()
   }
 
-  def err404(msg: String): Response = {
-    logger.error(msg)
+  def err404(logMsg: String): Response = {
+    logger.error(logMsg)
     Response.status(Response.Status.NOT_FOUND).build()
   }
 

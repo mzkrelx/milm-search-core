@@ -15,6 +15,7 @@ import net.liftweb.common.Loggable
 import org.milmsearch.core.domain.MlProposalColumn
 import org.milmsearch.core.domain.MlProposalStatus
 import org.milmsearch.core.domain.CreateMLRequest
+import org.milmsearch.core.domain.UpdateMlProposalRequest
 
 /**
  * ML登録申請情報を管理するサービス
@@ -54,10 +55,10 @@ trait MlProposalService {
    * ML登録申請情報を更新する
    *
    * @param id ID
-   * @param UpdateMlProposalRequest ML登録申請情報
-   * @return 更新対象が存在したかどうか
+   * @param updateRequest ML登録申請情報
    */
-  def update(id: Long, request: CreateMlProposalRequest): Boolean
+  @throws(classOf[ResourceNotFoundException])
+  def update(id: Long, updateRequest: UpdateMlProposalRequest)
 
   /**
    * ML登録申請情報を削除する
@@ -120,7 +121,20 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
 
   def find(id: Long) = mpDao.find(id)
 
-  def update(id: Long, request: CreateMlProposalRequest) = mpDao.update(id, request)
+  def update(id: Long, updateRequest: UpdateMlProposalRequest) {
+    def updateColValList = {
+      import MlProposalColumn._
+      import updateRequest._
+      List((MlTitle, mlTitle),
+        (ArchiveType, archiveType),
+        (ArchiveUrl, archiveUrl))
+    }
+
+    if (!mpDao.update(id, updateColValList)) {
+      throw new ResourceNotFoundException(
+        "MlProposal to update is not found. id=[%s]" format id)
+    }
+  }
 
   def delete(id: Long) {
     try {

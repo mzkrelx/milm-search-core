@@ -29,6 +29,7 @@ import org.scalatest.PrivateMethodTester
 import org.milmsearch.core.exception.ResourceNotFoundException
 import org.milmsearch.core.ComponentRegistry
 import java.util.Date
+import org.milmsearch.core.domain.UpdateMlProposalRequest
 
 class MlProposalResourceSuite extends FunSuite
     with MockFactory with ProxyMockFactory with MockCreatable
@@ -595,34 +596,22 @@ class MlProposalResourceSuite extends FunSuite
     }
   }
 
-  test("update full") {
+  test("update") {
     val json = """
       |{
-      |  "proposerName": "申請者の名前",
-      |  "proposerEmail": "proposer@example.com",
       |  "mlTitle": "MLタイトル",
-      |  "status": "new",
       |  "archiveType": "mailman",
       |  "archiveUrl": "http://localhost/path/to/archive/",
-      |  "comment": "コメント(MLの説明など)"
       |}""".stripMargin
 
-      val request = CreateMlProposalRequest(
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル",
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)")
-    )
-
-    val id = "1": String
     val m = mock[MlProposalService]
-    m expects 'update withArgs(id.toLong, request) returning true
+    m expects 'update withArgs(1,
+      UpdateMlProposalRequest("MLタイトル",
+        MlArchiveType.Mailman,
+        new URL("http://localhost/path/to/archive/")))
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().update(id, json)
+      new MlProposalResource().update("1", json)
     }
 
     expect(204) { response.getStatus }
@@ -631,37 +620,39 @@ class MlProposalResourceSuite extends FunSuite
   test("update notfound") {
     val json = """
       |{
-      |  "proposerName": "申請者の名前",
-      |  "proposerEmail": "proposer@example.com",
       |  "mlTitle": "MLタイトル",
-      |  "status": "new",
       |  "archiveType": "mailman",
       |  "archiveUrl": "http://localhost/path/to/archive/",
-      |  "comment": "コメント(MLの説明など)"
       |}""".stripMargin
 
-      val request = CreateMlProposalRequest(
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル",
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)")
-    )
-
-    val id = "1": String
     val m = mock[MlProposalService]
-    m expects 'update withArgs(id.toLong, request) returning false
+    m expects 'update withArgs(1,
+      UpdateMlProposalRequest("MLタイトル",
+        MlArchiveType.Mailman,
+        new URL("http://localhost/path/to/archive/"))
+    ) throws new ResourceNotFoundException("any")
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
-      new MlProposalResource().update(id, json)
+      new MlProposalResource().update("1", json)
     }
 
     expect(404) { response.getStatus }
   }
 
   test("update id illegal format") {
+    val json = """
+      |{
+      |  "mlTitle": "MLタイトル",
+      |  "archiveType": "mailman",
+      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |}""".stripMargin
+
+    val response = new MlProposalResource().update("one", json)
+
+    expect(400) { response.getStatus }
+  }
+
+  test("update json の項目が多い場合はエラーにならない") {
     val json = """
       |{
       |  "proposerName": "申請者の名前",
@@ -673,18 +664,27 @@ class MlProposalResourceSuite extends FunSuite
       |  "comment": "コメント(MLの説明など)"
       |}""".stripMargin
 
-      val request = CreateMlProposalRequest(
-      "申請者の名前",
-      "proposer@example.com",
-      "MLタイトル",
-      MlProposalStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)")
-    )
+    val m = mock[MlProposalService]
+    m expects 'update withArgs(1,
+      UpdateMlProposalRequest("MLタイトル",
+        MlArchiveType.Mailman,
+        new URL("http://localhost/path/to/archive/")))
 
-    val id = "one": String
-    val response = new MlProposalResource().update(id, json)
+    val response = ComponentRegistry.mlProposalService.doWith(m) {
+      new MlProposalResource().update("1", json)
+    }
+
+    expect(204) { response.getStatus }
+  }
+
+  test("update json の項目が足りない場合はエラー") {
+    val json = """
+      |{
+      |  "archiveType": "mailman",
+      |}""".stripMargin
+
+    val response = new MlProposalResource().update("1", json)
+
     expect(400) { response.getStatus }
   }
 

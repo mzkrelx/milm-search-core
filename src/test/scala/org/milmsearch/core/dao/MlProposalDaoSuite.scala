@@ -204,41 +204,6 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     }
   }
 
-  test("update full") {
-    val request = CreateMlProposalRequest(
-      "changedName",
-      "proposer@example.com",
-      "MLタイトル",
-      MLPStatus.New,
-      Some(MlArchiveType.Mailman),
-      Some(new URL("http://localhost/path/to/archive/")),
-      Some("コメント(MLの説明など)"))
-
-    val id = 1L
-    DB.runUpdate(insert1RecordSql,
-      List(1, "name1", "sample1@sample.com", "title1", 2, 1,
-        "http://sample.com2", "message2", "2012-10-10 10:10:11",
-        "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
-
-    expect(true) {
-      new MlProposalDaoImpl().update(1, request)
-    }
-
-    val (column, rows) = DB.runQuery("SELECT * FROM ml_proposal WHERE id = 1")
-
-    expect(1) {
-	  rows.head.head.toInt
-    }
-
-//    expect("changedName") {
-//      rows.head.proposerName
-//    }
-  }
-
-  test("update empty") { pending }
-
-  test("update failure") { pending }
-
   test("find 1件DBに入っていて、その1件が取得できるか") {
     DB.runUpdate(insert1RecordSql,
       List(1, "name1", "sample@sample.com", "title",

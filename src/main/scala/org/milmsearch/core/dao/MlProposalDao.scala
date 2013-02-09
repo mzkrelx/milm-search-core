@@ -72,8 +72,6 @@ trait MlProposalDao {
    */
   def count(filter: Option[Filter[MLPFilterBy.type]] = None): Long
 
-  def update(id: Long, request: CreateMlProposalRequest): Boolean{}
-
   def update(id: Long, colVal: Pair[MlProposalColumn.Value, Object]): Boolean
 
   def update(id: Long, colValList: List[Pair[MlProposalColumn.Value, Object]]): Boolean
@@ -191,15 +189,6 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
     mapper match {
       case Some(m) => MLPMMapper.delete_!(m)
       case None => false
-    }
-  }
-
-  def update(id: Long, request: CreateMlProposalRequest) = {
-    val target: Box[mapper.MlProposalMapper] = mapper.MlProposalMetaMapper.find(id)
-    target match {
-      case Full(row) => mapper.MlProposalMetaMapper.save(row)
-      case Empty => false
-      case Failure(message, e, _) => throw e openOr new RuntimeException(message)
     }
   }
 
