@@ -28,6 +28,9 @@ seq(webSettings :_*)
 
 libraryDependencies += "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
 
+// test report for jenkins (output to target/test-reports/)
+testListeners <<= target.map(t => Seq(new eu.henkelmann.sbt.JUnitXmlTestsListener(t.getAbsolutePath)))
+
 // for test
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "1.7.1" % "test",
@@ -45,6 +48,16 @@ testOptions in Test += Tests.Cleanup { loader =>
   loader.loadClass("org.milmsearch.core.test.Boot").getMethod("cleanup").invoke(null)
 }
 
-// test report for jenkins (output to target/test-reports/)
-testListeners <<= target.map(t => Seq(new eu.henkelmann.sbt.JUnitXmlTestsListener(t.getAbsolutePath)))
+// for Scct (coverage report)
+seq(ScctPlugin.instrumentSettings : _*)
+
+parallelExecution in ScctTest := false
+
+testOptions in ScctTest += Tests.Setup { loader =>
+  loader.loadClass("org.milmsearch.core.test.Boot").getMethod("setup").invoke(null)
+}
+
+testOptions in ScctTest += Tests.Cleanup { loader =>
+  loader.loadClass("org.milmsearch.core.test.Boot").getMethod("cleanup").invoke(null)
+}
 
