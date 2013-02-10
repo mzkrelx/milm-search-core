@@ -45,3 +45,6 @@ testOptions in Test += Tests.Cleanup { loader =>
   loader.loadClass("org.milmsearch.core.test.Boot").getMethod("cleanup").invoke(null)
 }
 
+// test report for jenkins (output to target/test-reports/)
+testListeners <<= target.map(t => Seq(new eu.henkelmann.sbt.JUnitXmlTestsListener(t.getAbsolutePath)))
+
