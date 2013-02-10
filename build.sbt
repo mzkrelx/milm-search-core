@@ -11,18 +11,10 @@ artifactName := { (version: ScalaVersion, module: ModuleID, artifact: Artifact) 
 // for MilmSearch
 libraryDependencies ++= Seq(
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
-  "javax.servlet" % "servlet-api" % "2.5" % "provided",
+  "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided",
   "org.apache.wink" % "wink-server" % "1.1.2-incubating",
-  "org.apache.wink" % "wink" % "1.1.2-incubating",
-  "org.apache.wink" % "wink-client" % "1.1.2-incubating",
-  "dom4j" % "dom4j" % "1.6.1",
-  "commons-logging" % "commons-logging" % "1.1.1",
-  "org.slf4j" % "slf4j-api" %  "1.6.6",
   "org.slf4j" % "slf4j-log4j12" %  "1.6.6",
-  "org.apache.lucene" % "lucene-analyzers" % "2.9.4",
-  "org.apache.lucene" % "lucene-highlighter" % "2.9.4",
   "org.apache.commons" % "commons-lang3" % "3.1",
-  "nekohtml" % "nekohtml" % "1.9.6.2",
   "net.liftweb" %% "lift-mapper" % "2.4",
   "net.liftweb" %% "lift-json" % "2.4"
 )
