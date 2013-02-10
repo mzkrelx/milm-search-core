@@ -210,8 +210,6 @@ class MlProposalResource extends Loggable with PageableResource {
         case None => err400("Param 'id' is not passed.")
         case Some(x) => {
           val dto = try {
-            println(parse(requestBody))
-            println(parse(requestBody).extract[UpdateRequestDto])
             parse(requestBody).extract[UpdateRequestDto]
           } catch {
             case e: MappingException => {
