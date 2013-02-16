@@ -45,7 +45,7 @@ trait MLService {
    * @param id ID
    * @return ML情報
    */
-  def find(id: Long): ML
+  def find(id: Long): Option[ML]
 }
 
 /**
@@ -62,5 +62,5 @@ class MLServiceImpl extends MLService with Loggable {
       sort: Option[Sort[MLSortBy.type]] = None,
       filter: Option[Filter[MLFilterBy.type]] = None) = null // TODO
 
-  def find(id: Long) = null // TODO
+  def find(id: Long) = mlDao.find(id)
 }
