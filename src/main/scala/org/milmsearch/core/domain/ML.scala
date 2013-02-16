@@ -1,6 +1,7 @@
 package org.milmsearch.core.domain
+
 import java.net.URL
-import java.util.Date
+import org.joda.time.DateTime
 
 /**
  * ML情報
@@ -17,8 +18,8 @@ case class ML(
   title: String,
   archiveType: MlArchiveType.Value,
   archiveURL: URL,
-  lastMailedAt: Date,
-  approvedAt: Date)
+  lastMailedAt: DateTime,
+  approvedAt: DateTime)
 
 /**
  * ML情報の作成要求
@@ -27,7 +28,7 @@ case class CreateMLRequest(
   title: String,
   archiveType: MlArchiveType.Value,
   archiveURL: URL,
-  approvedAt: Date)
+  approvedAt: DateTime)
 
 /**
  * ML情報の絞り込みに使える項目

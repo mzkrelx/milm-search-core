@@ -625,7 +625,7 @@ class MlProposalServiceSuite extends FunSuite
                 "MLタイトル",
                 MlArchiveType.Mailman,
                 new URL("http://localhost/path/to/archive/"),
-                now.toDate)) returning 10L
+                now)) returning 10L
           }
         } { new MlProposalServiceImpl().accept(1) }
       }

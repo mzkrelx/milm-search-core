@@ -156,10 +156,10 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
   }
 
   def accept(id: Long) {
-    val now = dateTimeService.now.toDate
+    val now = dateTimeService.now
     if (!mpDao.update(id, List(
         (MlProposalColumn.Status, MlProposalStatus.Accepted.toString),
-        (MlProposalColumn.JudgedAt, now)))) {
+        (MlProposalColumn.JudgedAt, now.toDate)))) {
       throw new ResourceNotFoundException(
         "MlProposal to accept is not found.")
     }
