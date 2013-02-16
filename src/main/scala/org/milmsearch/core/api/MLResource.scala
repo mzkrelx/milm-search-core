@@ -30,10 +30,10 @@ class MLResource extends Loggable {
   def show(@PathParam("id") id: String): Response =
     asLong(id) match {
       case Full(longID) => mlService.find(longID) match {
-        case None => err404("ML Not Found. [id=%s]" format longID)
+        case None => err404("ML Not Found. id=[%s]" format longID)
         case Some(ml) => ok(toDto(ml).toJson)
       }
-      case _ => err400("Invalid path param. [id=%s]" format id)
+      case _ => err400("Invalid path param. id=[%s]" format id)
     }
 
   /**
