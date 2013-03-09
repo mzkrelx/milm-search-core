@@ -84,22 +84,29 @@ class MLResourceSpec extends FeatureSpec
     }
 
     scenario("ML一覧を取得する") {
-      given("デフォルトの一覧条件を用いて")
+      // サービスメソッドの結果
+      val result = MLSearchResult(
+        totalResults = 10,
+        startIndex   = 1,
+        itemsPerPage = 10,
+        items = (1 to 10) map { i => ML(
+            i,
+            "MLタイトル" + i,
+            MLArchiveType.Mailman,
+            new URL("http://localhost/path/to/archive/"),
+            newDateTime(2013, 1, 1),
+            newDateTime(2013, 1, 1))
+          } toList)
       val m = createMock[MLService] {
         _ expects 'search withArgs(
-          Page(1L, 10L), None, None) returning MLSearchResult(
-            10, 1, 10, 1 to 10 map { i => ML(
-                i,
-                "MLタイトル" + i,
-                MLArchiveType.Mailman,
-                new URL("http://localhost/path/to/archive/"),
-                newDateTime(2013, 1, 1),
-                newDateTime(2013, 1, 1))
-              } toList
-        )
+          Page(1L, 10L),
+          None, // sort
+          None  // filter
+        ) returning result
       }
 
       CR.mlService.doWith(m) {
+        given("デフォルトの一覧条件を用いて")
         when("/mls に GET リクエストをすると")
         val response = new MLResource().list(
           filterBy    = null,
