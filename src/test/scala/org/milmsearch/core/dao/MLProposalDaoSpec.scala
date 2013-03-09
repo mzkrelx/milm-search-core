@@ -4,9 +4,9 @@ import java.net.URL
 import java.sql.Timestamp
 
 import org.joda.time.DateTime
-import org.milmsearch.core.domain.{CreateMlProposalRequest => CreateMLPRequest}
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import org.milmsearch.core.domain.{CreateMLProposalRequest => CreateMLPRequest}
+import org.milmsearch.core.domain.MLArchiveType
+import org.milmsearch.core.domain.{MLProposalStatus => MLPStatus}
 import org.milmsearch.core.service.DateTimeService
 import org.milmsearch.core.test.util.MockCreatable
 import org.milmsearch.core.ComponentRegistry
@@ -16,20 +16,20 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSpec
 
-import mapper.MlProposalMetaMapper
+import mapper.MLProposalMetaMapper
 import net.liftweb.mapper.DB
 import net.liftweb.mapper.Schemifier
 
 /**
- * MlProposalDao の単体テスト
+ * MLProposalDao の単体テスト
  */
-class MlProposalDaoSpec extends FunSpec with ShouldMatchers
+class MLProposalDaoSpec extends FunSpec with ShouldMatchers
     with BeforeAndAfter with ProxyMockFactory
     with MockFactory with MockCreatable {
 
   before {
     DB.runUpdate("DROP TABLE IF EXISTS ml_proposal", Nil)
-    Schemifier.schemify(true, Schemifier.infoF _, MlProposalMetaMapper)
+    Schemifier.schemify(true, Schemifier.infoF _, MLProposalMetaMapper)
   }
 
   describe("create(request) メソッドは") {
@@ -39,13 +39,13 @@ class MlProposalDaoSpec extends FunSpec with ShouldMatchers
         createMock[DateTimeService] {
 		  _ expects 'now returning now
         }) {
-          new MlProposalDaoImpl().create(
+          new MLProposalDaoImpl().create(
             CreateMLPRequest(
               "テスト 太郎",
               "proposer@example.com",
               "MLタイトル",
               MLPStatus.New,
-              Some(MlArchiveType.Mailman),
+              Some(MLArchiveType.Mailman),
               Some(new URL("http://localhost/path/to/archive/")),
               Some("コメント(MLの説明など)\nほげほげ)")))
         }
@@ -77,14 +77,14 @@ class MlProposalDaoSpec extends FunSpec with ShouldMatchers
         createMock[DateTimeService] {
 		  _ expects 'now returning now
         }) {
-          new MlProposalDaoImpl().create(
+          new MLProposalDaoImpl().create(
             CreateMLPRequest(
               "テスト 太郎",
               "proposer@example.com",
               "MLタイトル",
               MLPStatus.New,
               archiveType = None,
-              archiveUrl  = None,
+              archiveURL  = None,
               comment     = None))
         }
 

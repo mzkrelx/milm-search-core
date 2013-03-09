@@ -1,13 +1,13 @@
 package org.milmsearch.core.dao
 import java.net.URL
 import org.apache.commons.lang3.time.DateFormatUtils
-import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
-import org.milmsearch.core.domain.MlProposalColumn
+import org.milmsearch.core.domain.MLArchiveType
+import org.milmsearch.core.domain.{MLProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MLProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MLProposalStatus => MLPStatus}
+import org.milmsearch.core.domain.MLProposalColumn
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
@@ -17,8 +17,8 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FunSuite
 import org.scalatest.FunSuite
-import mapper.{MlProposalMetaMapper => MLPMMapper}
-import mapper.MlProposalMetaMapper
+import mapper.{MLProposalMetaMapper => MLPMMapper}
+import mapper.MLProposalMetaMapper
 import net.liftweb.db.DB1.db1ToDb
 import net.liftweb.mapper.Ascending
 import net.liftweb.mapper.By
@@ -27,7 +27,7 @@ import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.Schemifier
 import org.milmsearch.core.test.util.DateUtil
 
-class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
+class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     with BeforeAndAfter {
 
   private val insert1RecordSql = """
@@ -58,14 +58,14 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
 
   test("toBy ステータスが承認済みを変換") {
     expect(By(MLPMMapper.status, MLPStatus.Accepted.toString)) {
-      new MlProposalDaoImpl().toBy(
+      new MLProposalDaoImpl().toBy(
         Filter(MLPFilterBy.Status, MLPStatus.Accepted))
     }
   }
 
   test("toOrderBy 作成日時の昇順を変換") {
     expect(OrderBy(MLPMMapper.createdAt, Ascending)) {
-      new MlProposalDaoImpl().toOrderBy(
+      new MLProposalDaoImpl().toOrderBy(
         Sort(MLPSortBy.CreatedAt, SortOrder.Ascending))
     }
   }
@@ -77,7 +77,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         "accepted", "other", "http://sample.com", "message",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
 
-    val mps = new MlProposalDaoImpl().findAll(Range(0, 10))
+    val mps = new MLProposalDaoImpl().findAll(Range(0, 10))
 
     expect(1)(mps.length)
 
@@ -88,8 +88,8 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     expect("sample@sample.com")(mp.proposerEmail)
     expect("title")(mp.mlTitle)
     expect(MLPStatus.Accepted)(mp.status)
-    expect(Some(MlArchiveType.Other))(mp.archiveType)
-    expect(Some(new URL("http://sample.com")))(mp.archiveUrl)
+    expect(Some(MLArchiveType.Other))(mp.archiveType)
+    expect(Some(new URL("http://sample.com")))(mp.archiveURL)
     expect(Some("message"))(mp.comment)
     expect("2012-10-10T10:10:11")(
       DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.createdAt))
@@ -117,7 +117,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         "rejected", "other", "http://sample.com3", "message3",
         "2012-10-10 12:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
 
-    val mps = new MlProposalDaoImpl().findAll(
+    val mps = new MLProposalDaoImpl().findAll(
       Range(0, 10), None,
       Some(Filter(MLPFilterBy.Status, MLPStatus.Rejected)))
 
@@ -143,7 +143,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         "rejected", "other", "http://sample.com3", "message3",
         "2012-10-10 12:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
 
-    val mps = new MlProposalDaoImpl().findAll(
+    val mps = new MLProposalDaoImpl().findAll(
       Range(0, 10),
       Some(Sort(MLPSortBy.CreatedAt, SortOrder.Descending)),
       None)
@@ -172,7 +172,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         "rejected", "other", "http://sample.com3", "message3",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
 
-    val mps = new MlProposalDaoImpl().findAll(Range(1, 1))
+    val mps = new MLProposalDaoImpl().findAll(Range(1, 1))
 
     expect(1)(mps.length)
   }
@@ -185,7 +185,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
             "2012-10-11 10:10:11", "2012-10-12 10:10:11"
             )) // 一旦挿入して、（prepared statement）
     expect(true) {
-      new MlProposalDaoImpl().delete(id) // それを削除する
+      new MLProposalDaoImpl().delete(id) // それを削除する
     }
     expect(0) { // 削除結果を確認する
       val (columns, rows) = DB.runQuery("SELECT COUNT(id) FROM ml_proposal") //件数を取得するSQL
@@ -196,7 +196,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
   test("delete_idなし") {
     val id = 1L
     expect(false) {
-      new MlProposalDaoImpl().delete(id)
+      new MLProposalDaoImpl().delete(id)
     }
     expect(0) {
       val (columns, rows) = DB.runQuery("SELECT COUNT(id) FROM ml_proposal") //件数を取得するSQL
@@ -210,15 +210,15 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         "accepted", "other", "http://sample.com", "message",
         "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
 
-    val mlp = new MlProposalDaoImpl().find(1)
+    val mlp = new MLProposalDaoImpl().find(1)
 
     expect(1)(mlp.get.id)
     expect("name1")(mlp.get.proposerName)
     expect("sample@sample.com")(mlp.get.proposerEmail)
     expect("title")(mlp.get.mlTitle)
     expect(MLPStatus.Accepted)(mlp.get.status)
-    expect(Some(MlArchiveType.Other))(mlp.get.archiveType)
-    expect(Some(new URL("http://sample.com")))(mlp.get.archiveUrl)
+    expect(Some(MLArchiveType.Other))(mlp.get.archiveType)
+    expect(Some(new URL("http://sample.com")))(mlp.get.archiveURL)
     expect(Some("message"))(mlp.get.comment)
     expect("2012-10-10T10:10:11")(
       DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.get.createdAt))
@@ -235,18 +235,18 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
 
     expect(true) {
-      new MlProposalDaoImpl().update(
-        1, Pair(MlProposalColumn.ProposerName, "hideo"))
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.ProposerName, "hideo"))
     }
 
-    val mlp = new MlProposalDaoImpl().find(1)
+    val mlp = new MLProposalDaoImpl().find(1)
     expect("hideo")(mlp.get.proposerName)
   }
 
   test("update(id, colVal) 存在しないIDを指定") {
     expect(false) {
-      new MlProposalDaoImpl().update(
-        1, Pair(MlProposalColumn.ProposerName, "hideo"))
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.ProposerName, "hideo"))
     }
   }
 
@@ -259,13 +259,13 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
 
     expect(true) {
-      new MlProposalDaoImpl().update(
+      new MLProposalDaoImpl().update(
         1, List(
-          (MlProposalColumn.ProposerName, "hideo"),
-          (MlProposalColumn.JudgedAt, judgedAt)))
+          (MLProposalColumn.ProposerName, "hideo"),
+          (MLProposalColumn.JudgedAt, judgedAt)))
     }
 
-    val mlp = new MlProposalDaoImpl().find(1)
+    val mlp = new MLProposalDaoImpl().find(1)
     expect("hideo")(mlp.get.proposerName)
     expect("2013-01-01T00:00:00")(
       DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.get.judgedAt.get))

@@ -16,7 +16,7 @@ object DaoHelper {
    */
   def schemify() {
     Schemifier.schemify(true, Schemifier.infoF _,
-      MlProposalMetaMapper,
+      MLProposalMetaMapper,
       MLMetaMapper
     )
   }

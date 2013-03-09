@@ -3,18 +3,18 @@ package org.milmsearch.core.dao
 import java.net.URL
 import scala.collection.mutable.ListBuffer
 import org.milmsearch.core.ComponentRegistry.{dateTimeService => Time}
-import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposal
-import org.milmsearch.core.domain.MlProposalColumn
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
-import org.milmsearch.core.domain.{MlProposalStatus => MLPStatus}
+import org.milmsearch.core.domain.MLArchiveType
+import org.milmsearch.core.domain.MLProposal
+import org.milmsearch.core.domain.MLProposalColumn
+import org.milmsearch.core.domain.{MLProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MLProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.{MLProposalStatus => MLPStatus}
 import org.milmsearch.core.domain.Range
 import org.milmsearch.core.domain.Sort
-import mapper.{MlProposalMapper => MLPMapper}
-import mapper.{MlProposalMetaMapper => MLPMMapper}
+import mapper.{MLProposalMapper => MLPMapper}
+import mapper.{MLProposalMetaMapper => MLPMMapper}
 import net.liftweb.common.Box
 import net.liftweb.common.Empty
 import net.liftweb.common.Failure
@@ -39,7 +39,7 @@ import java.util.Date
 /**
  * ML登録申請情報 の DAO
  */
-trait MlProposalDao {
+trait MLProposalDao {
 
   /**
    * 検索条件と取得範囲と並び順を指定して、ML登録申請情報を検索します。
@@ -47,14 +47,14 @@ trait MlProposalDao {
    * @param filter 検索条件
    * @param range  取得範囲
    * @param sort   並び順
-   * @return List[MlProposal] ML登録申請情報のリスト
+   * @return List[MLProposal] ML登録申請情報のリスト
    */
   def findAll(range: Range,
     sort: Option[Sort[MLPSortBy.type]] = None,
-    filter: Option[Filter[MLPFilterBy.type]] = None): List[MlProposal]
+    filter: Option[Filter[MLPFilterBy.type]] = None): List[MLProposal]
 
-  def find(id: Long): Option[MlProposal]
-  def create(request: CreateMlProposalRequest): Long
+  def find(id: Long): Option[MLProposal]
+  def create(request: CreateMLProposalRequest): Long
 
   /**
    * IDを指定して、ML登録申請情報を削除します。
@@ -72,16 +72,16 @@ trait MlProposalDao {
    */
   def count(filter: Option[Filter[MLPFilterBy.type]] = None): Long
 
-  def update(id: Long, colVal: Pair[MlProposalColumn.Value, Object]): Boolean
+  def update(id: Long, colVal: Pair[MLProposalColumn.Value, Object]): Boolean
 
-  def update(id: Long, colValList: List[Pair[MlProposalColumn.Value, Object]]): Boolean
+  def update(id: Long, colValList: List[Pair[MLProposalColumn.Value, Object]]): Boolean
 
 }
 
 /**
- * MlProposalDao の実装クラス
+ * MLProposalDao の実装クラス
  */
-class MlProposalDaoImpl extends MlProposalDao with Loggable {
+class MLProposalDaoImpl extends MLProposalDao with Loggable {
 
   def find(id: Long) = {
     MLPMMapper.find(id) match {
@@ -94,12 +94,12 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
     }
   }
 
-  def create(request: CreateMlProposalRequest) = toMapper(request).saveMe().id
+  def create(request: CreateMLProposalRequest) = toMapper(request).saveMe().id
 
   /**
    * ML登録申請情報ドメインを Mapper オブジェクトに変換する
    */
-  private def toMapper(request: CreateMlProposalRequest): MLPMapper = {
+  private def toMapper(request: CreateMLProposalRequest): MLPMapper = {
     val now = Time().now().toDate
     MLPMMapper.create
       .proposerName(request.proposerName)
@@ -107,7 +107,7 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       .mlTitle(request.mlTitle)
       .status(request.status.toString)
       .archiveType(request.archiveType map { _.toString } getOrElse null)
-      .archiveUrl(request.archiveUrl map { _.toString } getOrElse null)
+      .archiveURL(request.archiveURL map { _.toString } getOrElse null)
       .message(request.comment getOrElse null)
       .createdAt(now)
       .updatedAt(now)
@@ -137,14 +137,14 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       MLPMMapper.count()
 
   private def toDomain(mapper: MLPMapper) =
-    MlProposal(
+    MLProposal(
       mapper.id.get,
       mapper.proposerName.get,
       mapper.proposerEmail.get,
       mapper.mlTitle.get,
       MLPStatus.withName(mapper.status.get),
-      Option(MlArchiveType.withName(mapper.archiveType.get)),
-      Option(new URL(mapper.archiveUrl.get)),
+      Option(MLArchiveType.withName(mapper.archiveType.get)),
+      Option(new URL(mapper.archiveURL.get)),
       Option(mapper.message.get),
       mapper.createdAt.get,
       mapper.updatedAt.get,
@@ -174,7 +174,7 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
     import MLPSortBy._
     import MLPMMapper._
     OrderBy(sort.column match {
-      case MlTitle => mlTitle
+      case MLTitle => mlTitle
       case Status => status
       case ArchiveType => archiveType
       case CreatedAt => createdAt
@@ -192,45 +192,45 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
     }
   }
 
-  def update(id: Long, colVal: Pair[MlProposalColumn.Value, Object]) = {
+  def update(id: Long, colVal: Pair[MLProposalColumn.Value, Object]) = {
     findMapper(id) match {
       case None => false
       case Some(mlpMapper) => {
-        setMlpMapper(mlpMapper, colVal)
+        setMLPMapper(mlpMapper, colVal)
         mlpMapper.save()
       }
     }
   }
 
-  def update(id: Long, colValList: List[Pair[MlProposalColumn.Value, Object]]) = {
+  def update(id: Long, colValList: List[Pair[MLProposalColumn.Value, Object]]) = {
     findMapper(id) match {
       case None => false
       case Some(mlpMapper) => {
-        import MlProposalColumn._
+        import MLProposalColumn._
         import mlpMapper._
-        colValList foreach { colVal => setMlpMapper(mlpMapper, colVal) }
+        colValList foreach { colVal => setMLPMapper(mlpMapper, colVal) }
         mlpMapper.save()
       }
     }
   }
 
-  private def setMlpMapper(mlpMapper: MLPMapper, colVal: Pair[MlProposalColumn.Value, Object]) {
-    import MlProposalColumn._
+  private def setMLPMapper(mlpMapper: MLPMapper, colVal: Pair[MLProposalColumn.Value, Object]) {
+    import MLProposalColumn._
     import mlpMapper._
 
     colVal match {
       case (ProposerName,  value: String) => proposerName.set(value)
       case (ProposerEmail, value: String) => proposerEmail.set(value)
-      case (MlTitle,       value: String) => mlTitle.set(value)
+      case (MLTitle,       value: String) => mlTitle.set(value)
       case (Status,        value: String) => status.set(value)
       case (ArchiveType,   value: String) => archiveType.set(value)
-      case (ArchiveUrl,    value: String) => archiveUrl.set(value)
+      case (ArchiveURL,    value: String) => archiveURL.set(value)
       case (Comment,       value: String) => message.set(value)
       case (CreatedAt,     value: Date)   => createdAt.set(value)
       case (UpdatedAt,     value: Date)   => updatedAt.set(value)
       case (JudgedAt,      value: Date)   => judgedAt.set(value)
-      case notMlpColumn => throw new NoSuchFieldException(
-        "Can't update by [%s]." formatted (notMlpColumn.toString))
+      case notMLPColumn => throw new NoSuchFieldException(
+        "Can't update by [%s]." formatted (notMLPColumn.toString))
     }
     mlpMapper
   }
@@ -244,29 +244,29 @@ package mapper {
   /**
    * ML登録申請情報テーブルの操作を行う
    */
-  private[dao] object MlProposalMetaMapper
-    extends MlProposalMapper
-    with LongKeyedMetaMapper[MlProposalMapper] {
+  private[dao] object MLProposalMetaMapper
+    extends MLProposalMapper
+    with LongKeyedMetaMapper[MLProposalMapper] {
     override def dbTableName = "ml_proposal"
     override def fieldOrder = List(
       id, proposerName, proposerEmail, mlTitle, status,
-      archiveType, archiveUrl, message, createdAt, updatedAt,
+      archiveType, archiveURL, message, createdAt, updatedAt,
       judgedAt)
   }
 
   /**
    * ML登録申請情報のモデルクラス
    */
-  private[dao] class MlProposalMapper extends
-      LongKeyedMapper[MlProposalMapper] with IdPK {
-    def getSingleton = MlProposalMetaMapper
+  private[dao] class MLProposalMapper extends
+      LongKeyedMapper[MLProposalMapper] with IdPK {
+    def getSingleton = MLProposalMetaMapper
 
     object proposerName extends MappedString(this, 200)
     object proposerEmail extends MappedEmail(this, 200)
     object mlTitle extends MappedString(this, 200)
     object status extends MappedString(this, 200)
     object archiveType extends MappedString(this, 200)
-    object archiveUrl extends MappedText(this)
+    object archiveURL extends MappedText(this)
     object message extends MappedText(this)
     object createdAt extends MappedDateTime(this)
     object updatedAt extends MappedDateTime(this)

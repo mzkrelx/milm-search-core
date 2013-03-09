@@ -31,11 +31,11 @@ object Boot extends Logger {
    */
   private def initializeDBCon() {
     lazy val defaultDriver = "org.h2.Driver"
-    lazy val defaultUrl = "jdbc:h2:mem:milmsearch_test;DB_CLOSE_DELAY=-1"
+    lazy val defaultURL = "jdbc:h2:mem:milmsearch_test;DB_CLOSE_DELAY=-1"
       
     val vendor = new StandardDBVendor(
       Props.get("db.driver") openOr defaultDriver,
-      Props.get("db.url") openOr defaultUrl,
+      Props.get("db.url") openOr defaultURL,
       Props.get("db.user"),
       Props.get("db.password")
     )

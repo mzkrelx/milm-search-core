@@ -9,14 +9,14 @@ import org.joda.time.DateTime
  * @param id ID
  * @param title MLのタイトル
  * @param archiveType MLのアーカイブのタイプ
- * @param archiveUrl MLのアーカイブページのURL
+ * @param archiveURL MLのアーカイブページのURL
  * @param lastMailedAt 最終投稿日時
  * @param approvedAt ML登録申請が承認された日時
  */
 case class ML(
   id: Long,
   title: String,
-  archiveType: MlArchiveType.Value,
+  archiveType: MLArchiveType.Value,
   archiveURL: URL,
   lastMailedAt: DateTime,
   approvedAt: DateTime)
@@ -26,23 +26,23 @@ case class ML(
  */
 case class CreateMLRequest(
   title: String,
-  archiveType: MlArchiveType.Value,
+  archiveType: MLArchiveType.Value,
   archiveURL: URL,
   approvedAt: DateTime)
 
 /**
  * ML情報の絞り込みに使える項目
  */
-object MLFilterBy extends Enumeration {
-  val title = Value("title")
+object MLFilterBy extends FilterByEnum {
+  val Title = Value("title")
 }
 
 /**
  * ML情報の並べ替えに使える項目
  */
 object MLSortBy extends SortByEnum {
-  val title        = Value("title")
-  val lastMailedAt = Value("lastMailedAt")
+  val Title        = Value("title")
+  val LastMailedAt = Value("lastMailedAt")
 }
 
 /**

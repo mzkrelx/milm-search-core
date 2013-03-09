@@ -1,11 +1,6 @@
 package org.milmsearch.core.domain
 
 /**
- * 絞り込み条件.
- */
-case class Filter[E <: Enumeration](column: E#Value, value: Any)
-
-/**
  * 取得するデータの範囲
  */
 case class Range(offset: Long, limit: Long)
@@ -23,9 +18,19 @@ case class Page(page: Long, count: Long) {
 }
 
 /**
+ * 絞り込み条件の列挙型
+ */
+trait FilterByEnum extends Enumeration
+
+/**
+ * 絞り込み条件
+ */
+case class Filter[E <: FilterByEnum](column: E#Value, value: Any)
+
+/**
  * ソート項目の列挙型
  */
-trait SortByEnum extends Enumeration {}
+trait SortByEnum extends Enumeration
 
 /**
  * 取得するデータのソート方法
