@@ -2,6 +2,7 @@ package org.milmsearch.core.domain
 import java.net.URL
 import java.util.Date
 
+
 /**
  * ML登録申請情報
  *
@@ -97,7 +98,7 @@ object MlProposalStatus extends Enumeration {
 /**
  * ML登録申請の絞り込みに使える項目
  */
-object MlProposalFilterBy extends Enumeration {
+object MlProposalFilterBy extends FilterByEnum {
   val Status = Value("status")
 }
 

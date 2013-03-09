@@ -13,6 +13,7 @@ import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.MLSortBy
 import org.milmsearch.core.domain.MLFilterBy
+import org.milmsearch.core.domain.MLSearchResult
 
 /**
  * ML情報を管理するサービス
@@ -60,7 +61,13 @@ class MLServiceImpl extends MLService with Loggable {
 
   def search(page: Page,
       sort: Option[Sort[MLSortBy.type]] = None,
-      filter: Option[Filter[MLFilterBy.type]] = None) = null // TODO
+      filter: Option[Filter[MLFilterBy.type]] = None) = {
+    val mls = mlDao.findAll(page.toRange, sort, filter)
+    MLSearchResult(
+      mlDao.count(filter),
+      page.getStartIndex,
+      mls.length.toLong min page.count, mls)
+  }
 
   def find(id: Long) = mlDao.find(id)
 }

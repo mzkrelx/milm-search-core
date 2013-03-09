@@ -150,6 +150,7 @@ class MlProposalResource extends Loggable with PageableResource {
         "filterValue at the same time.")
     }
 
+  //  TODO ResourceHelper に移動したので消す
   private def createPage(startPage: Long, count: Long) = {
     if (startPage <= 0)
       throw new BadQueryParameterException(
@@ -335,7 +336,7 @@ class MlProposalResource extends Loggable with PageableResource {
   }
 
   private def toDto(result: MlProposalSearchResult):
-      SearchResultDto =
+      SearchResultDto[MlProposalDto] =
     SearchResultDto(
       result.totalResults, result.startIndex,
       result.itemsPerPage, result.mlProposals map toDto)
@@ -368,20 +369,6 @@ case class MlProposalDto(
   createdAt: String,
   updatedAt: String,
   judgedAt: String) {
-  // for lift-json
-  implicit val formats = DefaultFormats
-
-  def toJson(): String = Serialization.write(this)
-}
-
-/**
- * ML登録申請検索結果の変換用オブジェクト
- */
-case class SearchResultDto(
-    totalResults: Long,
-    startIndex: Long,
-    itemsPerPage: Long,
-    mlProposals: List[MlProposalDto]) {
   // for lift-json
   implicit val formats = DefaultFormats
 

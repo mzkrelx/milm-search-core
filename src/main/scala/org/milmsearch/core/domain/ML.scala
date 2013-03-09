@@ -33,16 +33,16 @@ case class CreateMLRequest(
 /**
  * ML情報の絞り込みに使える項目
  */
-object MLFilterBy extends Enumeration {
-  val title = Value("title")
+object MLFilterBy extends FilterByEnum {
+  val Title = Value("title")
 }
 
 /**
  * ML情報の並べ替えに使える項目
  */
 object MLSortBy extends SortByEnum {
-  val title        = Value("title")
-  val lastMailedAt = Value("lastMailedAt")
+  val Title        = Value("title")
+  val LastMailedAt = Value("lastMailedAt")
 }
 
 /**
