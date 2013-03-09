@@ -1,8 +1,8 @@
 package org.milmsearch.core.service
 import org.milmsearch.core.ComponentRegistry
-import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.exception.ResourceNotFoundException
-import org.milmsearch.core.domain.MlProposal
+import org.milmsearch.core.domain.MLProposal
 import org.milmsearch.core.exception.DeleteFailedException
 import org.milmsearch.core.domain.ML
 import org.milmsearch.core.domain.CreateMLRequest

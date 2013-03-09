@@ -1,10 +1,10 @@
 package org.milmsearch.core.service
 import java.net.URL
-import org.milmsearch.core.dao.MlProposalDao
+import org.milmsearch.core.dao.MLProposalDao
 import org.milmsearch.core.domain.MlArchiveType
 import org.milmsearch.core.domain.ML
-import org.milmsearch.core.domain.{CreateMlProposalRequest => CreateMLPRequest}
-import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.{CreateMLProposalRequest => CreateMLPRequest}
+import org.milmsearch.core.domain.MLProposalStatus
 import org.milmsearch.core.{ComponentRegistry => CR}
 import org.scalamock.scalatest.MockFactory
 import org.scalamock.ProxyMockFactory

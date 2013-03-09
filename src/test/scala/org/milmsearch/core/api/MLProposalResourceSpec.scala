@@ -2,9 +2,9 @@ package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
 import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.{CreateMlProposalRequest => CreateMLPRequest}
-import org.milmsearch.core.domain.MlProposalStatus
-import org.milmsearch.core.service.MlProposalService
+import org.milmsearch.core.domain.{CreateMLProposalRequest => CreateMLPRequest}
+import org.milmsearch.core.domain.MLProposalStatus
+import org.milmsearch.core.service.MLProposalService
 import org.milmsearch.core.ComponentRegistry.{mlProposalService => mlpService}
 import org.scalamock.scalatest.MockFactory
 import org.scalamock.ProxyMockFactory
@@ -13,7 +13,7 @@ import org.milmsearch.core.test.util.MockCreatable
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.GivenWhenThen
 
-class MlProposalResourceSpec extends FunSpec
+class MLProposalResourceSpec extends FunSpec
     with MockFactory with ProxyMockFactory
     with MockCreatable with ShouldMatchers with GivenWhenThen {
 
@@ -35,20 +35,20 @@ class MlProposalResourceSpec extends FunSpec
 
       when("POST リクエストを受け付けると")
       then("JSON を作成要求ドメインに変換して Service に渡す")
-      val m = createMock[MlProposalService] {
+      val m = createMock[MLProposalService] {
         _ expects 'create withArgs(
           CreateMLPRequest(
             "申請者の名前",
             "proposer@example.com",
             "MLタイトル",
-            MlProposalStatus.New,
+            MLProposalStatus.New,
             Some(MlArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)")
           )) returning 1L
       }
       val response = mlpService.doWith(m) {
-        new MlProposalResource().create(json)
+        new MLProposalResource().create(json)
       }
 
       then("ステータスコードは 201 を返す")
@@ -74,10 +74,10 @@ class MlProposalResourceSpec extends FunSpec
 
       when("POST リクエストを受け付けると")
       then("Service のメソッドは呼ばずに、例外を投げる")
-      val m = createMock[MlProposalService] { x => () }
+      val m = createMock[MLProposalService] { x => () }
       mlpService.doWith(m) {
         evaluating {
-          new MlProposalResource().create(json)
+          new MLProposalResource().create(json)
         } should produce [BadRequestException]
       }
     }
@@ -94,10 +94,10 @@ class MlProposalResourceSpec extends FunSpec
 
       when("POST リクエストを受け付けると")
       then("Service のメソッドは呼ばずに、例外を投げる")
-      val m = createMock[MlProposalService] { x => () }
+      val m = createMock[MLProposalService] { x => () }
       mlpService.doWith(m) {
         evaluating {
-          new MlProposalResource().create(json)
+          new MLProposalResource().create(json)
         } should produce [BadRequestException]
       }
     }
@@ -108,10 +108,10 @@ class MlProposalResourceSpec extends FunSpec
 
       when("POST リクエストを受け付けると")
       then("Service のメソッドは呼ばずに、例外を投げる")
-      val m = createMock[MlProposalService] { x => () }
+      val m = createMock[MLProposalService] { x => () }
       mlpService.doWith(m) {
         evaluating {
-          new MlProposalResource().create(json)
+          new MLProposalResource().create(json)
         } should produce [BadRequestException]
       }
     }

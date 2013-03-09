@@ -6,9 +6,9 @@ import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.domain.SortByEnum
 import org.milmsearch.core.domain.Sort
-import org.milmsearch.core.domain.MlProposalSortBy
+import org.milmsearch.core.domain.MLProposalSortBy
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlProposalFilterBy
+import org.milmsearch.core.domain.MLProposalFilterBy
 import org.milmsearch.core.domain.FilterByEnum
 
 

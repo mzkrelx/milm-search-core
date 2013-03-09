@@ -17,12 +17,12 @@ import java.util.Date
  * @param createdAt 作成日時
  * @param updatedAt 更新日時
  */
-case class MlProposal(
+case class MLProposal(
   id: Long,
   proposerName: String,
   proposerEmail: String,
   mlTitle: String,
-  status: MlProposalStatus.Value,
+  status: MLProposalStatus.Value,
   archiveType: Option[MlArchiveType.Value] = None,
   archiveURL: Option[URL] = None,
   comment: Option[String] = None,
@@ -43,11 +43,11 @@ case class MlProposal(
  * @param archiveURL MLのアーカイブページのURL
  * @param comment コメント
  */
-case class CreateMlProposalRequest(
+case class CreateMLProposalRequest(
   proposerName: String,
   proposerEmail: String,
   mlTitle: String,
-  status: MlProposalStatus.Value,
+  status: MLProposalStatus.Value,
   archiveType: Option[MlArchiveType.Value] = None,
   archiveURL: Option[URL] = None,
   comment: Option[String] = None
@@ -61,7 +61,7 @@ case class CreateMlProposalRequest(
  * @param archiveType MLのアーカイブのタイプ
  * @param archiveURL MLのアーカイブページのURL
  */
-case class UpdateMlProposalRequest(
+case class UpdateMLProposalRequest(
   mlTitle: String,
   archiveType: MlArchiveType.Value,
   archiveURL: URL
@@ -71,11 +71,11 @@ case class UpdateMlProposalRequest(
 /**
  * ML登録申請情報の検索結果
  */
-case class MlProposalSearchResult(
+case class MLProposalSearchResult(
   totalResults: Long,
   startIndex: Long,
   itemsPerPage: Long,
-  mlProposals: List[MlProposal]
+  mlProposals: List[MLProposal]
 )
 
 /**
@@ -89,7 +89,7 @@ object MlArchiveType extends Enumeration {
 /**
  * ML登録申請の状態
  */
-object MlProposalStatus extends Enumeration {
+object MLProposalStatus extends Enumeration {
   val New      = Value("new")
   val Accepted = Value("accepted")
   val Rejected = Value("rejected")
@@ -98,14 +98,14 @@ object MlProposalStatus extends Enumeration {
 /**
  * ML登録申請の絞り込みに使える項目
  */
-object MlProposalFilterBy extends FilterByEnum {
+object MLProposalFilterBy extends FilterByEnum {
   val Status = Value("status")
 }
 
 /**
  * ML登録申請の並べ替えに使える項目
  */
-object MlProposalSortBy extends SortByEnum {
+object MLProposalSortBy extends SortByEnum {
   val MlTitle       = Value("mlTitle")
   val Status        = Value("status")
   val ArchiveType   = Value("archiveType")
@@ -116,7 +116,7 @@ object MlProposalSortBy extends SortByEnum {
 /**
  * ML登録申請の項目
  */
-object MlProposalColumn extends Enumeration {
+object MLProposalColumn extends Enumeration {
   val ProposerName  = Value("proposerName")
   val ProposerEmail = Value("proposerEmail")
   val MlTitle       = Value("mlTitle")

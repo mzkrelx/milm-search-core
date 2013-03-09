@@ -1,26 +1,26 @@
 package org.milmsearch.core.service
 
-import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlProposal
-import org.milmsearch.core.domain.{MlProposalFilterBy => MLPFilterBy}
-import org.milmsearch.core.domain.{MlProposalSearchResult => MLPSearchResult}
-import org.milmsearch.core.domain.{MlProposalSortBy => MLPSortBy}
+import org.milmsearch.core.domain.MLProposal
+import org.milmsearch.core.domain.{MLProposalFilterBy => MLPFilterBy}
+import org.milmsearch.core.domain.{MLProposalSearchResult => MLPSearchResult}
+import org.milmsearch.core.domain.{MLProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.Sort
 import org.milmsearch.core.exception.DeleteFailedException
 import org.milmsearch.core.exception.ResourceNotFoundException
 import org.milmsearch.core.ComponentRegistry
 import net.liftweb.common.Loggable
-import org.milmsearch.core.domain.MlProposalColumn
-import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.MLProposalColumn
+import org.milmsearch.core.domain.MLProposalStatus
 import org.milmsearch.core.domain.CreateMLRequest
-import org.milmsearch.core.domain.UpdateMlProposalRequest
+import org.milmsearch.core.domain.UpdateMLProposalRequest
 
 /**
  * ML登録申請情報を管理するサービス
  */
-trait MlProposalService {
+trait MLProposalService {
 
   /**
    * ML登録申請情報を作成する
@@ -28,7 +28,7 @@ trait MlProposalService {
    * @param mlProposal ML登録申請情報
    * @return ID
    */
-  def create(request: CreateMlProposalRequest): Long
+  def create(request: CreateMLProposalRequest): Long
 
   /**
    * 検索結果情報を取得する
@@ -49,7 +49,7 @@ trait MlProposalService {
    * @param id ID
    * @return ML登録申請情報
    */
-  def find(id: Long): Option[MlProposal]
+  def find(id: Long): Option[MLProposal]
 
   /**
    * ML登録申請情報を更新する
@@ -58,7 +58,7 @@ trait MlProposalService {
    * @param updateRequest ML登録申請情報
    */
   @throws(classOf[ResourceNotFoundException])
-  def update(id: Long, updateRequest: UpdateMlProposalRequest)
+  def update(id: Long, updateRequest: UpdateMLProposalRequest)
 
   /**
    * ML登録申請情報を削除する
@@ -93,9 +93,9 @@ trait MlProposalService {
 class SearchFailedException(msg: String) extends Exception(msg)
 
 /**
- * MlProposalService の実装クラス
+ * MLProposalService の実装クラス
  */
-class MlProposalServiceImpl extends MlProposalService with Loggable {
+class MLProposalServiceImpl extends MLProposalService with Loggable {
 
   /** ML登録申請情報 DAO */
   private def mpDao = ComponentRegistry.mlProposalDao()
@@ -106,7 +106,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
   /** 日付サービス */
   private def dateTimeService = ComponentRegistry.dateTimeService()
 
-  def create(request: CreateMlProposalRequest) =
+  def create(request: CreateMLProposalRequest) =
     mpDao.create(request)
 
   def search(page: Page,
@@ -121,9 +121,9 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
 
   def find(id: Long) = mpDao.find(id)
 
-  def update(id: Long, updateRequest: UpdateMlProposalRequest) {
+  def update(id: Long, updateRequest: UpdateMLProposalRequest) {
     def updateColValList = {
-      import MlProposalColumn._
+      import MLProposalColumn._
       import updateRequest._
       List((MlTitle, mlTitle),
         (ArchiveType, archiveType),
@@ -132,7 +132,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
 
     if (!mpDao.update(id, updateColValList)) {
       throw new ResourceNotFoundException(
-        "MlProposal to update is not found. id=[%s]" format id)
+        "MLProposal to update is not found. id=[%s]" format id)
     }
   }
 
@@ -158,10 +158,10 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
   def accept(id: Long) {
     val now = dateTimeService.now
     if (!mpDao.update(id, List(
-        (MlProposalColumn.Status, MlProposalStatus.Accepted.toString),
-        (MlProposalColumn.JudgedAt, now.toDate)))) {
+        (MLProposalColumn.Status, MLProposalStatus.Accepted.toString),
+        (MLProposalColumn.JudgedAt, now.toDate)))) {
       throw new ResourceNotFoundException(
-        "MlProposal to accept is not found.")
+        "MLProposal to accept is not found.")
     }
 
     find(id) match {
@@ -176,10 +176,10 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
 
   def reject(id: Long) {
     if (!mpDao.update(id, List(
-        (MlProposalColumn.Status, MlProposalStatus.Rejected.toString),
-        (MlProposalColumn.JudgedAt, dateTimeService.now.toDate)))) {
+        (MLProposalColumn.Status, MLProposalStatus.Rejected.toString),
+        (MLProposalColumn.JudgedAt, dateTimeService.now.toDate)))) {
       throw new ResourceNotFoundException(
-        "MlProposal to reject is not found.")
+        "MLProposal to reject is not found.")
     }
   }
 }
