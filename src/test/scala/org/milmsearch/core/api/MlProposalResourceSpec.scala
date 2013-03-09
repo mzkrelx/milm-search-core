@@ -29,7 +29,7 @@ class MlProposalResourceSpec extends FunSpec
         |  "mlTitle": "MLタイトル",
         |  "status": "new",
         |  "archiveType": "mailman",
-        |  "archiveUrl": "http://localhost/path/to/archive/",
+        |  "archiveURL": "http://localhost/path/to/archive/",
         |  "comment": "コメント(MLの説明など)"
         |}""".stripMargin
 
@@ -68,7 +68,7 @@ class MlProposalResourceSpec extends FunSpec
         |  "mlTitle": "MLタイトル",
         |  "status": "accepted",
         |  "archiveType": "mailman",
-        |  "archiveUrl": "http://localhost/path/to/archive/",
+        |  "archiveURL": "http://localhost/path/to/archive/",
         |  "comment": "コメント(MLの説明など)"
         |}""".stripMargin
 
@@ -83,7 +83,7 @@ class MlProposalResourceSpec extends FunSpec
     }
 
     it ("必須項目が JSON に含まれていない場合は BadRequestException を投げる。") {
-      given("archiveType, archiveUrl, comment が存在しない JSON")
+      given("archiveType, archiveURL, comment が存在しない JSON")
       val json = """
         |{
         |  "proposerName": "申請者の名前",

@@ -84,7 +84,7 @@ class MlProposalDaoSpec extends FunSpec with ShouldMatchers
               "MLタイトル",
               MLPStatus.New,
               archiveType = None,
-              archiveUrl  = None,
+              archiveURL  = None,
               comment     = None))
         }
 

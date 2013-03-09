@@ -89,7 +89,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     expect("title")(mp.mlTitle)
     expect(MLPStatus.Accepted)(mp.status)
     expect(Some(MlArchiveType.Other))(mp.archiveType)
-    expect(Some(new URL("http://sample.com")))(mp.archiveUrl)
+    expect(Some(new URL("http://sample.com")))(mp.archiveURL)
     expect(Some("message"))(mp.comment)
     expect("2012-10-10T10:10:11")(
       DateFormatUtils.ISO_DATETIME_FORMAT.format(mp.createdAt))
@@ -218,7 +218,7 @@ class MlProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     expect("title")(mlp.get.mlTitle)
     expect(MLPStatus.Accepted)(mlp.get.status)
     expect(Some(MlArchiveType.Other))(mlp.get.archiveType)
-    expect(Some(new URL("http://sample.com")))(mlp.get.archiveUrl)
+    expect(Some(new URL("http://sample.com")))(mlp.get.archiveURL)
     expect(Some("message"))(mlp.get.comment)
     expect("2012-10-10T10:10:11")(
       DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.get.createdAt))

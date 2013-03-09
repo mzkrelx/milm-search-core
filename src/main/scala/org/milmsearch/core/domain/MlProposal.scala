@@ -12,7 +12,7 @@ import java.util.Date
  * @param mlTitle MLのタイトル
  * @param status 申請状況
  * @param archiveType MLのアーカイブのタイプ
- * @param archiveUrl MLのアーカイブページのURL
+ * @param archiveURL MLのアーカイブページのURL
  * @param comment コメント
  * @param createdAt 作成日時
  * @param updatedAt 更新日時
@@ -24,7 +24,7 @@ case class MlProposal(
   mlTitle: String,
   status: MlProposalStatus.Value,
   archiveType: Option[MlArchiveType.Value] = None,
-  archiveUrl: Option[URL] = None,
+  archiveURL: Option[URL] = None,
   comment: Option[String] = None,
   createdAt: Date,
   updatedAt: Date,
@@ -40,7 +40,7 @@ case class MlProposal(
  * @param mlTitle MLのタイトル
  * @param status 申請状況
  * @param archiveType MLのアーカイブのタイプ
- * @param archiveUrl MLのアーカイブページのURL
+ * @param archiveURL MLのアーカイブページのURL
  * @param comment コメント
  */
 case class CreateMlProposalRequest(
@@ -49,7 +49,7 @@ case class CreateMlProposalRequest(
   mlTitle: String,
   status: MlProposalStatus.Value,
   archiveType: Option[MlArchiveType.Value] = None,
-  archiveUrl: Option[URL] = None,
+  archiveURL: Option[URL] = None,
   comment: Option[String] = None
 )
 
@@ -59,12 +59,12 @@ case class CreateMlProposalRequest(
  *
  * @param mlTitle MLのタイトル
  * @param archiveType MLのアーカイブのタイプ
- * @param archiveUrl MLのアーカイブページのURL
+ * @param archiveURL MLのアーカイブページのURL
  */
 case class UpdateMlProposalRequest(
   mlTitle: String,
   archiveType: MlArchiveType.Value,
-  archiveUrl: URL
+  archiveURL: URL
   // TODO 管理者コメント追加
 )
 
@@ -122,7 +122,7 @@ object MlProposalColumn extends Enumeration {
   val MlTitle       = Value("mlTitle")
   val Status        = Value("status")
   val ArchiveType   = Value("archiveType")
-  val ArchiveUrl    = Value("archiveUrl")
+  val ArchiveURL    = Value("archiveURL")
   val Comment       = Value("comment")
   val CreatedAt     = Value("createdAt")
   val UpdatedAt     = Value("updatedAt")

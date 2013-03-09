@@ -57,7 +57,7 @@ class Bootstrap extends ServletContextListener with Loggable {
       case _ => "org.h2.Driver"
     }
 
-    lazy val defaultUrl = Props.mode match {
+    lazy val defaultURL = Props.mode match {
       case Props.RunModes.Production => "jdbc:postgresql:milmsearch"
       case _ => {
         startH2Server()
@@ -67,7 +67,7 @@ class Bootstrap extends ServletContextListener with Loggable {
 
     val vendor = new StandardDBVendor(
       Props.get("db.driver") openOr defaultDriver,
-      Props.get("db.url") openOr defaultUrl,
+      Props.get("db.url") openOr defaultURL,
       Props.get("db.user"),
       Props.get("db.password"))
 

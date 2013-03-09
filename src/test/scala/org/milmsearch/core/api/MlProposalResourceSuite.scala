@@ -43,7 +43,7 @@ class MlProposalResourceSuite extends FunSuite
       |  "mlTitle": "MLタイトル",
       |  "status": "new",
       |  "archiveType": "mailman",
-      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "archiveURL": "http://localhost/path/to/archive/",
       |  "comment": "コメント(MLの説明など)"
       |}""".stripMargin
 
@@ -258,7 +258,7 @@ class MlProposalResourceSuite extends FunSuite
         |"mlTitle":"MLタイトル%s",
         |"status":"new",
         |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
+        |"archiveURL":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
         |"updatedAt":"2012-10-28T10:20:30+09:00",
@@ -312,7 +312,7 @@ class MlProposalResourceSuite extends FunSuite
         |"mlTitle":"MLタイトル%s",
         |"status":"new",
         |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
+        |"archiveURL":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
         |"updatedAt":"2012-10-28T10:20:30+09:00",
@@ -601,7 +601,7 @@ class MlProposalResourceSuite extends FunSuite
       |{
       |  "mlTitle": "MLタイトル",
       |  "archiveType": "mailman",
-      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "archiveURL": "http://localhost/path/to/archive/",
       |}""".stripMargin
 
     val m = mock[MlProposalService]
@@ -622,7 +622,7 @@ class MlProposalResourceSuite extends FunSuite
       |{
       |  "mlTitle": "MLタイトル",
       |  "archiveType": "mailman",
-      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "archiveURL": "http://localhost/path/to/archive/",
       |}""".stripMargin
 
     val m = mock[MlProposalService]
@@ -644,7 +644,7 @@ class MlProposalResourceSuite extends FunSuite
       |{
       |  "mlTitle": "MLタイトル",
       |  "archiveType": "mailman",
-      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "archiveURL": "http://localhost/path/to/archive/",
       |}""".stripMargin
 
     val response = new MlProposalResource().update("one", json)
@@ -660,7 +660,7 @@ class MlProposalResourceSuite extends FunSuite
       |  "mlTitle": "MLタイトル",
       |  "status": "new",
       |  "archiveType": "mailman",
-      |  "archiveUrl": "http://localhost/path/to/archive/",
+      |  "archiveURL": "http://localhost/path/to/archive/",
       |  "comment": "コメント(MLの説明など)"
       |}""".stripMargin
 
@@ -715,7 +715,7 @@ class MlProposalResourceSuite extends FunSuite
         |"mlTitle":"MLタイトル",
         |"status":"new",
         |"archiveType":"mailman",
-        |"archiveUrl":"http://localhost/path/to/archive/",
+        |"archiveURL":"http://localhost/path/to/archive/",
         |"comment":"コメント(MLの説明など)",
         |"createdAt":"2012-10-28T10:20:30+09:00",
         |"updatedAt":"2012-10-28T10:20:30+09:00",

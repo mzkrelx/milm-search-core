@@ -67,7 +67,7 @@ class MlProposalResource extends Loggable with PageableResource {
    *   "mlTitle": "MLタイトル(ML名)",
    *   "status": "new",
    *   "archiveType": "メールアーカイブの種類(ex. mailman)",
-   *   "archiveUrl": "メールアーカイブの基底URL",
+   *   "archiveURL": "メールアーカイブの基底URL",
    *   "comment": "コメント(MLの説明など)"
    * }
    * </pre>
@@ -303,7 +303,7 @@ class MlProposalResource extends Loggable with PageableResource {
     mlTitle: String,
     status: String,
     archiveType: String,
-    archiveUrl: String,
+    archiveURL: String,
     comment: String) {
 
     /**
@@ -316,7 +316,7 @@ class MlProposalResource extends Loggable with PageableResource {
         mlTitle,
         MlProposalStatus.withName(status),
         Some(MlArchiveType.withName(archiveType)),
-        Some(new URL(archiveUrl)),
+        Some(new URL(archiveURL)),
         Some(comment))
   }
 
@@ -326,13 +326,13 @@ class MlProposalResource extends Loggable with PageableResource {
   case class UpdateRequestDto(
     mlTitle: String,
     archiveType: String,
-    archiveUrl: String) {
+    archiveURL: String) {
 
     def toDomain =
       UpdateMlProposalRequest(
         mlTitle,
         MlArchiveType.withName(archiveType),
-        new URL(archiveUrl))
+        new URL(archiveURL))
   }
 
   private def toDto(result: MlProposalSearchResult):
@@ -346,7 +346,7 @@ class MlProposalResource extends Loggable with PageableResource {
       mlp.id, mlp.proposerName, mlp.proposerEmail,
       mlp.mlTitle, mlp.status.toString,
       mlp.archiveType map { _.toString } getOrElse "",
-      mlp.archiveUrl map { _.toString } getOrElse "",
+      mlp.archiveURL map { _.toString } getOrElse "",
       mlp.comment getOrElse "",
       dateFormat.format(mlp.createdAt),
       dateFormat.format(mlp.updatedAt),
@@ -364,7 +364,7 @@ case class MlProposalDto(
   mlTitle: String,
   status: String,
   archiveType: String,
-  archiveUrl: String,
+  archiveURL: String,
   comment: String,
   createdAt: String,
   updatedAt: String,

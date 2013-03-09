@@ -9,7 +9,7 @@ import org.joda.time.DateTime
  * @param id ID
  * @param title MLのタイトル
  * @param archiveType MLのアーカイブのタイプ
- * @param archiveUrl MLのアーカイブページのURL
+ * @param archiveURL MLのアーカイブページのURL
  * @param lastMailedAt 最終投稿日時
  * @param approvedAt ML登録申請が承認された日時
  */

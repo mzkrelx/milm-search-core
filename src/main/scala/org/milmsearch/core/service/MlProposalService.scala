@@ -127,7 +127,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
       import updateRequest._
       List((MlTitle, mlTitle),
         (ArchiveType, archiveType),
-        (ArchiveUrl, archiveUrl))
+        (ArchiveURL, archiveURL))
     }
 
     if (!mpDao.update(id, updateColValList)) {
@@ -170,7 +170,7 @@ class MlProposalServiceImpl extends MlProposalService with Loggable {
       case Some(mlp) =>
         mlService.create(
           CreateMLRequest(
-            mlp.mlTitle, mlp.archiveType.get, mlp.archiveUrl.get, now))
+            mlp.mlTitle, mlp.archiveType.get, mlp.archiveURL.get, now))
     }
   }
 

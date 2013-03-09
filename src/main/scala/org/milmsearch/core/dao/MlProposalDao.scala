@@ -107,7 +107,7 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       .mlTitle(request.mlTitle)
       .status(request.status.toString)
       .archiveType(request.archiveType map { _.toString } getOrElse null)
-      .archiveUrl(request.archiveUrl map { _.toString } getOrElse null)
+      .archiveURL(request.archiveURL map { _.toString } getOrElse null)
       .message(request.comment getOrElse null)
       .createdAt(now)
       .updatedAt(now)
@@ -144,7 +144,7 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       mapper.mlTitle.get,
       MLPStatus.withName(mapper.status.get),
       Option(MlArchiveType.withName(mapper.archiveType.get)),
-      Option(new URL(mapper.archiveUrl.get)),
+      Option(new URL(mapper.archiveURL.get)),
       Option(mapper.message.get),
       mapper.createdAt.get,
       mapper.updatedAt.get,
@@ -224,7 +224,7 @@ class MlProposalDaoImpl extends MlProposalDao with Loggable {
       case (MlTitle,       value: String) => mlTitle.set(value)
       case (Status,        value: String) => status.set(value)
       case (ArchiveType,   value: String) => archiveType.set(value)
-      case (ArchiveUrl,    value: String) => archiveUrl.set(value)
+      case (ArchiveURL,    value: String) => archiveURL.set(value)
       case (Comment,       value: String) => message.set(value)
       case (CreatedAt,     value: Date)   => createdAt.set(value)
       case (UpdatedAt,     value: Date)   => updatedAt.set(value)
@@ -250,7 +250,7 @@ package mapper {
     override def dbTableName = "ml_proposal"
     override def fieldOrder = List(
       id, proposerName, proposerEmail, mlTitle, status,
-      archiveType, archiveUrl, message, createdAt, updatedAt,
+      archiveType, archiveURL, message, createdAt, updatedAt,
       judgedAt)
   }
 
@@ -266,7 +266,7 @@ package mapper {
     object mlTitle extends MappedString(this, 200)
     object status extends MappedString(this, 200)
     object archiveType extends MappedString(this, 200)
-    object archiveUrl extends MappedText(this)
+    object archiveURL extends MappedText(this)
     object message extends MappedText(this)
     object createdAt extends MappedDateTime(this)
     object updatedAt extends MappedDateTime(this)

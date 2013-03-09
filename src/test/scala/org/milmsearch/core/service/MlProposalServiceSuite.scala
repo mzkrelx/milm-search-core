@@ -578,7 +578,7 @@ class MlProposalServiceSuite extends FunSuite
       createMock[MlProposalDao] {
         _ expects 'update withArgs(1, List((MlTitle, "new Title"),
           (ArchiveType, MlArchiveType.Other),
-          (ArchiveUrl, new URL("http://newurl")))) returning true
+          (ArchiveURL, new URL("http://newurl")))) returning true
       }
     } {
       new MlProposalServiceImpl().update(1,
