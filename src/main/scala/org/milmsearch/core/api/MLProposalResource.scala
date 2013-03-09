@@ -3,15 +3,15 @@ import java.net.URI
 import java.net.URL
 import java.util.NoSuchElementException
 import org.apache.commons.lang3.time.DateFormatUtils
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.CreateMlProposalRequest
+import org.milmsearch.core.domain.MLArchiveType
+import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
-import org.milmsearch.core.domain.MlProposal
-import org.milmsearch.core.domain.MlProposalFilterBy
-import org.milmsearch.core.domain.MlProposalSearchResult
-import org.milmsearch.core.domain.MlProposalSortBy
-import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.MLArchiveType
+import org.milmsearch.core.domain.MLProposal
+import org.milmsearch.core.domain.MLProposalFilterBy
+import org.milmsearch.core.domain.MLProposalSearchResult
+import org.milmsearch.core.domain.MLProposalSortBy
+import org.milmsearch.core.domain.MLProposalStatus
 import org.milmsearch.core.domain.Page
 import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.ComponentRegistry
@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response.Status
 import org.milmsearch.core.exception.ResourceNotFoundException
 import net.liftweb.json.MappingException
 import ResourceHelper._
-import org.milmsearch.core.domain.UpdateMlProposalRequest
+import org.milmsearch.core.domain.UpdateMLProposalRequest
 
 class BadQueryParameterException(msg: String) extends Exception(msg)
 class BadRequestException(msg: String) extends Exception(msg)
@@ -45,14 +45,14 @@ class BadRequestException(msg: String) extends Exception(msg)
  * ML登録申請情報のAPIリソース
  */
 @Path("/ml-proposals")
-class MlProposalResource extends Loggable with PageableResource {
+class MLProposalResource extends Loggable with PageableResource {
   // for lift-json
   implicit val formats = DefaultFormats
 
   /** ML登録申請管理サービス */
   private def mpService = ComponentRegistry.mlProposalService.vend
 
-  protected val defaultSortBy = MlProposalSortBy.MlTitle
+  protected val defaultSortBy = MLProposalSortBy.MLTitle
 
   private val dateFormat =
     DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
@@ -67,7 +67,7 @@ class MlProposalResource extends Loggable with PageableResource {
    *   "mlTitle": "MLタイトル(ML名)",
    *   "status": "new",
    *   "archiveType": "メールアーカイブの種類(ex. mailman)",
-   *   "archiveUrl": "メールアーカイブの基底URL",
+   *   "archiveURL": "メールアーカイブの基底URL",
    *   "comment": "コメント(MLの説明など)"
    * }
    * </pre>
@@ -133,12 +133,12 @@ class MlProposalResource extends Loggable with PageableResource {
 
   private def createFilter(filterBy: Option[String],
       filterValue: Option[String]):
-      Option[Filter[MlProposalFilterBy.type]] =
+      Option[Filter[MLProposalFilterBy.type]] =
     (filterBy, filterValue) match {
       case (None, None) => None
       case (Some(by), Some(value)) =>
         try {
-          Some(Filter(MlProposalFilterBy.withName(by), value))
+          Some(Filter(MLProposalFilterBy.withName(by), value))
         } catch {
           case e: NoSuchElementException =>
             throw new BadQueryParameterException(
@@ -150,6 +150,7 @@ class MlProposalResource extends Loggable with PageableResource {
         "filterValue at the same time.")
     }
 
+  //  TODO ResourceHelper に移動したので消す
   private def createPage(startPage: Long, count: Long) = {
     if (startPage <= 0)
       throw new BadQueryParameterException(
@@ -162,12 +163,12 @@ class MlProposalResource extends Loggable with PageableResource {
 
   private def createSort(sortBy: Option[String],
       sortOrder: Option[String]):
-      Option[Sort[MlProposalSortBy.type]] =
+      Option[Sort[MLProposalSortBy.type]] =
     (sortBy, sortOrder) match {
       case (None, None) => None
       case (Some(by), Some(order)) =>
         try {
-          Some(Sort(MlProposalSortBy.withName(by),
+          Some(Sort(MLProposalSortBy.withName(by),
             SortOrder.withName(order)))
         } catch {
           case e: NoSuchElementException =>
@@ -302,20 +303,20 @@ class MlProposalResource extends Loggable with PageableResource {
     mlTitle: String,
     status: String,
     archiveType: String,
-    archiveUrl: String,
+    archiveURL: String,
     comment: String) {
 
     /**
      * ドメインオブジェクトに変換する
      */
     def toDomain =
-      CreateMlProposalRequest(
+      CreateMLProposalRequest(
         proposerName,
         proposerEmail,
         mlTitle,
-        MlProposalStatus.withName(status),
-        Some(MlArchiveType.withName(archiveType)),
-        Some(new URL(archiveUrl)),
+        MLProposalStatus.withName(status),
+        Some(MLArchiveType.withName(archiveType)),
+        Some(new URL(archiveURL)),
         Some(comment))
   }
 
@@ -325,27 +326,27 @@ class MlProposalResource extends Loggable with PageableResource {
   case class UpdateRequestDto(
     mlTitle: String,
     archiveType: String,
-    archiveUrl: String) {
+    archiveURL: String) {
 
     def toDomain =
-      UpdateMlProposalRequest(
+      UpdateMLProposalRequest(
         mlTitle,
-        MlArchiveType.withName(archiveType),
-        new URL(archiveUrl))
+        MLArchiveType.withName(archiveType),
+        new URL(archiveURL))
   }
 
-  private def toDto(result: MlProposalSearchResult):
-      SearchResultDto =
+  private def toDto(result: MLProposalSearchResult):
+      SearchResultDto[MLProposalDto] =
     SearchResultDto(
       result.totalResults, result.startIndex,
       result.itemsPerPage, result.mlProposals map toDto)
 
-  private def toDto(mlp: MlProposal) =
-    MlProposalDto(
+  private def toDto(mlp: MLProposal) =
+    MLProposalDto(
       mlp.id, mlp.proposerName, mlp.proposerEmail,
       mlp.mlTitle, mlp.status.toString,
       mlp.archiveType map { _.toString } getOrElse "",
-      mlp.archiveUrl map { _.toString } getOrElse "",
+      mlp.archiveURL map { _.toString } getOrElse "",
       mlp.comment getOrElse "",
       dateFormat.format(mlp.createdAt),
       dateFormat.format(mlp.updatedAt),
@@ -356,32 +357,18 @@ class MlProposalResource extends Loggable with PageableResource {
 /**
  * ML登録申請ドメインの変換用オブジェクト
  */
-case class MlProposalDto(
+case class MLProposalDto(
   id: Long,
   proposerName: String,
   proposerEmail: String,
   mlTitle: String,
   status: String,
   archiveType: String,
-  archiveUrl: String,
+  archiveURL: String,
   comment: String,
   createdAt: String,
   updatedAt: String,
   judgedAt: String) {
-  // for lift-json
-  implicit val formats = DefaultFormats
-
-  def toJson(): String = Serialization.write(this)
-}
-
-/**
- * ML登録申請検索結果の変換用オブジェクト
- */
-case class SearchResultDto(
-    totalResults: Long,
-    startIndex: Long,
-    itemsPerPage: Long,
-    mlProposals: List[MlProposalDto]) {
   // for lift-json
   implicit val formats = DefaultFormats
 

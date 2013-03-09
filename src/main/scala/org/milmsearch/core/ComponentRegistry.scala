@@ -8,8 +8,8 @@ import net.liftweb.util.SimpleInjector
  * Service と DAO の初期化を行う
  */
 object ComponentRegistry extends SimpleInjector {
-  val mlProposalDao     = new Inject[MlProposalDao](new MlProposalDaoImpl) {}
-  val mlProposalService = new Inject[MlProposalService](new MlProposalServiceImpl) {}
+  val mlProposalDao     = new Inject[MLProposalDao](new MLProposalDaoImpl) {}
+  val mlProposalService = new Inject[MLProposalService](new MLProposalServiceImpl) {}
 
   val mlDao     = new Inject[MLDao](new MLDaoImpl) {}
   val mlService = new Inject[MLService](new MLServiceImpl) {}

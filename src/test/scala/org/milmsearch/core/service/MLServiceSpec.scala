@@ -1,10 +1,10 @@
 package org.milmsearch.core.service
 import java.net.URL
-import org.milmsearch.core.dao.MlProposalDao
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.dao.MLProposalDao
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.ML
-import org.milmsearch.core.domain.{CreateMlProposalRequest => CreateMLPRequest}
-import org.milmsearch.core.domain.MlProposalStatus
+import org.milmsearch.core.domain.{CreateMLProposalRequest => CreateMLPRequest}
+import org.milmsearch.core.domain.MLProposalStatus
 import org.milmsearch.core.{ComponentRegistry => CR}
 import org.scalamock.scalatest.MockFactory
 import org.scalamock.ProxyMockFactory
@@ -62,7 +62,7 @@ class MLServiceSpec extends FeatureSpec
   private def newSampleML = ML(
     id           = 1L,
     title        = "ML タイトル",
-    archiveType  = MlArchiveType.Mailman,
+    archiveType  = MLArchiveType.Mailman,
     archiveURL   = new URL("http://localhost/path/to/archive/"),
     lastMailedAt = newDateTime(2013, 1, 1),
     approvedAt   = newDateTime(2013, 1, 5))
