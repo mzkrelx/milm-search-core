@@ -9,7 +9,7 @@ import net.liftweb.mapper.MappedText
 import net.liftweb.mapper.MappedDateTime
 import org.milmsearch.core.domain.CreateMLRequest
 import org.milmsearch.core.domain.ML
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import mapper._
 import net.liftweb.common.Full
 import net.liftweb.common.Empty
@@ -151,7 +151,7 @@ class MLDaoImpl extends MLDao with Loggable {
   private def toDomain(mapper: MLMapper) = ML(
     id           = mapper.id,
     title        = mapper.title,
-    archiveType  = MlArchiveType.withName(mapper.archiveType),
+    archiveType  = MLArchiveType.withName(mapper.archiveType),
     archiveURL   = new URL(mapper.archiveURL),
     lastMailedAt = new DateTime(mapper.lastMailedAt.getTime),
     approvedAt   = new DateTime(mapper.approvedAt.getTime))

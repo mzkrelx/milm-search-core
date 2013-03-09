@@ -5,7 +5,7 @@ import java.sql.Timestamp
 
 import org.joda.time.DateTime
 import org.milmsearch.core.domain.{CreateMLProposalRequest => CreateMLPRequest}
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.{MLProposalStatus => MLPStatus}
 import org.milmsearch.core.service.DateTimeService
 import org.milmsearch.core.test.util.MockCreatable
@@ -45,7 +45,7 @@ class MLProposalDaoSpec extends FunSpec with ShouldMatchers
               "proposer@example.com",
               "MLタイトル",
               MLPStatus.New,
-              Some(MlArchiveType.Mailman),
+              Some(MLArchiveType.Mailman),
               Some(new URL("http://localhost/path/to/archive/")),
               Some("コメント(MLの説明など)\nほげほげ)")))
         }

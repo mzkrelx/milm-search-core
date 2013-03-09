@@ -125,7 +125,7 @@ class MLProposalServiceImpl extends MLProposalService with Loggable {
     def updateColValList = {
       import MLProposalColumn._
       import updateRequest._
-      List((MlTitle, mlTitle),
+      List((MLTitle, mlTitle),
         (ArchiveType, archiveType),
         (ArchiveURL, archiveURL))
     }

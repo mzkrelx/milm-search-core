@@ -5,7 +5,7 @@ import scala.collection.mutable.ListBuffer
 import org.milmsearch.core.ComponentRegistry.{dateTimeService => Time}
 import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.MLProposal
 import org.milmsearch.core.domain.MLProposalColumn
 import org.milmsearch.core.domain.{MLProposalFilterBy => MLPFilterBy}
@@ -143,7 +143,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       mapper.proposerEmail.get,
       mapper.mlTitle.get,
       MLPStatus.withName(mapper.status.get),
-      Option(MlArchiveType.withName(mapper.archiveType.get)),
+      Option(MLArchiveType.withName(mapper.archiveType.get)),
       Option(new URL(mapper.archiveURL.get)),
       Option(mapper.message.get),
       mapper.createdAt.get,
@@ -174,7 +174,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
     import MLPSortBy._
     import MLPMMapper._
     OrderBy(sort.column match {
-      case MlTitle => mlTitle
+      case MLTitle => mlTitle
       case Status => status
       case ArchiveType => archiveType
       case CreatedAt => createdAt
@@ -196,7 +196,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
     findMapper(id) match {
       case None => false
       case Some(mlpMapper) => {
-        setMlpMapper(mlpMapper, colVal)
+        setMLPMapper(mlpMapper, colVal)
         mlpMapper.save()
       }
     }
@@ -208,20 +208,20 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       case Some(mlpMapper) => {
         import MLProposalColumn._
         import mlpMapper._
-        colValList foreach { colVal => setMlpMapper(mlpMapper, colVal) }
+        colValList foreach { colVal => setMLPMapper(mlpMapper, colVal) }
         mlpMapper.save()
       }
     }
   }
 
-  private def setMlpMapper(mlpMapper: MLPMapper, colVal: Pair[MLProposalColumn.Value, Object]) {
+  private def setMLPMapper(mlpMapper: MLPMapper, colVal: Pair[MLProposalColumn.Value, Object]) {
     import MLProposalColumn._
     import mlpMapper._
 
     colVal match {
       case (ProposerName,  value: String) => proposerName.set(value)
       case (ProposerEmail, value: String) => proposerEmail.set(value)
-      case (MlTitle,       value: String) => mlTitle.set(value)
+      case (MLTitle,       value: String) => mlTitle.set(value)
       case (Status,        value: String) => status.set(value)
       case (ArchiveType,   value: String) => archiveType.set(value)
       case (ArchiveURL,    value: String) => archiveURL.set(value)
@@ -229,8 +229,8 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       case (CreatedAt,     value: Date)   => createdAt.set(value)
       case (UpdatedAt,     value: Date)   => updatedAt.set(value)
       case (JudgedAt,      value: Date)   => judgedAt.set(value)
-      case notMlpColumn => throw new NoSuchFieldException(
-        "Can't update by [%s]." formatted (notMlpColumn.toString))
+      case notMLPColumn => throw new NoSuchFieldException(
+        "Can't update by [%s]." formatted (notMLPColumn.toString))
     }
     mlpMapper
   }

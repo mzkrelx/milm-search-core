@@ -3,7 +3,7 @@ import java.net.URL
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.{MLProposalFilterBy => MLPFilterBy}
 import org.milmsearch.core.domain.{MLProposalSortBy => MLPSortBy}
 import org.milmsearch.core.domain.{MLProposalStatus => MLPStatus}
@@ -88,7 +88,7 @@ class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     expect("sample@sample.com")(mp.proposerEmail)
     expect("title")(mp.mlTitle)
     expect(MLPStatus.Accepted)(mp.status)
-    expect(Some(MlArchiveType.Other))(mp.archiveType)
+    expect(Some(MLArchiveType.Other))(mp.archiveType)
     expect(Some(new URL("http://sample.com")))(mp.archiveURL)
     expect(Some("message"))(mp.comment)
     expect("2012-10-10T10:10:11")(
@@ -217,7 +217,7 @@ class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     expect("sample@sample.com")(mlp.get.proposerEmail)
     expect("title")(mlp.get.mlTitle)
     expect(MLPStatus.Accepted)(mlp.get.status)
-    expect(Some(MlArchiveType.Other))(mlp.get.archiveType)
+    expect(Some(MLArchiveType.Other))(mlp.get.archiveType)
     expect(Some(new URL("http://sample.com")))(mlp.get.archiveURL)
     expect(Some("message"))(mlp.get.comment)
     expect("2012-10-10T10:10:11")(

@@ -3,10 +3,10 @@ import java.net.URI
 import java.net.URL
 import java.util.NoSuchElementException
 import org.apache.commons.lang3.time.DateFormatUtils
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.MLProposal
 import org.milmsearch.core.domain.MLProposalFilterBy
 import org.milmsearch.core.domain.MLProposalSearchResult
@@ -52,7 +52,7 @@ class MLProposalResource extends Loggable with PageableResource {
   /** ML登録申請管理サービス */
   private def mpService = ComponentRegistry.mlProposalService.vend
 
-  protected val defaultSortBy = MLProposalSortBy.MlTitle
+  protected val defaultSortBy = MLProposalSortBy.MLTitle
 
   private val dateFormat =
     DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
@@ -315,7 +315,7 @@ class MLProposalResource extends Loggable with PageableResource {
         proposerEmail,
         mlTitle,
         MLProposalStatus.withName(status),
-        Some(MlArchiveType.withName(archiveType)),
+        Some(MLArchiveType.withName(archiveType)),
         Some(new URL(archiveURL)),
         Some(comment))
   }
@@ -331,7 +331,7 @@ class MLProposalResource extends Loggable with PageableResource {
     def toDomain =
       UpdateMLProposalRequest(
         mlTitle,
-        MlArchiveType.withName(archiveType),
+        MLArchiveType.withName(archiveType),
         new URL(archiveURL))
   }
 

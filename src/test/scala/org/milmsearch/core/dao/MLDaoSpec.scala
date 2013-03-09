@@ -3,7 +3,7 @@ package org.milmsearch.core.dao
 import java.net.URL
 
 import org.milmsearch.core.domain.ML
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.test.util.DateUtil.newDate
 import org.milmsearch.core.test.util.DateUtil.newDateTime
 import org.milmsearch.core.test.util.MockCreatable
@@ -73,7 +73,7 @@ class MLDaoSpec extends FeatureSpec
   private def newSampleML = ML(
     id           = 1L,
     title        = "ML タイトル",
-    archiveType  = MlArchiveType.Mailman,
+    archiveType  = MLArchiveType.Mailman,
     archiveURL   = new URL("http://localhost/path/to/archive/"),
     lastMailedAt = newDateTime(2013, 1, 1),
     approvedAt   = newDateTime(2013, 1, 5))

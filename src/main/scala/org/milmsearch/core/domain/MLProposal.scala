@@ -23,7 +23,7 @@ case class MLProposal(
   proposerEmail: String,
   mlTitle: String,
   status: MLProposalStatus.Value,
-  archiveType: Option[MlArchiveType.Value] = None,
+  archiveType: Option[MLArchiveType.Value] = None,
   archiveURL: Option[URL] = None,
   comment: Option[String] = None,
   createdAt: Date,
@@ -48,7 +48,7 @@ case class CreateMLProposalRequest(
   proposerEmail: String,
   mlTitle: String,
   status: MLProposalStatus.Value,
-  archiveType: Option[MlArchiveType.Value] = None,
+  archiveType: Option[MLArchiveType.Value] = None,
   archiveURL: Option[URL] = None,
   comment: Option[String] = None
 )
@@ -63,7 +63,7 @@ case class CreateMLProposalRequest(
  */
 case class UpdateMLProposalRequest(
   mlTitle: String,
-  archiveType: MlArchiveType.Value,
+  archiveType: MLArchiveType.Value,
   archiveURL: URL
   // TODO 管理者コメント追加
 )
@@ -81,7 +81,7 @@ case class MLProposalSearchResult(
 /**
  * MLのアーカイブのタイプ(ソフトウェア)
  */
-object MlArchiveType extends Enumeration {
+object MLArchiveType extends Enumeration {
   val Mailman = Value("mailman")
   val Other   = Value("other")
 }
@@ -106,7 +106,7 @@ object MLProposalFilterBy extends FilterByEnum {
  * ML登録申請の並べ替えに使える項目
  */
 object MLProposalSortBy extends SortByEnum {
-  val MlTitle       = Value("mlTitle")
+  val MLTitle       = Value("mlTitle")
   val Status        = Value("status")
   val ArchiveType   = Value("archiveType")
   val CreatedAt     = Value("createdAt")
@@ -119,7 +119,7 @@ object MLProposalSortBy extends SortByEnum {
 object MLProposalColumn extends Enumeration {
   val ProposerName  = Value("proposerName")
   val ProposerEmail = Value("proposerEmail")
-  val MlTitle       = Value("mlTitle")
+  val MLTitle       = Value("mlTitle")
   val Status        = Value("status")
   val ArchiveType   = Value("archiveType")
   val ArchiveURL    = Value("archiveURL")

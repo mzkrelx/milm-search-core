@@ -6,7 +6,7 @@ import org.milmsearch.core.dao.NoSuchFieldException
 import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.CreateMLRequest
 import org.milmsearch.core.domain.Filter
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.MLProposal
 import org.milmsearch.core.domain.MLProposalColumn
 import org.milmsearch.core.domain.{MLProposalFilterBy => MLPFilterBy}
@@ -38,7 +38,7 @@ class MLProposalServiceSuite extends FunSuite
       "proposer@example.com",
       "MLタイトル",
       MLPStatus.New,
-      Some(MlArchiveType.Mailman),
+      Some(MLArchiveType.Mailman),
       Some(new URL("http://localhost/path/to/archive/")),
       Some("コメント(MLの説明など)\nほげほげ)")
     )
@@ -67,7 +67,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -122,7 +122,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -177,7 +177,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -210,7 +210,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -243,7 +243,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -277,7 +277,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -357,7 +357,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -418,7 +418,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -454,7 +454,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -490,7 +490,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル" + i,
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -560,7 +560,7 @@ class MLProposalServiceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル",
             MLPStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
@@ -576,15 +576,15 @@ class MLProposalServiceSuite extends FunSuite
     import MLProposalColumn._
     ComponentRegistry.mlProposalDao.doWith {
       createMock[MLProposalDao] {
-        _ expects 'update withArgs(1, List((MlTitle, "new Title"),
-          (ArchiveType, MlArchiveType.Other),
+        _ expects 'update withArgs(1, List((MLTitle, "new Title"),
+          (ArchiveType, MLArchiveType.Other),
           (ArchiveURL, new URL("http://newurl")))) returning true
       }
     } {
       new MLProposalServiceImpl().update(1,
         UpdateMLProposalRequest(
           "new Title",
-          MlArchiveType.Other,
+          MLArchiveType.Other,
           new URL("http://newurl")))
     }
   }
@@ -610,7 +610,7 @@ class MLProposalServiceSuite extends FunSuite
               "proposer@example.com",
               "MLタイトル",
               MLPStatus.Accepted,
-              Some(MlArchiveType.Mailman),
+              Some(MLArchiveType.Mailman),
               Some(new URL("http://localhost/path/to/archive/")),
               Some("コメント(MLの説明など)"),
               DateUtil.createDate("2012/10/28 10:20:30"),
@@ -623,7 +623,7 @@ class MLProposalServiceSuite extends FunSuite
             _ expects 'create withArgs(
               CreateMLRequest(
                 "MLタイトル",
-                MlArchiveType.Mailman,
+                MLArchiveType.Mailman,
                 new URL("http://localhost/path/to/archive/"),
                 now)) returning 10L
           }

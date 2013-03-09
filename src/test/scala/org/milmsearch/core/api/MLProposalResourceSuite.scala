@@ -2,7 +2,7 @@ package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
 import org.milmsearch.core.domain.CreateMLProposalRequest
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.MLProposal
 import org.milmsearch.core.domain.MLProposalStatus
 import org.milmsearch.core.service.MLProposalService
@@ -52,7 +52,7 @@ class MLProposalResourceSuite extends FunSuite
       "proposer@example.com",
       "MLタイトル",
       MLProposalStatus.New,
-      Some(MlArchiveType.Mailman),
+      Some(MLArchiveType.Mailman),
       Some(new URL("http://localhost/path/to/archive/")),
       Some("コメント(MLの説明など)"))
 
@@ -227,7 +227,7 @@ class MLProposalResourceSuite extends FunSuite
                 "proposer@example.com",
                 "MLタイトル" + i,
                 MLProposalStatus.New,
-                Some(MlArchiveType.Mailman),
+                Some(MLArchiveType.Mailman),
                 Some(new URL("http://localhost/path/to/archive/")),
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
@@ -280,7 +280,7 @@ class MLProposalResourceSuite extends FunSuite
                 "proposer@example.com",
                 "MLタイトル" + i,
                 MLProposalStatus.New,
-                Some(MlArchiveType.Mailman),
+                Some(MLArchiveType.Mailman),
                 Some(new URL("http://localhost/path/to/archive/")),
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
@@ -495,7 +495,7 @@ class MLProposalResourceSuite extends FunSuite
       createMock[MLProposalService] {
         _ expects 'search withArgs (
             Page(1, 10),
-            Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending)),
+            Some(Sort(MLPSortBy.MLTitle, SortOrder.Ascending)),
             None
           ) returning MLProposalSearchResult(0, 1, 10, Nil)
       }) {
@@ -524,7 +524,7 @@ class MLProposalResourceSuite extends FunSuite
       createMock[MLProposalService] {
         _ expects 'search withArgs (
           Page(1, 10),
-          Some(Sort(MLPSortBy.MlTitle, SortOrder.Ascending)),
+          Some(Sort(MLPSortBy.MLTitle, SortOrder.Ascending)),
           Some(Filter(MLPFilterBy.Status, "new"))
         ) returning MLProposalSearchResult(0, 1, 10, Nil)
       }) {
@@ -607,7 +607,7 @@ class MLProposalResourceSuite extends FunSuite
     val m = mock[MLProposalService]
     m expects 'update withArgs(1,
       UpdateMLProposalRequest("MLタイトル",
-        MlArchiveType.Mailman,
+        MLArchiveType.Mailman,
         new URL("http://localhost/path/to/archive/")))
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -628,7 +628,7 @@ class MLProposalResourceSuite extends FunSuite
     val m = mock[MLProposalService]
     m expects 'update withArgs(1,
       UpdateMLProposalRequest("MLタイトル",
-        MlArchiveType.Mailman,
+        MLArchiveType.Mailman,
         new URL("http://localhost/path/to/archive/"))
     ) throws new ResourceNotFoundException("any")
 
@@ -667,7 +667,7 @@ class MLProposalResourceSuite extends FunSuite
     val m = mock[MLProposalService]
     m expects 'update withArgs(1,
       UpdateMLProposalRequest("MLタイトル",
-        MlArchiveType.Mailman,
+        MLArchiveType.Mailman,
         new URL("http://localhost/path/to/archive/")))
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -698,7 +698,7 @@ class MLProposalResourceSuite extends FunSuite
             "proposer@example.com",
             "MLタイトル",
             MLProposalStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),

@@ -1,7 +1,7 @@
 package org.milmsearch.core.api
 import java.net.URL
 import org.milmsearch.core.domain.ML
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.service.MLService
 import org.milmsearch.core.test.util.DateUtil.newDateTime
 import org.milmsearch.core.test.util.MockCreatable
@@ -91,7 +91,7 @@ class MLResourceSpec extends FeatureSpec
             10, 1, 10, 1 to 10 map { i => ML(
                 i,
                 "MLタイトル" + i,
-                MlArchiveType.Mailman,
+                MLArchiveType.Mailman,
                 new URL("http://localhost/path/to/archive/"),
                 newDateTime(2013, 1, 1),
                 newDateTime(2013, 1, 1))
@@ -141,7 +141,7 @@ class MLResourceSpec extends FeatureSpec
   private def newSampleML = ML(
     id           = 1L,
     title        = "ML タイトル",
-    archiveType  = MlArchiveType.Mailman,
+    archiveType  = MLArchiveType.Mailman,
     archiveURL   = new URL("http://localhost/path/to/archive/"),
     lastMailedAt = newDateTime(2013, 1, 1),
     approvedAt   = newDateTime(2013, 1, 5))

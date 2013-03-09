@@ -16,7 +16,7 @@ import org.joda.time.DateTime
 case class ML(
   id: Long,
   title: String,
-  archiveType: MlArchiveType.Value,
+  archiveType: MLArchiveType.Value,
   archiveURL: URL,
   lastMailedAt: DateTime,
   approvedAt: DateTime)
@@ -26,7 +26,7 @@ case class ML(
  */
 case class CreateMLRequest(
   title: String,
-  archiveType: MlArchiveType.Value,
+  archiveType: MLArchiveType.Value,
   archiveURL: URL,
   approvedAt: DateTime)
 

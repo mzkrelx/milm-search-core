@@ -1,7 +1,7 @@
 package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
-import org.milmsearch.core.domain.MlArchiveType
+import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.{CreateMLProposalRequest => CreateMLPRequest}
 import org.milmsearch.core.domain.MLProposalStatus
 import org.milmsearch.core.service.MLProposalService
@@ -42,7 +42,7 @@ class MLProposalResourceSpec extends FunSpec
             "proposer@example.com",
             "MLタイトル",
             MLProposalStatus.New,
-            Some(MlArchiveType.Mailman),
+            Some(MLArchiveType.Mailman),
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)")
           )) returning 1L
