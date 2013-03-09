@@ -249,7 +249,7 @@ class MlProposalResourceSuite extends FunSuite
       |"totalResults":100,
       |"startIndex":21,
       |"itemsPerPage":20,
-      |"mlProposals":[%s]
+      |"items":[%s]
       |}""".stripMargin format (21 to 40 map { i =>
         """{
         |"id":%s,
@@ -303,7 +303,7 @@ class MlProposalResourceSuite extends FunSuite
       |"totalResults":100,
       |"startIndex":1,
       |"itemsPerPage":10,
-      |"mlProposals":[%s]
+      |"items":[%s]
       |}""".stripMargin format (1 to 10 map { i =>
         """{
         |"id":%s,
@@ -514,7 +514,7 @@ class MlProposalResourceSuite extends FunSuite
       |"totalResults":0,
       |"startIndex":1,
       |"itemsPerPage":10,
-      |"mlProposals":[]
+      |"items":[]
       |}""".stripMargin replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
@@ -543,7 +543,7 @@ class MlProposalResourceSuite extends FunSuite
       |"totalResults":0,
       |"startIndex":1,
       |"itemsPerPage":10,
-      |"mlProposals":[]
+      |"items":[]
       |}""".stripMargin replaceAll ("\n", "")
     ) { response.getEntity.toString }
   }
