@@ -27,7 +27,7 @@ version := "0.1"
 scalaVersion := "2.9.1"
 
 artifactName := { (version: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-  artifact.name + "-" + module.revision + "." + artifact.extension
+  artifact.name + "." + artifact.extension
 }
 
 // for MilmSearch
