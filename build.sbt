@@ -22,12 +22,13 @@
  */
 name := "milm-search-core"
 
-version := "0.0.1"
- 
+version := "0.1"
+
 scalaVersion := "2.9.1"
- 
+
 artifactName := { (version: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-  artifact.name + "." + artifact.extension
+  artifact.name + "-" + module.revision + "." + artifact.extension
+}
 
 // for MilmSearch
 libraryDependencies ++= Seq(
