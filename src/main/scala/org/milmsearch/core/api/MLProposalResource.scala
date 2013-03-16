@@ -60,9 +60,6 @@ import net.liftweb.json.MappingException
 import ResourceHelper._
 import org.milmsearch.core.domain.UpdateMLProposalRequest
 
-class BadQueryParameterException(msg: String) extends Exception(msg)
-class BadRequestException(msg: String) extends Exception(msg)
-
 /**
  * ML登録申請情報のAPIリソース
  */
