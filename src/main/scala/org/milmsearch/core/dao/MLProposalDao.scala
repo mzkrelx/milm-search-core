@@ -189,7 +189,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
     case Filter(MLPFilterBy.Status, v: MLPStatus.Value) =>
       By(MLPMMapper.status, v.toString)
     case _ => throw new NoSuchFieldException(
-      "Can't convert Filter to By")
+      "Can't convert Filter to By. filter=[%s]" format filter)
   }
 
   def toOrderBy(sort: Sort[MLPSortBy.type]) = {
@@ -202,7 +202,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       case CreatedAt => createdAt
       case UpdatedAt => updatedAt
       case _ => throw new NoSuchFieldException(
-        "Can't convert Filter to By")
+        "Can't convert Sort to OrderBy. sort=[%s]" format sort)
     }, DaoHelper.toAscOrDesc(sort.sortOrder))
   }
 
