@@ -112,6 +112,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       .createdAt(now)
       .updatedAt(now)
       .judgedAt(null)
+      .adminComment(null)
   }
 
   def findAll(range: Range,
@@ -148,7 +149,8 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       Option(mapper.message.get),
       mapper.createdAt.get,
       mapper.updatedAt.get,
-      Option(mapper.judgedAt.get))
+      Option(mapper.judgedAt.get),
+      Option(mapper.adminComment.get))
 
   /**
    * 指定された情報のmapperを返す
@@ -229,6 +231,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       case (CreatedAt,     value: Date)   => createdAt.set(value)
       case (UpdatedAt,     value: Date)   => updatedAt.set(value)
       case (JudgedAt,      value: Date)   => judgedAt.set(value)
+      case (AdminComment,  value: String) => adminComment.set(value)
       case notMLPColumn => throw new NoSuchFieldException(
         "Can't update by [%s]." formatted (notMLPColumn.toString))
     }
@@ -251,7 +254,7 @@ package mapper {
     override def fieldOrder = List(
       id, proposerName, proposerEmail, mlTitle, status,
       archiveType, archiveURL, message, createdAt, updatedAt,
-      judgedAt)
+      judgedAt, adminComment)
   }
 
   /**
@@ -261,6 +264,7 @@ package mapper {
       LongKeyedMapper[MLProposalMapper] with IdPK {
     def getSingleton = MLProposalMetaMapper
 
+    // DB定義（S.N.)
     object proposerName extends MappedString(this, 200)
     object proposerEmail extends MappedEmail(this, 200)
     object mlTitle extends MappedString(this, 200)
@@ -271,5 +275,6 @@ package mapper {
     object createdAt extends MappedDateTime(this)
     object updatedAt extends MappedDateTime(this)
     object judgedAt extends MappedDateTime(this)
+    object adminComment extends MappedText(this)
   }
 }
