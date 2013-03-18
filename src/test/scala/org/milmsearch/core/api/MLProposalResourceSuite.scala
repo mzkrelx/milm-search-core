@@ -232,7 +232,8 @@ class MLProposalResourceSuite extends FunSuite
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
-                None)
+                None,
+                Some("管理者コメント"))
               } toList)
       }) {
         new MLProposalResource().list(
@@ -285,7 +286,8 @@ class MLProposalResourceSuite extends FunSuite
                 Some("コメント(MLの説明など)"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
                 DateUtil.createDate("2012/10/28 10:20:30"),
-                None)
+                None,
+                Some("管理者コメント"))
               } toList)
       }) {
         new MLProposalResource().list(
@@ -602,13 +604,15 @@ class MLProposalResourceSuite extends FunSuite
       |  "mlTitle": "MLタイトル",
       |  "archiveType": "mailman",
       |  "archiveURL": "http://localhost/path/to/archive/",
+      |  "adminComment": "管理者コメント"
       |}""".stripMargin
 
     val m = mock[MLProposalService]
     m expects 'update withArgs(1,
       UpdateMLProposalRequest("MLタイトル",
         MLArchiveType.Mailman,
-        new URL("http://localhost/path/to/archive/")))
+        new URL("http://localhost/path/to/archive/"),
+        Some("管理者コメント")))
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
       new MLProposalResource().update("1", json)
@@ -623,13 +627,15 @@ class MLProposalResourceSuite extends FunSuite
       |  "mlTitle": "MLタイトル",
       |  "archiveType": "mailman",
       |  "archiveURL": "http://localhost/path/to/archive/",
+      |  "adminComment": "管理者コメント"
       |}""".stripMargin
 
     val m = mock[MLProposalService]
     m expects 'update withArgs(1,
       UpdateMLProposalRequest("MLタイトル",
         MLArchiveType.Mailman,
-        new URL("http://localhost/path/to/archive/"))
+        new URL("http://localhost/path/to/archive/"),
+        Some("管理者コメント"))
     ) throws new ResourceNotFoundException("any")
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
@@ -662,13 +668,15 @@ class MLProposalResourceSuite extends FunSuite
       |  "archiveType": "mailman",
       |  "archiveURL": "http://localhost/path/to/archive/",
       |  "comment": "コメント(MLの説明など)"
+      |  "adminComment": "管理者コメント"
       |}""".stripMargin
 
     val m = mock[MLProposalService]
     m expects 'update withArgs(1,
       UpdateMLProposalRequest("MLタイトル",
         MLArchiveType.Mailman,
-        new URL("http://localhost/path/to/archive/")))
+        new URL("http://localhost/path/to/archive/"),
+        Some("管理者コメント")))
 
     val response = ComponentRegistry.mlProposalService.doWith(m) {
       new MLProposalResource().update("1", json)
@@ -703,7 +711,8 @@ class MLProposalResourceSuite extends FunSuite
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            None))
+            None,
+            Some("管理者コメント")))
       })(new MLProposalResource().show("1"))
 
     expect(200) { response.getStatus() }
