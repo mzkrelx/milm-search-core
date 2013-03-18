@@ -155,15 +155,16 @@ class MLProposalResource extends Loggable with PageableResource {
       Option[Filter[MLProposalFilterBy.type]] =
     (filterBy, filterValue) match {
       case (None, None) => None
-      case (Some(by), Some(value)) =>
-        try {
-          Some(Filter(MLProposalFilterBy.withName(by), value))
-        } catch {
-          case e: NoSuchElementException =>
-            throw new BadQueryParameterException(
-              "Can't create filter. by[%s], value[%s]"
-                format (by, value))
-        }
+      case (Some(by), Some(value)) => {
+        val b = MLProposalFilterBy.withNameOption(by) getOrElse (
+          throw new BadQueryParameterException(
+            "Can't create filter. by[%s]" format by))
+        val v = MLProposalStatus.withNameOption(value) getOrElse (
+          throw new BadQueryParameterException(
+            "Can't create filter. value[%s]" format value))
+
+        Some(Filter(b, v))
+      }
       case _ => throw new BadQueryParameterException(
         "Invalid filter. Please query filterBy and " +
         "filterValue at the same time.")

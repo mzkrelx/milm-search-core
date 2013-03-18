@@ -21,6 +21,7 @@
  * milm-search-public@lists.sourceforge.jp.
  */
 package org.milmsearch.core.domain
+import org.milmsearch.common.RichEnumeration
 
 /**
  * 取得するデータの範囲
@@ -42,7 +43,7 @@ case class Page(page: Long, count: Long) {
 /**
  * 絞り込み条件の列挙型
  */
-trait FilterByEnum extends Enumeration
+trait FilterByEnum extends RichEnumeration
 
 /**
  * 絞り込み条件

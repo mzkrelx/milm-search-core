@@ -23,6 +23,7 @@
 package org.milmsearch.core.domain
 import java.net.URL
 import java.util.Date
+import org.milmsearch.common.RichEnumeration
 
 
 /**
@@ -111,7 +112,7 @@ object MLArchiveType extends Enumeration {
 /**
  * ML登録申請の状態
  */
-object MLProposalStatus extends Enumeration {
+object MLProposalStatus extends RichEnumeration {
   val New      = Value("new")
   val Accepted = Value("accepted")
   val Rejected = Value("rejected")

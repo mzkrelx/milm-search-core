@@ -98,7 +98,7 @@ class MLProposalResourceSuite extends FunSuite
 
     expect(true)(filter isDefined)
     expect(MLPFilterBy.Status)(filter.get.column)
-    expect("new")(filter.get.value)
+    expect(MLProposalStatus.New)(filter.get.value)
   }
 
   test("createFilter 絞り込み項目を指定して、絞り込み値を指定しなかった場合") {
@@ -128,7 +128,7 @@ class MLProposalResourceSuite extends FunSuite
           'createFilter)(Some("hello"), Some("new"))
     }
 
-    expect("Can't create filter. by[hello], value[new]")(
+    expect("Can't create filter. by[hello]")(
       e.getMessage())
   }
 
@@ -241,7 +241,7 @@ class MLProposalResourceSuite extends FunSuite
         _ expects 'search withArgs (
             Page(2, 20),
             Some(Sort(MLPSortBy.ArchiveType, SortOrder.Ascending)),
-            Some(Filter(MLPFilterBy.Status, "new"))
+            Some(Filter(MLPFilterBy.Status, MLProposalStatus.New))
           ) returning MLProposalSearchResult(100, 21, 20,
               21 to 40 map { i => MLProposal(
                 i,
@@ -547,7 +547,7 @@ class MLProposalResourceSuite extends FunSuite
         _ expects 'search withArgs (
           Page(1, 10),
           Some(Sort(MLPSortBy.MLTitle, SortOrder.Ascending)),
-          Some(Filter(MLPFilterBy.Status, "new"))
+          Some(Filter(MLPFilterBy.Status, MLProposalStatus.New))
         ) returning MLProposalSearchResult(0, 1, 10, Nil)
       }) {
         new MLProposalResource().list(
