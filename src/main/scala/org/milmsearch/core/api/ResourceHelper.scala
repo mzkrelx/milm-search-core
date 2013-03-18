@@ -73,16 +73,6 @@ object ResourceHelper extends Loggable {
     Response.status(Response.Status.NOT_FOUND).build()
   }
 
-  def createPage(startPage: Long, count: Long, maxCount: Long) = {
-    if (startPage <= 0)
-      throw new BadQueryParameterException(
-        "Invalid startPage value. [%d]" format startPage)
-    if (count <= 0 | count > maxCount)
-      throw new BadQueryParameterException(
-        "Invalid count value. [%d]" format count)
-    Page(startPage, count)
-  }
-
   def createSort[E <: SortByEnum](sortBy: Option[String],
       sortOrder: Option[String],
       toColumn: String => E#Value): Option[Sort[E]] =

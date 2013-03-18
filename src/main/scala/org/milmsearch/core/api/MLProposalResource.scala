@@ -139,7 +139,9 @@ class MLProposalResource extends Loggable with PageableResource {
         createPage(
           getLongParam(startPage) getOrElse defaultStartPage,
           getLongParam(count) getOrElse defaultCount),
-        createSort(Option(sortBy), Option(sortOrder)),
+        createSort[MLProposalSortBy.type](
+            Option(sortBy), Option(sortOrder),
+            MLProposalSortBy.withName(_)),
         createFilter(Option(filterBy), Option(filterValue))
       )).toJson).build()
     } catch {
@@ -170,36 +172,6 @@ class MLProposalResource extends Loggable with PageableResource {
         "filterValue at the same time.")
     }
 
-  //  TODO ResourceHelper に移動したので消す
-  private def createPage(startPage: Long, count: Long) = {
-    if (startPage <= 0)
-      throw new BadQueryParameterException(
-        "Invalid startPage value. [%d]" format startPage)
-    if (count <= 0 | count > maxCount)
-      throw new BadQueryParameterException(
-        "Invalid count value. [%d]" format count)
-    Page(startPage, count)
-  }
-
-  private def createSort(sortBy: Option[String],
-      sortOrder: Option[String]):
-      Option[Sort[MLProposalSortBy.type]] =
-    (sortBy, sortOrder) match {
-      case (None, None) => None
-      case (Some(by), Some(order)) =>
-        try {
-          Some(Sort(MLProposalSortBy.withName(by),
-            SortOrder.withName(order)))
-        } catch {
-          case e: NoSuchElementException =>
-            throw new BadQueryParameterException(
-              "Can't create sort. by[%s], order[%s]"
-                format (by, order))
-        }
-      case _ => throw new BadQueryParameterException(
-          "Invalid sort. Please query sortBy and sortOrder " +
-          "at the same time.")
-    }
 
   @Path("{id}")
   @GET

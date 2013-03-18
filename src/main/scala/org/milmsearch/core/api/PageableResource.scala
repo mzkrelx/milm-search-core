@@ -25,6 +25,7 @@ import org.milmsearch.core.domain.SortByEnum
 import org.milmsearch.core.domain.SortOrder
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.FilterByEnum
+import org.milmsearch.core.domain.Page
 
 /**
  * 一覧のときにページネーションするためのトレイト
@@ -38,6 +39,16 @@ trait PageableResource {
 
   /** 1ページの項目数の上限値 */
   protected val maxCount = 100L
+
+  def createPage(startPage: Long, count: Long, maxCount: Long = maxCount) = {
+    if (startPage <= 0)
+      throw new BadQueryParameterException(
+        "Invalid startPage value. [%d]" format startPage)
+    if (count <= 0 | count > maxCount)
+      throw new BadQueryParameterException(
+        "Invalid count value. [%d]" format count)
+    Page(startPage, count)
+  }
 
   /**
    * Filter オブジェクトを作る
