@@ -265,6 +265,21 @@ class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     expect("hideo")(mlp.proposerName)
   }
 
+  test("update(id, colVal) archiveTypeを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.ArchiveType, MLArchiveType.Mailman))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("mailman")(mlp.archiveType.get.toString)
+  }
+
   test("update(id, colVal) archiveURLを更新") {
     DB.runUpdate(insert1RecordSql,
       List(1, "name1", "sample@sample.com", "title",
