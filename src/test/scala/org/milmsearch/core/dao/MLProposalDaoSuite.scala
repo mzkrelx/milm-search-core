@@ -261,8 +261,23 @@ class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         1, Pair(MLProposalColumn.ProposerName, "hideo"))
     }
 
-    val mlp = new MLProposalDaoImpl().find(1)
-    expect("hideo")(mlp.get.proposerName)
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("hideo")(mlp.proposerName)
+  }
+
+  test("update(id, colVal) archiveURLを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.ArchiveURL, new URL("http://test.com")))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("http://test.com")(mlp.archiveURL.get.toString)
   }
 
   test("update(id, colVal) 存在しないIDを指定") {

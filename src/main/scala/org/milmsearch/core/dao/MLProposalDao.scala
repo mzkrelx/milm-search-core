@@ -246,7 +246,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       case (MLTitle,       value: String) => mlTitle.set(value)
       case (Status,        value: String) => status.set(value)
       case (ArchiveType,   value: String) => archiveType.set(value)
-      case (ArchiveURL,    value: String) => archiveURL.set(value)
+      case (ArchiveURL,    value: URL)    => archiveURL.set(value.toString())
       case (Comment,       value: String) => message.set(value)
       case (CreatedAt,     value: Date)   => createdAt.set(value)
       case (UpdatedAt,     value: Date)   => updatedAt.set(value)
