@@ -48,6 +48,7 @@ import net.liftweb.mapper.DB
 import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.Schemifier
 import org.milmsearch.core.test.util.DateUtil
+import org.joda.time.JodaTimePermission
 
 class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     with BeforeAndAfter {
@@ -293,6 +294,38 @@ class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
 
     val mlp = new MLProposalDaoImpl().find(1).get
     expect("http://test.com")(mlp.archiveURL.get.toString)
+  }
+
+  test("update(id, colVal) statusを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.Status, MLPStatus.Rejected))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("rejected")(mlp.status.toString)
+  }
+
+  test("update(id, colVal) judgedAtを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    val time = DateUtil.createDate("2013/01/01 00:00:00")
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.JudgedAt, time))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("2013-01-01T00:00:00")(
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.judgedAt.get))
   }
 
   test("update(id, colVal) 存在しないIDを指定") {
