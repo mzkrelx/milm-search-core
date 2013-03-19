@@ -78,7 +78,7 @@ class MLProposalResourceSpec extends FunSpec
 
       then("Location ヘッダーに作成したリソースの URL を記載する")
       response.getMetadata.getFirst("Location") should
-        equal (new URI("/ml-proposal/1"))
+        equal (new URI("/ml-proposals/1"))
     }
 
     it ("申請ステータスの値は new のみ許可する。") {

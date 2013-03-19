@@ -86,7 +86,7 @@ class MLProposalResourceSuite extends FunSuite
     }
 
     expect(201) { response.getStatus }
-    expect(new URI("/ml-proposal/1")) {
+    expect(new URI("/ml-proposals/1")) {
       response.getMetadata().getFirst("Location")
     }
   }

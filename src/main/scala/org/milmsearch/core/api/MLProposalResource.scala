@@ -112,7 +112,7 @@ class MLProposalResource extends Loggable with PageableResource {
 
     val id = mpService.create(dto.toDomain)
 
-    Response.created(new URI("/ml-proposal/" + id)).build()
+    Response.created(new URI("/ml-proposals/" + id)).build()
   }
 
   /**
