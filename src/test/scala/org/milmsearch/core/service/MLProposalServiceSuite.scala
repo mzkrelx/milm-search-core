@@ -622,7 +622,7 @@ class MLProposalServiceSuite extends FunSuite
         createMock[MLProposalDao] { m =>
           m expects 'update withArgs(
             1, List(
-            (MLProposalColumn.Status, MLPStatus.Accepted.toString),
+            (MLProposalColumn.Status, MLPStatus.Accepted),
             (MLProposalColumn.JudgedAt, now.toDate()))
           ) returning (true)
           m expects 'find withArgs(1L) returning Some(
@@ -666,7 +666,7 @@ class MLProposalServiceSuite extends FunSuite
           createMock[MLProposalDao] {
             _ expects 'update withArgs(
               1, List(
-              (MLProposalColumn.Status, MLPStatus.Accepted.toString),
+              (MLProposalColumn.Status, MLPStatus.Accepted),
               (MLProposalColumn.JudgedAt, now.toDate()))
             ) returning (false)
           }
@@ -688,7 +688,7 @@ class MLProposalServiceSuite extends FunSuite
         createMock[MLProposalDao] {
           _ expects 'update withArgs(
             1, List(
-            (MLProposalColumn.Status, MLPStatus.Rejected.toString),
+            (MLProposalColumn.Status, MLPStatus.Rejected),
             (MLProposalColumn.JudgedAt, now.toDate()))
           ) returning (true)
         }
@@ -710,7 +710,7 @@ class MLProposalServiceSuite extends FunSuite
           createMock[MLProposalDao] {
             _ expects 'update withArgs(
               1, List(
-              (MLProposalColumn.Status, MLPStatus.Rejected.toString),
+              (MLProposalColumn.Status, MLPStatus.Rejected),
               (MLProposalColumn.JudgedAt, now.toDate()))
             ) returning (false)
           }

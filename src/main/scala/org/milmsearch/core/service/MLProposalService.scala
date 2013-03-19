@@ -180,7 +180,7 @@ class MLProposalServiceImpl extends MLProposalService with Loggable {
   def accept(id: Long) {
     val now = dateTimeService.now
     if (!mpDao.update(id, List(
-        (MLProposalColumn.Status, MLProposalStatus.Accepted.toString),
+        (MLProposalColumn.Status, MLProposalStatus.Accepted),
         (MLProposalColumn.JudgedAt, now.toDate)))) {
       throw new ResourceNotFoundException(
         "MLProposal to accept is not found.")
@@ -198,7 +198,7 @@ class MLProposalServiceImpl extends MLProposalService with Loggable {
 
   def reject(id: Long) {
     if (!mpDao.update(id, List(
-        (MLProposalColumn.Status, MLProposalStatus.Rejected.toString),
+        (MLProposalColumn.Status, MLProposalStatus.Rejected),
         (MLProposalColumn.JudgedAt, dateTimeService.now.toDate)))) {
       throw new ResourceNotFoundException(
         "MLProposal to reject is not found.")
