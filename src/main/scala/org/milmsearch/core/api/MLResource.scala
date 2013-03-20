@@ -124,14 +124,20 @@ class MLResource extends Loggable with PageableResource {
   /**
    * ML情報を JSON 変換用オブジェクトに変換する
    */
-  private def toDto(ml: ML) =
+  private def toDto(ml: ML) = {
+    val lastMailedAt = ml.lastMailedAt match {
+      case None => null
+      case Some(x) => formatToISO(x)
+    }
+
     MLDto(
       id           = ml.id,
       title        = ml.title,
       archiveType  = ml.archiveType.toString,
       archiveURL   = ml.archiveURL.toString,
-      lastMailedAt = formatToISO(ml.lastMailedAt),
+      lastMailedAt = lastMailedAt,
       approvedAt   = formatToISO(ml.approvedAt))
+  }
 }
 
 /**

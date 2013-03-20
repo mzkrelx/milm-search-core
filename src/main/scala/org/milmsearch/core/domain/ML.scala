@@ -40,7 +40,7 @@ case class ML(
   title: String,
   archiveType: MLArchiveType.Value,
   archiveURL: URL,
-  lastMailedAt: DateTime,
+  lastMailedAt: Option[DateTime],
   approvedAt: DateTime)
 
 /**

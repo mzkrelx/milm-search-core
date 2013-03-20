@@ -170,13 +170,20 @@ class MLDaoImpl extends MLDao with Loggable {
    * @param mapper Mapper オブジェクト
    * @return ML情報
    */
-  private def toDomain(mapper: MLMapper) = ML(
-    id           = mapper.id,
-    title        = mapper.title,
-    archiveType  = MLArchiveType.withName(mapper.archiveType),
-    archiveURL   = new URL(mapper.archiveURL),
-    lastMailedAt = new DateTime(mapper.lastMailedAt.getTime),
-    approvedAt   = new DateTime(mapper.approvedAt.getTime))
+  private def toDomain(mapper: MLMapper) = {
+    val lastMailedAt = mapper.lastMailedAt.is match {
+      case null => null
+      case x    => new DateTime(x.getTime)
+    }
+
+    ML(
+      id           = mapper.id,
+      title        = mapper.title,
+      archiveType  = MLArchiveType.withName(mapper.archiveType),
+      archiveURL   = new URL(mapper.archiveURL),
+      lastMailedAt = Option(lastMailedAt),
+      approvedAt   = new DateTime(mapper.approvedAt.getTime))
+  }
 
   /**
    * ML情報作成要求を Mapper オブジェクトに変換する

@@ -116,7 +116,7 @@ class MLResourceSpec extends FeatureSpec
             "MLタイトル" + i,
             MLArchiveType.Mailman,
             new URL("http://localhost/path/to/archive/"),
-            newDateTime(2013, 1, 1),
+            Some(newDateTime(2013, 1, 1)),
             newDateTime(2013, 1, 1))
           } toList)
       val m = createMock[MLService] {
@@ -172,6 +172,6 @@ class MLResourceSpec extends FeatureSpec
     title        = "ML タイトル",
     archiveType  = MLArchiveType.Mailman,
     archiveURL   = new URL("http://localhost/path/to/archive/"),
-    lastMailedAt = newDateTime(2013, 1, 1),
+    lastMailedAt = Some(newDateTime(2013, 1, 1)),
     approvedAt   = newDateTime(2013, 1, 5))
 }
