@@ -20,17 +20,21 @@
  * You can contact MilmSearch Project at mailing list
  * milm-search-public@lists.sourceforge.jp.
  */
-libraryDependencies <+= sbtVersion(v => v match {
-  case "0.11.0" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.0-0.2.8"
-  case "0.11.1" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.1-0.2.10"
-  case "0.11.2" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.2-0.2.11"
-  case "0.11.3" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.3-0.2.11.1"
-  case x if (x.startsWith("0.12")) => "com.github.siasia" %% "xsbt-web-plugin" % "0.12.0-0.2.11.1"
-})
+package org.milmsearch.core
+import dao._
+import service._
+import net.liftweb.util.SimpleInjector
 
-resolvers += Classpaths.typesafeResolver
+/**
+ * サービスロケーター<br/
+ * Service と DAO の初期化を行う
+ */
+object ComponentRegistry extends SimpleInjector {
+  val mlProposalDao     = new Inject[MLProposalDao](new MLProposalDaoImpl) {}
+  val mlProposalService = new Inject[MLProposalService](new MLProposalServiceImpl) {}
 
-resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
+  val mlDao     = new Inject[MLDao](new MLDaoImpl) {}
+  val mlService = new Inject[MLService](new MLServiceImpl) {}
 
-addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
-        
+  val dateTimeService = new Inject[DateTimeService](new DateTimeServiceImpl) {}
+}

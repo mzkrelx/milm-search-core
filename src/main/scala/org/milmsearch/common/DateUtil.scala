@@ -20,17 +20,22 @@
  * You can contact MilmSearch Project at mailing list
  * milm-search-public@lists.sourceforge.jp.
  */
-libraryDependencies <+= sbtVersion(v => v match {
-  case "0.11.0" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.0-0.2.8"
-  case "0.11.1" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.1-0.2.10"
-  case "0.11.2" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.2-0.2.11"
-  case "0.11.3" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.3-0.2.11.1"
-  case x if (x.startsWith("0.12")) => "com.github.siasia" %% "xsbt-web-plugin" % "0.12.0-0.2.11.1"
-})
+package org.milmsearch.common
 
-resolvers += Classpaths.typesafeResolver
+import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.DateTime
 
-resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
+/**
+ * 日付関連ユーティリティ
+ */
+object DateUtil {
 
-addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
-        
+  /**
+   * DateTime オブジェクトを ISO8601 形式の文字列に変換する
+   *
+   * @dateTime 変換したい日時
+   * @return 変換済み文字列 (ex. 2004-06-09T10:20:30+09:00)
+   */
+  def formatToISO(dateTime: DateTime) =
+    ISODateTimeFormat.dateTimeNoMillis().print(dateTime)
+}

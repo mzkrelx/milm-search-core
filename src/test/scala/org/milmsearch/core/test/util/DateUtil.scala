@@ -20,17 +20,33 @@
  * You can contact MilmSearch Project at mailing list
  * milm-search-public@lists.sourceforge.jp.
  */
-libraryDependencies <+= sbtVersion(v => v match {
-  case "0.11.0" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.0-0.2.8"
-  case "0.11.1" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.1-0.2.10"
-  case "0.11.2" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.2-0.2.11"
-  case "0.11.3" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.3-0.2.11.1"
-  case x if (x.startsWith("0.12")) => "com.github.siasia" %% "xsbt-web-plugin" % "0.12.0-0.2.11.1"
-})
+package org.milmsearch.core.test.util
+import org.apache.commons.lang3.time.DateUtils
+import org.joda.time.DateTime
 
-resolvers += Classpaths.typesafeResolver
+object DateUtil {
 
-resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
+    def createDate(dateStr: String) =
+      DateUtils.parseDate(dateStr, {"yyyy/MM/dd HH:mm:ss"})
 
-addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
-        
+    /**
+     * Date オブジェクトを生成する
+     *
+     * @param year 年
+     * @param monthOfYear 月 (January -> 1)
+     * @param dayOfMonth 日
+     */
+    def newDate(year: Int, monthOfYear: Int, dayOfMonth: Int) =
+      newDateTime(year, monthOfYear, dayOfMonth).toDate
+
+    /**
+     * DateTime オブジェクトを生成する
+     *
+     * @param year 年
+     * @param monthOfYear 月 (January -> 1)
+     * @param dayOfMonth 日
+     */
+    def newDateTime(year: Int, monthOfYear: Int, dayOfMonth: Int) =
+      new DateTime(year, monthOfYear, dayOfMonth, 0, 0, 0, 0)
+
+}

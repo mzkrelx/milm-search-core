@@ -20,17 +20,27 @@
  * You can contact MilmSearch Project at mailing list
  * milm-search-public@lists.sourceforge.jp.
  */
-libraryDependencies <+= sbtVersion(v => v match {
-  case "0.11.0" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.0-0.2.8"
-  case "0.11.1" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.1-0.2.10"
-  case "0.11.2" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.2-0.2.11"
-  case "0.11.3" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.3-0.2.11.1"
-  case x if (x.startsWith("0.12")) => "com.github.siasia" %% "xsbt-web-plugin" % "0.12.0-0.2.11.1"
-})
+package org.milmsearch.core.dao
+import org.milmsearch.core.Bootstrap
+import org.milmsearch.core.ComponentRegistry
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.FunSuite
+import net.liftweb.mapper.DB
+import net.liftweb.mapper.Schemifier
+import org.milmsearch.core.domain.Range
+import org.milmsearch.core.domain.Sort
+import org.milmsearch.core.domain.SortOrder
+import net.liftweb.mapper.Ascending
+import net.liftweb.mapper.Descending
 
-resolvers += Classpaths.typesafeResolver
+class DaoHelperSuite extends FunSuite {
 
-resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
+  test("toAscOrDesc Ascending の場合") {
+    expect(Ascending)(DaoHelper.toAscOrDesc(SortOrder.Ascending))
+  }
 
-addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
-        
+  test("toAscOrDesc Descending の場合") {
+    expect(Descending)(DaoHelper.toAscOrDesc(SortOrder.Descending))
+  }
+
+}

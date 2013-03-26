@@ -20,17 +20,16 @@
  * You can contact MilmSearch Project at mailing list
  * milm-search-public@lists.sourceforge.jp.
  */
-libraryDependencies <+= sbtVersion(v => v match {
-  case "0.11.0" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.0-0.2.8"
-  case "0.11.1" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.1-0.2.10"
-  case "0.11.2" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.2-0.2.11"
-  case "0.11.3" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.3-0.2.11.1"
-  case x if (x.startsWith("0.12")) => "com.github.siasia" %% "xsbt-web-plugin" % "0.12.0-0.2.11.1"
-})
+package org.milmsearch.core.api
 
-resolvers += Classpaths.typesafeResolver
+import javax.ws.rs.core.Application
+import scala.collection.JavaConverters._
 
-resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
-
-addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
-        
+class MilmSearchApiApplication extends Application {
+  override def getClasses(): java.util.Set[Class[_]] = {
+    Set[Class[_]](
+        classOf[MLProposalResource],
+        classOf[MLResource]
+    ).asJava
+  }
+}

@@ -20,17 +20,22 @@
  * You can contact MilmSearch Project at mailing list
  * milm-search-public@lists.sourceforge.jp.
  */
-libraryDependencies <+= sbtVersion(v => v match {
-  case "0.11.0" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.0-0.2.8"
-  case "0.11.1" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.1-0.2.10"
-  case "0.11.2" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.2-0.2.11"
-  case "0.11.3" => "com.github.siasia" %% "xsbt-web-plugin" % "0.11.3-0.2.11.1"
-  case x if (x.startsWith("0.12")) => "com.github.siasia" %% "xsbt-web-plugin" % "0.12.0-0.2.11.1"
-})
+package org.milmsearch.core.api
+import net.liftweb.json.Serialization
+import net.liftweb.json.DefaultFormats
 
-resolvers += Classpaths.typesafeResolver
+/**
+ * ML登録申請検索結果の変換用オブジェクト
+ *
+ * D の型は内包するアイテムのDTOの型を指定します。
+ */
+case class SearchResultDto[D](
+    totalResults: Long,
+    startIndex: Long,
+    itemsPerPage: Long,
+    items: List[D]) {
+  // for lift-json
+  implicit val formats = DefaultFormats
 
-resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
-
-addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
-        
+  def toJson(): String = Serialization.write(this)
+}
