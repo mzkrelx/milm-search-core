@@ -1,3 +1,25 @@
+/*
+ * MilmSearch is a mailing list searching system.
+ *
+ * Copyright (C) 2013 MilmSearch Project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can contact MilmSearch Project at mailing list
+ * milm-search-public@lists.sourceforge.jp.
+ */
 package org.milmsearch.core.api
 import org.milmsearch.common.DateUtil.formatToISO
 import org.milmsearch.core.domain.ML
@@ -102,14 +124,20 @@ class MLResource extends Loggable with PageableResource {
   /**
    * ML情報を JSON 変換用オブジェクトに変換する
    */
-  private def toDto(ml: ML) =
+  private def toDto(ml: ML) = {
+    val lastMailedAt = ml.lastMailedAt match {
+      case None => null
+      case Some(x) => formatToISO(x)
+    }
+
     MLDto(
       id           = ml.id,
       title        = ml.title,
       archiveType  = ml.archiveType.toString,
       archiveURL   = ml.archiveURL.toString,
-      lastMailedAt = formatToISO(ml.lastMailedAt),
+      lastMailedAt = lastMailedAt,
       approvedAt   = formatToISO(ml.approvedAt))
+  }
 }
 
 /**

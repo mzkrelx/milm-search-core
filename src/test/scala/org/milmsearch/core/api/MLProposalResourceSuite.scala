@@ -1,3 +1,25 @@
+/*
+ * MilmSearch is a mailing list searching system.
+ *
+ * Copyright (C) 2013 MilmSearch Project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can contact MilmSearch Project at mailing list
+ * milm-search-public@lists.sourceforge.jp.
+ */
 package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
@@ -64,7 +86,7 @@ class MLProposalResourceSuite extends FunSuite
     }
 
     expect(201) { response.getStatus }
-    expect(new URI("/ml-proposal/1")) {
+    expect(new URI("/ml-proposals/1")) {
       response.getMetadata().getFirst("Location")
     }
   }
@@ -76,7 +98,7 @@ class MLProposalResourceSuite extends FunSuite
 
     expect(true)(filter isDefined)
     expect(MLPFilterBy.Status)(filter.get.column)
-    expect("new")(filter.get.value)
+    expect(MLProposalStatus.New)(filter.get.value)
   }
 
   test("createFilter 絞り込み項目を指定して、絞り込み値を指定しなかった場合") {
@@ -106,7 +128,7 @@ class MLProposalResourceSuite extends FunSuite
           'createFilter)(Some("hello"), Some("new"))
     }
 
-    expect("Can't create filter. by[hello], value[new]")(
+    expect("Can't create filter. by[hello]")(
       e.getMessage())
   }
 
@@ -119,8 +141,7 @@ class MLProposalResourceSuite extends FunSuite
   }
 
   test("createPage ページに 1、カウントに 1 を指定した場合") {
-    val page = new MLProposalResource invokePrivate
-      PrivateMethod[Page]('createPage)(1L, 1L)
+    val page = new MLProposalResource().createPage(1L, 1L)
 
     expect(1L)(page.page)
     expect(1L)(page.count)
@@ -128,8 +149,7 @@ class MLProposalResourceSuite extends FunSuite
 
   test("createPage ページに 0 を指定した場合") {
     val e = intercept[BadQueryParameterException] {
-      new MLProposalResource invokePrivate
-        PrivateMethod[Page]('createPage)(0L, 1L)
+      new MLProposalResource().createPage(0L, 1L)
     }
 
     expect("Invalid startPage value. [0]")(
@@ -138,8 +158,7 @@ class MLProposalResourceSuite extends FunSuite
 
   test("createPage カウントに 0 を指定した場合") {
     val e = intercept[BadQueryParameterException] {
-      new MLProposalResource invokePrivate
-        PrivateMethod[Page]('createPage)(1L, 0L)
+      new MLProposalResource().createPage(1L, 0L)
     }
 
     expect("Invalid count value. [0]")(
@@ -147,8 +166,7 @@ class MLProposalResourceSuite extends FunSuite
   }
 
   test("createPage カウントに 100 を指定した場合") {
-    val page = new MLProposalResource invokePrivate
-        PrivateMethod[Page]('createPage)(1L, 100L)
+    val page = new MLProposalResource().createPage(1L, 100L)
 
     expect(1L)(page.page)
     expect(100L)(page.count)
@@ -156,61 +174,11 @@ class MLProposalResourceSuite extends FunSuite
 
   test("createPage カウントに 101 を指定した場合") {
     val e = intercept[BadQueryParameterException] {
-      new MLProposalResource invokePrivate
-        PrivateMethod[Page]('createPage)(1L, 101L)
+      new MLProposalResource().createPage(1L, 101L)
     }
 
     expect("Invalid count value. [101]")(
       e.getMessage())
-  }
-
-  test("createSort ソート列名と値を指定した場合") {
-    val sort = new MLProposalResource invokePrivate
-      PrivateMethod[Option[Sort[MLPSortBy.type]]](
-        'createSort)(Some("createdAt"), Some("ascending"))
-
-    expect(true)(sort isDefined)
-    expect(MLPSortBy.CreatedAt)(sort.get.column)
-    expect(SortOrder.Ascending)(sort.get.sortOrder)
-  }
-
-  test("createSort ソート列名を指定して、ソート順序を指定しなかった場合") {
-    val e = intercept[BadQueryParameterException] {
-      new MLProposalResource invokePrivate
-        PrivateMethod[Option[Sort[MLPSortBy.type]]](
-          'createSort)(Some("createdAt"), None)
-    }
-
-    expect(true)(e.getMessage().startsWith("Invalid sort."))
-  }
-
-  test("createSort ソート列名を指定しないで、ソート順序を指定した場合") {
-    val e = intercept[BadQueryParameterException] {
-      new MLProposalResource invokePrivate
-        PrivateMethod[Option[Sort[MLPSortBy.type]]](
-          'createSort)(None, Some("ascending"))
-    }
-
-    expect(true)(e.getMessage().startsWith("Invalid sort."))
-  }
-
-  test("createSort ソート列名が規定外の場合") {
-    val e = intercept[BadQueryParameterException] {
-      new MLProposalResource invokePrivate
-        PrivateMethod[Option[Sort[MLPSortBy.type]]](
-          'createSort)(Some("hello"), Some("ascending"))
-    }
-
-    expect("Can't create sort. by[hello], order[ascending]")(
-      e.getMessage())
-  }
-
-  test("createSort ソート列名とソート順序を指定しなかった場合") {
-    val sort = new MLProposalResource invokePrivate
-      PrivateMethod[Option[Sort[MLPSortBy.type]]](
-        'createSort)(None, None)
-
-    expect(None)(sort)
   }
 
   test("list パラメータがすべて正常値の場合") {
@@ -219,7 +187,7 @@ class MLProposalResourceSuite extends FunSuite
         _ expects 'search withArgs (
             Page(2, 20),
             Some(Sort(MLPSortBy.ArchiveType, SortOrder.Ascending)),
-            Some(Filter(MLPFilterBy.Status, "new"))
+            Some(Filter(MLPFilterBy.Status, MLProposalStatus.New))
           ) returning MLProposalSearchResult(100, 21, 20,
               21 to 40 map { i => MLProposal(
                 i,
@@ -525,7 +493,7 @@ class MLProposalResourceSuite extends FunSuite
         _ expects 'search withArgs (
           Page(1, 10),
           Some(Sort(MLPSortBy.MLTitle, SortOrder.Ascending)),
-          Some(Filter(MLPFilterBy.Status, "new"))
+          Some(Filter(MLPFilterBy.Status, MLProposalStatus.New))
         ) returning MLProposalSearchResult(0, 1, 10, Nil)
       }) {
         new MLProposalResource().list(

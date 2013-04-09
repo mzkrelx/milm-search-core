@@ -1,3 +1,25 @@
+/*
+ * MilmSearch is a mailing list searching system.
+ *
+ * Copyright (C) 2013 MilmSearch Project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can contact MilmSearch Project at mailing list
+ * milm-search-public@lists.sourceforge.jp.
+ */
 package org.milmsearch.core.dao
 import java.net.URL
 import org.apache.commons.lang3.time.DateFormatUtils
@@ -26,6 +48,7 @@ import net.liftweb.mapper.DB
 import net.liftweb.mapper.OrderBy
 import net.liftweb.mapper.Schemifier
 import org.milmsearch.core.test.util.DateUtil
+import org.joda.time.JodaTimePermission
 
 class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
     with BeforeAndAfter {
@@ -239,8 +262,70 @@ class MLProposalDaoSuite extends FunSuite with BeforeAndAfterAll
         1, Pair(MLProposalColumn.ProposerName, "hideo"))
     }
 
-    val mlp = new MLProposalDaoImpl().find(1)
-    expect("hideo")(mlp.get.proposerName)
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("hideo")(mlp.proposerName)
+  }
+
+  test("update(id, colVal) archiveTypeを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.ArchiveType, MLArchiveType.Mailman))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("mailman")(mlp.archiveType.get.toString)
+  }
+
+  test("update(id, colVal) archiveURLを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.ArchiveURL, new URL("http://test.com")))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("http://test.com")(mlp.archiveURL.get.toString)
+  }
+
+  test("update(id, colVal) statusを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.Status, MLPStatus.Rejected))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("rejected")(mlp.status.toString)
+  }
+
+  test("update(id, colVal) judgedAtを更新") {
+    DB.runUpdate(insert1RecordSql,
+      List(1, "name1", "sample@sample.com", "title",
+        "accepted", "other", "http://sample.com", "message",
+        "2012-10-10 10:10:11", "2012-10-11 10:10:11", "2012-10-12 10:10:11"))
+
+    val time = DateUtil.createDate("2013/01/01 00:00:00")
+    expect(true) {
+      new MLProposalDaoImpl().update(
+        1, Pair(MLProposalColumn.JudgedAt, time))
+    }
+
+    val mlp = new MLProposalDaoImpl().find(1).get
+    expect("2013-01-01T00:00:00")(
+      DateFormatUtils.ISO_DATETIME_FORMAT.format(mlp.judgedAt.get))
   }
 
   test("update(id, colVal) 存在しないIDを指定") {

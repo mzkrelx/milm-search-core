@@ -1,3 +1,25 @@
+/*
+ * MilmSearch is a mailing list searching system.
+ *
+ * Copyright (C) 2013 MilmSearch Project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can contact MilmSearch Project at mailing list
+ * milm-search-public@lists.sourceforge.jp.
+ */
 package org.milmsearch.core.dao
 
 import java.net.URL
@@ -167,7 +189,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
     case Filter(MLPFilterBy.Status, v: MLPStatus.Value) =>
       By(MLPMMapper.status, v.toString)
     case _ => throw new NoSuchFieldException(
-      "Can't convert Filter to By")
+      "Can't convert Filter to By. filter=[%s]" format filter)
   }
 
   def toOrderBy(sort: Sort[MLPSortBy.type]) = {
@@ -180,7 +202,7 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       case CreatedAt => createdAt
       case UpdatedAt => updatedAt
       case _ => throw new NoSuchFieldException(
-        "Can't convert Filter to By")
+        "Can't convert Sort to OrderBy. sort=[%s]" format sort)
     }, DaoHelper.toAscOrDesc(sort.sortOrder))
   }
 
@@ -222,9 +244,9 @@ class MLProposalDaoImpl extends MLProposalDao with Loggable {
       case (ProposerName,  value: String) => proposerName.set(value)
       case (ProposerEmail, value: String) => proposerEmail.set(value)
       case (MLTitle,       value: String) => mlTitle.set(value)
-      case (Status,        value: String) => status.set(value)
-      case (ArchiveType,   value: String) => archiveType.set(value)
-      case (ArchiveURL,    value: String) => archiveURL.set(value)
+      case (Status,        value: MLPStatus.Value) => status.set(value.toString)
+      case (ArchiveType,   value: MLArchiveType.Value) => archiveType.set(value.toString)
+      case (ArchiveURL,    value: URL)    => archiveURL.set(value.toString)
       case (Comment,       value: String) => message.set(value)
       case (CreatedAt,     value: Date)   => createdAt.set(value)
       case (UpdatedAt,     value: Date)   => updatedAt.set(value)

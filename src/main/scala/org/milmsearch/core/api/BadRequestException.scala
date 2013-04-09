@@ -20,7 +20,7 @@
  * You can contact MilmSearch Project at mailing list
  * milm-search-public@lists.sourceforge.jp.
  */
-package org.milmsearch.core.dao
+package org.milmsearch.core.api
 
-/** データアクセス時の例外 */
-class DataAccessException(msg: String) extends Exception(msg)
+class BadRequestException(msg: String) extends Exception(msg)
+

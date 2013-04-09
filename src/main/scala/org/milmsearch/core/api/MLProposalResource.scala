@@ -1,3 +1,25 @@
+/*
+ * MilmSearch is a mailing list searching system.
+ *
+ * Copyright (C) 2013 MilmSearch Project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can contact MilmSearch Project at mailing list
+ * milm-search-public@lists.sourceforge.jp.
+ */
 package org.milmsearch.core.api
 import java.net.URI
 import java.net.URL
@@ -37,9 +59,6 @@ import org.milmsearch.core.exception.ResourceNotFoundException
 import net.liftweb.json.MappingException
 import ResourceHelper._
 import org.milmsearch.core.domain.UpdateMLProposalRequest
-
-class BadQueryParameterException(msg: String) extends Exception(msg)
-class BadRequestException(msg: String) extends Exception(msg)
 
 /**
  * ML登録申請情報のAPIリソース
@@ -93,7 +112,7 @@ class MLProposalResource extends Loggable with PageableResource {
 
     val id = mpService.create(dto.toDomain)
 
-    Response.created(new URI("/ml-proposal/" + id)).build()
+    Response.created(new URI("/ml-proposals/" + id)).build()
   }
 
   /**
@@ -120,7 +139,9 @@ class MLProposalResource extends Loggable with PageableResource {
         createPage(
           getLongParam(startPage) getOrElse defaultStartPage,
           getLongParam(count) getOrElse defaultCount),
-        createSort(Option(sortBy), Option(sortOrder)),
+        createSort[MLProposalSortBy.type](
+            Option(sortBy), Option(sortOrder),
+            MLProposalSortBy.withName(_)),
         createFilter(Option(filterBy), Option(filterValue))
       )).toJson).build()
     } catch {
@@ -136,50 +157,21 @@ class MLProposalResource extends Loggable with PageableResource {
       Option[Filter[MLProposalFilterBy.type]] =
     (filterBy, filterValue) match {
       case (None, None) => None
-      case (Some(by), Some(value)) =>
-        try {
-          Some(Filter(MLProposalFilterBy.withName(by), value))
-        } catch {
-          case e: NoSuchElementException =>
-            throw new BadQueryParameterException(
-              "Can't create filter. by[%s], value[%s]"
-                format (by, value))
-        }
+      case (Some(by), Some(value)) => {
+        val b = MLProposalFilterBy.withNameOption(by) getOrElse (
+          throw new BadQueryParameterException(
+            "Can't create filter. by[%s]" format by))
+        val v = MLProposalStatus.withNameOption(value) getOrElse (
+          throw new BadQueryParameterException(
+            "Can't create filter. value[%s]" format value))
+
+        Some(Filter(b, v))
+      }
       case _ => throw new BadQueryParameterException(
         "Invalid filter. Please query filterBy and " +
         "filterValue at the same time.")
     }
 
-  //  TODO ResourceHelper に移動したので消す
-  private def createPage(startPage: Long, count: Long) = {
-    if (startPage <= 0)
-      throw new BadQueryParameterException(
-        "Invalid startPage value. [%d]" format startPage)
-    if (count <= 0 | count > maxCount)
-      throw new BadQueryParameterException(
-        "Invalid count value. [%d]" format count)
-    Page(startPage, count)
-  }
-
-  private def createSort(sortBy: Option[String],
-      sortOrder: Option[String]):
-      Option[Sort[MLProposalSortBy.type]] =
-    (sortBy, sortOrder) match {
-      case (None, None) => None
-      case (Some(by), Some(order)) =>
-        try {
-          Some(Sort(MLProposalSortBy.withName(by),
-            SortOrder.withName(order)))
-        } catch {
-          case e: NoSuchElementException =>
-            throw new BadQueryParameterException(
-              "Can't create sort. by[%s], order[%s]"
-                format (by, order))
-        }
-      case _ => throw new BadQueryParameterException(
-          "Invalid sort. Please query sortBy and sortOrder " +
-          "at the same time.")
-    }
 
   @Path("{id}")
   @GET

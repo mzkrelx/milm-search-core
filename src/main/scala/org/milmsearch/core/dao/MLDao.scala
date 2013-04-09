@@ -1,3 +1,25 @@
+/*
+ * MilmSearch is a mailing list searching system.
+ *
+ * Copyright (C) 2013 MilmSearch Project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can contact MilmSearch Project at mailing list
+ * milm-search-public@lists.sourceforge.jp.
+ */
 package org.milmsearch.core.dao
 
 import net.liftweb.common.Loggable
@@ -36,21 +58,21 @@ import net.liftweb.mapper.MappedField
 trait MLDao {
   /**
    * ML情報を永続化する
-   * 
+   *
    * @param req ML情報作成要求
    */
   def create(req: CreateMLRequest): Long
-  
+
   /**
    * ML情報を検索する
-   * 
+   *
    * @param id ML情報ID
    */
   def find(id: Long): Option[ML]
-  
+
   /**
    * ML情報を検索する
-   * 
+   *
    * @param sort ソート方法
    * @param filter 検索条件
    * @return 検索したML情報の一覧
@@ -58,7 +80,7 @@ trait MLDao {
   def findAll(range: Range,
     sort: Option[Sort[MLSortBy.type]] = None,
     filter: Option[Filter[MLFilterBy.type]] = None): List[ML]
-  
+
   /**
    * ML情報の件数を数える
    *
@@ -72,68 +94,68 @@ trait MLDao {
  * MLDao の実装クラス
  */
 class MLDaoImpl extends MLDao with Loggable {
-  
+
   def create(req: CreateMLRequest) = toMapper(req).saveMe().id
-  
+
   def find(id: Long) = MLMetaMapper.findByKey(id) match {
     case Empty   => None
     case Full(m) => Some(toDomain(m))
     case Failure(msg, e, _) =>
       throw e openOr new DataAccessException(msg)
   }
-  
+
   def findAll(
       range: Range,
       sort: Option[Sort[MLSortBy.type]] = None,
       filter: Option[Filter[MLFilterBy.type]] = None) = {
-    
+
     val queryParams = ListBuffer[QueryParam[MLMapper]](
       StartAt(range.offset), MaxRows(range.limit))
-   
+
     sort match {
       case Some(s) => queryParams += toOrderBy(s)
       case None =>
     }
-    
+
     filter match {
       case Some(f) => queryParams += toBy(f)
       case None =>
     }
-    
-    MLMetaMapper.findAll(queryParams: _*) map toDomain 
+
+    MLMetaMapper.findAll(queryParams: _*) map toDomain
   }
-  
+
   def count(filter: Option[Filter[MLFilterBy.type]] = None) =
     filter match {
       case None => MLMetaMapper.count
       case Some(f) => MLMetaMapper.count(toBy(f))
     }
-  
+
   /**
    * ソート方法を OrderBy オブジェクトに変換する
-   * 
+   *
    * @param sort ソート方法
    * @return OrderBy オブジェクト
    */
   def toOrderBy(sort: Sort[MLSortBy.type]) = {
     import org.milmsearch.core.domain.{MLSortBy => S}
     import mapper.{MLMetaMapper => M}
-    
+
     val field = sort.column match {
       case S.Title => M.title
       case S.LastMailedAt => M.lastMailedAt
       case _ => throw new NoSuchFieldException(
         "Can't convert Filter to By")
     }
-    
+
     OrderBy(field, toAscOrDesc(sort.sortOrder))
   }
-  
+
   /**
    * 検索条件を By オブジェクトに変換する
-   * 
+   *
    * @param filter 検索条件
-   * @return By オブジェクト 
+   * @return By オブジェクト
    */
   private def toBy(filter: Filter[MLFilterBy.type]) = filter match {
     case Filter(MLFilterBy.Title, v: String) =>
@@ -141,24 +163,31 @@ class MLDaoImpl extends MLDao with Loggable {
     case _ => throw new NoSuchFieldException(
       "Can't convert Filter to By")
   }
-  
+
   /**
    * Mapper オブジェクトをML情報に変換する
-   * 
+   *
    * @param mapper Mapper オブジェクト
    * @return ML情報
    */
-  private def toDomain(mapper: MLMapper) = ML(
-    id           = mapper.id,
-    title        = mapper.title,
-    archiveType  = MLArchiveType.withName(mapper.archiveType),
-    archiveURL   = new URL(mapper.archiveURL),
-    lastMailedAt = new DateTime(mapper.lastMailedAt.getTime),
-    approvedAt   = new DateTime(mapper.approvedAt.getTime))
+  private def toDomain(mapper: MLMapper) = {
+    val lastMailedAt = mapper.lastMailedAt.is match {
+      case null => null
+      case x    => new DateTime(x.getTime)
+    }
+
+    ML(
+      id           = mapper.id,
+      title        = mapper.title,
+      archiveType  = MLArchiveType.withName(mapper.archiveType),
+      archiveURL   = new URL(mapper.archiveURL),
+      lastMailedAt = Option(lastMailedAt),
+      approvedAt   = new DateTime(mapper.approvedAt.getTime))
+  }
 
   /**
    * ML情報作成要求を Mapper オブジェクトに変換する
-   * 
+   *
    * @param req ML情報作成要求
    * @return Mapper オブジェクト
    */
