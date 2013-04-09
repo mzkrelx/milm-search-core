@@ -51,8 +51,8 @@ case class MLProposal(
   comment: Option[String] = None,
   createdAt: Date,
   updatedAt: Date,
-  judgedAt: Option[Date] = None
-  // TODO 管理者コメント追加
+  judgedAt: Option[Date] = None,
+  adminComment: Option[String] = None
 )
 
 /**
@@ -87,8 +87,8 @@ case class CreateMLProposalRequest(
 case class UpdateMLProposalRequest(
   mlTitle: String,
   archiveType: MLArchiveType.Value,
-  archiveURL: URL
-  // TODO 管理者コメント追加
+  archiveURL: URL,
+  adminComment: Option[String]
 )
 
 /**
@@ -150,4 +150,5 @@ object MLProposalColumn extends Enumeration {
   val CreatedAt     = Value("createdAt")
   val UpdatedAt     = Value("updatedAt")
   val JudgedAt      = Value("judgedAt")
+  val AdminComment  = Value("adminComment")
 }

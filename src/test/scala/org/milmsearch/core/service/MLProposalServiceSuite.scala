@@ -93,7 +93,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count returning 100L
       }) {
@@ -148,7 +150,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count returning 10L
       }) {
@@ -203,7 +207,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count returning 11L
       }) {
@@ -236,7 +242,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count returning 11L
       }) {
@@ -269,7 +277,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count returning 21L
       }) {
@@ -303,7 +313,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
 
         m expects 'count withArgs(
@@ -383,7 +395,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count withArgs(
             Some(Filter(MLPFilterBy.Status, "new"))
@@ -444,7 +458,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count withArgs(
             Some(Filter(MLPFilterBy.Status, "new"))
@@ -480,7 +496,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count withArgs(
             Some(Filter(MLPFilterBy.Status, "new"))
@@ -516,7 +534,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))
           } toList)
         m expects 'count withArgs(
             Some(Filter(MLPFilterBy.Status, "new"))
@@ -586,7 +606,9 @@ class MLProposalServiceSuite extends FunSuite
             Some(new URL("http://localhost/path/to/archive/")),
             Some("コメント(MLの説明など)"),
             DateUtil.createDate("2012/10/28 10:20:30"),
-            DateUtil.createDate("2012/10/28 10:20:30"))))
+            DateUtil.createDate("2012/10/28 10:20:30"),
+            None,
+            Some("管理者コメント"))))
       }) {
         new MLProposalServiceImpl().find(1)
       }
@@ -607,7 +629,8 @@ class MLProposalServiceSuite extends FunSuite
         UpdateMLProposalRequest(
           "new Title",
           MLArchiveType.Other,
-          new URL("http://newurl")))
+          new URL("http://newurl"),
+          Some("管理者コメント")))
     }
   }
 
@@ -637,7 +660,8 @@ class MLProposalServiceSuite extends FunSuite
               Some("コメント(MLの説明など)"),
               DateUtil.createDate("2012/10/28 10:20:30"),
               DateUtil.createDate("2012/10/28 10:20:30"),
-              Some(now.toDate)))
+              Some(now.toDate),
+              Some("管理者コメント")))
         }
       } {
         CR.mlDao.doWith {

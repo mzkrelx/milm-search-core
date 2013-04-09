@@ -25,7 +25,6 @@ import java.net.URI
 import java.net.URL
 import java.util.NoSuchElementException
 import org.apache.commons.lang3.time.DateFormatUtils
-import org.milmsearch.core.domain.MLArchiveType
 import org.milmsearch.core.domain.CreateMLProposalRequest
 import org.milmsearch.core.domain.Filter
 import org.milmsearch.core.domain.MLArchiveType
@@ -318,13 +317,15 @@ class MLProposalResource extends Loggable with PageableResource {
   case class UpdateRequestDto(
     mlTitle: String,
     archiveType: String,
-    archiveURL: String) {
+    archiveURL: String,
+    adminComment: String) {
 
     def toDomain =
       UpdateMLProposalRequest(
         mlTitle,
         MLArchiveType.withName(archiveType),
-        new URL(archiveURL))
+        new URL(archiveURL),
+        Option(adminComment))
   }
 
   private def toDto(result: MLProposalSearchResult):
